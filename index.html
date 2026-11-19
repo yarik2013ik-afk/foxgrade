@@ -7,33 +7,24 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800;900&display=swap');
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background-color: #141824; /* Темный фон как на скринах */
+            background-color: #141824;
             color: white;
             font-family: 'Montserrat', sans-serif;
-            margin: 0;
-            padding: 0;
-            padding-bottom: 80px; /* Отступ для нижней панели */
+            padding-bottom: 80px;
             user-select: none;
+            overflow-x: hidden;
         }
-
-        /* --- Шапка --- */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 15px;
         }
-        .logo {
-            font-size: 24px;
-            font-weight: 900;
-            letter-spacing: -0.5px;
-            text-transform: uppercase;
-        }
+        .logo { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; text-transform: uppercase; }
         .logo .fox { color: #ff8c00; }
         .logo .grade { color: #ffffff; }
-        
         .balance {
             background: #232838;
             padding: 5px 15px;
@@ -44,25 +35,27 @@
             align-items: center;
             gap: 5px;
             border: 1px solid #333a4e;
+            cursor: pointer;
         }
+        .balance:active { background: #2a3146; }
 
-        /* --- Кейс --- */
+        /* Контейнер кейса */
         .case-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             margin-top: 10px;
+            padding: 0 15px;
         }
-
         .case-title {
             font-size: 18px;
             color: #8b92a5;
             margin-bottom: 15px;
             font-weight: 600;
+            text-align: center;
         }
-
         .case-window {
-            width: 90%;
+            width: 100%;
             height: 160px;
             background: #1c2233;
             border-radius: 20px;
@@ -73,8 +66,6 @@
             align-items: center;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
         }
-
-        /* Маркер по центру */
         .center-marker {
             position: absolute;
             left: 50%;
@@ -96,14 +87,12 @@
         .center-marker::before { top: 0; border-top: 10px solid #ff8c00; }
         .center-marker::after { bottom: 0; border-bottom: 10px solid #ff8c00; }
 
-        /* Лента с подарками */
         .roulette-track {
             display: flex;
             gap: 10px;
-            padding-left: calc(50% - 55px); /* Чтобы первый элемент был по центру */
+            padding-left: calc(50% - 55px);
             transition: transform 5s cubic-bezier(0.15, 0.9, 0.2, 1);
         }
-
         .item {
             width: 100px;
             height: 120px;
@@ -116,22 +105,14 @@
             flex-shrink: 0;
             border-bottom: 4px solid #ff8c00;
             position: relative;
-            font-size: 40px; /* Размер эмодзи */
+            font-size: 40px;
         }
-        .item .stars {
-            position: absolute;
-            bottom: 5px;
-            font-size: 12px;
-            color: #ff8c00;
-            font-weight: 800;
-        }
-        
-        /* Разные цвета для редкости */
+        .item .stars { position: absolute; bottom: 5px; font-size: 12px; color: #ff8c00; font-weight: 800; }
         .item.rare { border-bottom-color: #3b82f6; }
         .item.epic { border-bottom-color: #a855f7; }
         .item.legend { border-bottom-color: #ef4444; background: linear-gradient(180deg, #2a3146 0%, #3b1b2b 100%); }
 
-        /* Кнопка */
+        /* Кнопки */
         .btn-open {
             margin-top: 30px;
             background: #ff8c00;
@@ -145,173 +126,203 @@
             cursor: pointer;
             box-shadow: 0 5px 15px rgba(255, 140, 0, 0.3);
             transition: 0.2s;
-            width: 80%;
+            width: 90%;
         }
         .btn-open:active { transform: scale(0.95); }
         .btn-open:disabled { background: #4a5568; color: #8b92a5; box-shadow: none; }
 
-        .timer-text {
-            margin-top: 15px;
-            color: #8b92a5;
-            font-size: 14px;
-            font-weight: 600;
-        }
+        .timer-text { margin-top: 15px; color: #8b92a5; font-size: 14px; font-weight: 600; }
 
-        /* --- Нижняя панель --- */
+        /* Нижняя панель */
         .bottom-nav {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
+            bottom: 0; left: 0; width: 100%;
             background: #1c2233;
             display: flex;
             justify-content: space-around;
             padding: 15px 0;
             border-top: 1px solid #333a4e;
-            padding-bottom: max(15px, env(safe-area-inset-bottom)); /* Для iPhone */
+            padding-bottom: max(15px, env(safe-area-inset-bottom));
+            z-index: 100;
         }
-        .nav-item {
-            color: #8b92a5;
-            font-size: 12px;
-            font-weight: 800;
-            text-decoration: none;
-            text-transform: uppercase;
-        }
+        .nav-item { color: #8b92a5; font-size: 12px; font-weight: 800; text-decoration: none; text-transform: uppercase; cursor: pointer; }
         .nav-item.active { color: white; }
 
+        /* Скрытые блоки для переключения вкладок */
+        .tab-content { display: none; width: 100%; }
+        .tab-content.active-tab { display: block; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="logo">
-            <span class="fox">FOX</span> <span class="grade">Grade</span>
-        </div>
-        <div class="balance">
-            <span>💎</span> <span id="user-balance">0</span>
+        <div class="logo"><span class="fox">FOX</span> <span class="grade">Grade</span></div>
+        <div class="balance" onclick="addStarsTest()"><span>💎</span> <span id="user-balance">0</span></div>
+    </div>
+
+    <!-- Вкладка "Кейсы" -->
+    <div id="tab-cases" class="tab-content active-tab">
+        <div class="case-container">
+            <div class="case-title">Бесплатный кейс (раз в 24ч)</div>
+            <div class="case-window">
+                <div class="center-marker"></div>
+                <div class="roulette-track" id="roulette-free"></div>
+            </div>
+            <button class="btn-open" id="openBtnFree" onclick="openCase('free')">Открыть бесплатно</button>
+            <div class="timer-text" id="timerTextFree">Доступен прямо сейчас!</div>
+            
+            <div style="height: 30px;"></div>
+
+            <div class="case-title">Кейс за 5 звёзд</div>
+            <div class="case-window">
+                <div class="center-marker"></div>
+                <div class="roulette-track" id="roulette-paid"></div>
+            </div>
+            <button class="btn-open" id="openBtnPaid" onclick="openCase('paid')">Открыть за 5 💎</button>
         </div>
     </div>
 
-    <div class="case-container">
-        <div class="case-title">Бесплатный кейс (NFT)</div>
-        
-        <div class="case-window">
-            <div class="center-marker"></div>
-            <div class="roulette-track" id="roulette">
-                <!-- Сюда будут генерироваться элементы -->
-            </div>
-        </div>
-
-        <button class="btn-open" id="openBtn" onclick="openCase()">Открыть бесплатно</button>
-        <div class="timer-text" id="timerText">Доступен прямо сейчас!</div>
+    <!-- Вкладка "Игры" (заглушка) -->
+    <div id="tab-games" class="tab-content">
+        <div class="case-container"><h2 style="color:#8b92a5; margin-top:50px;">Игры скоро будут!</h2></div>
+    </div>
+    <!-- Вкладка "Заработок" (заглушка) -->
+    <div id="tab-earn" class="tab-content">
+        <div class="case-container"><h2 style="color:#8b92a5; margin-top:50px;">Заработок скоро будет!</h2></div>
+    </div>
+    <!-- Вкладка "Бонусы" (заглушка) -->
+    <div id="tab-bonus" class="tab-content">
+        <div class="case-container"><h2 style="color:#8b92a5; margin-top:50px;">Бонусы скоро будут!</h2></div>
     </div>
 
     <div class="bottom-nav">
-        <a href="#" class="nav-item">Игры</a>
-        <a href="#" class="nav-item active">Кейсы</a>
-        <a href="#" class="nav-item">Заработок</a>
-        <a href="#" class="nav-item">Бонусы</a>
+        <a href="#" class="nav-item" onclick="switchTab('games')">Игры</a>
+        <a href="#" class="nav-item active" onclick="switchTab('cases')">Кейсы</a>
+        <a href="#" class="nav-item" onclick="switchTab('earn')">Заработок</a>
+        <a href="#" class="nav-item" onclick="switchTab('bonus')">Бонусы</a>
     </div>
 
     <script>
-        // Инициализация Telegram
+        // --- ИНИЦИАЛИЗАЦИЯ ---
         const tg = window.Telegram.WebApp;
         tg.expand();
-        
-        // Данные из Telegram
         const userId = tg.initDataUnsafe?.user?.id || 'test_user';
-        
-        // Баланс из локального хранилища (чтобы не сбрасывался)
+
+        // Баланс (в звёздах)
         let balance = parseInt(localStorage.getItem('fox_balance_' + userId) || '0');
         document.getElementById('user-balance').innerText = balance;
 
-        // Время последнего открытия
-        let lastOpened = parseInt(localStorage.getItem('fox_last_open_' + userId) || '0');
-        const cooldown = 24 * 60 * 60 * 1000; // 24 часа в миллисекундах
+        // Время последнего открытия бесплатного кейса
+        let lastOpenedFree = parseInt(localStorage.getItem('fox_last_open_free_' + userId) || '0');
+        const cooldown = 24 * 60 * 60 * 1000; // 24 часа
 
-        const btn = document.getElementById('openBtn');
-        const timerText = document.getElementById('timerText');
-
-        // Проверка кулдауна при загрузке
-        function checkCooldown() {
-            const now = Date.now();
-            const timePassed = now - lastOpened;
-
-            if (timePassed < cooldown) {
-                // Кнопка заблокирована
-                btn.disabled = true;
-                btn.innerText = "Кейс недоступен";
-                updateTimer(cooldown - timePassed);
-            } else {
-                btn.disabled = false;
-                btn.innerText = "Открыть бесплатно";
-                timerText.innerText = "Доступен прямо сейчас!";
-            }
-        }
-
-        // Таймер обратного отсчета
-        function updateTimer(msLeft) {
-            const hours = Math.floor(msLeft / (1000 * 60 * 60));
-            const minutes = Math.floor((msLeft % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((msLeft % (1000 * 60)) / 1000);
-            
-            timerText.innerText = `Следующее открытие через: ${hours}ч ${minutes}м ${seconds}с`;
-            
-            setTimeout(() => {
-                if (Date.now() - lastOpened < cooldown) {
-                    updateTimer(cooldown - (Date.now() - lastOpened));
-                } else {
-                    checkCooldown();
-                }
-            }, 1000);
-        }
-
-        // Список возможных выпадений (Шансы подобраны под твои запросы)
-        const items = [
-            { emoji: '⭐', name: '1 Звезда', value: 1, rarity: 'common', chance: 40 },
+        // --- ПРЕДМЕТЫ ---
+        // Бесплатный кейс (как ты просил)
+        const itemsFree = [
+            { emoji: '⭐', name: '1 Звезда', value: 1, rarity: 'common', chance: 35 },
             { emoji: '🌟', name: '3 Звезды', value: 3, rarity: 'common', chance: 25 },
-            { emoji: '✨', name: '5 Звезд', value: 5, rarity: 'common', chance: 15 },
-            { emoji: '🧸', name: 'Мишка', value: 22, rarity: 'rare', chance: 8 },
-            { emoji: '💖', name: 'Сердечко', value: 22, rarity: 'rare', chance: 5 },
-            { emoji: '🌹', name: 'Роза', value: 36, rarity: 'rare', chance: 3 },
+            { emoji: '✨', name: '5 Звёзд', value: 5, rarity: 'common', chance: 15 },
+            { emoji: '🧸', name: 'Мишка', value: 22, rarity: 'rare', chance: 10 },
+            { emoji: '💖', name: 'Сердечко', value: 22, rarity: 'rare', chance: 7 },
+            { emoji: '🌹', name: 'Роза', value: 36, rarity: 'rare', chance: 4 },
             { emoji: '🍾', name: 'Шампанское', value: 73, rarity: 'epic', chance: 2 },
             { emoji: '🚀', name: 'Ракета', value: 73, rarity: 'epic', chance: 1 },
             { emoji: '💎', name: 'Алмаз', value: 145, rarity: 'legend', chance: 0.8 },
             { emoji: '🏆', name: 'Факел', value: 455, rarity: 'legend', chance: 0.2 }
         ];
 
-        // Функция для определения выпавшего предмета
-        function getRandomItem() {
+        // Платный кейс (за 5 звёзд) - твой новый список
+        // Названия и цены я взял примерные, но структура готова.
+        const itemsPaid = [
+            { emoji: '⭐', name: '1 Звезда', value: 1, rarity: 'common', chance: 30 },
+            { emoji: '🌟', name: '5 Звёзд', value: 5, rarity: 'common', chance: 20 },
+            { emoji: '🧸', name: 'Мишка', value: 22, rarity: 'rare', chance: 12 },
+            { emoji: '🌹', name: 'Роза', value: 36, rarity: 'rare', chance: 8 },
+            { emoji: '🎂', name: 'Торт', value: 73, rarity: 'epic', chance: 5 },
+            { emoji: '💎', name: 'Алмаз', value: 145, rarity: 'epic', chance: 3 },
+            { emoji: '🏆', name: 'Факел', value: 377, rarity: 'legend', chance: 1 },
+            { emoji: '🍦', name: 'Мороженка', value: 384, rarity: 'legend', chance: 0.8 },
+            { emoji: '📖', name: 'Книга', value: 422, rarity: 'legend', chance: 0.6 },
+            { emoji: '🎒', name: 'Рюкзак', value: 437, rarity: 'legend', chance: 0.5 },
+            { emoji: '💩', name: 'Какашка', value: 462, rarity: 'legend', chance: 0.4 },
+            { emoji: '🥫', name: 'Банка', value: 498, rarity: 'legend', chance: 0.3 },
+            { emoji: '🐶', name: 'Мопс', value: 527, rarity: 'legend', chance: 0.2 },
+            { emoji: '👑', name: 'Статуя', value: 577, rarity: 'legend', chance: 0.15 },
+            { emoji: '⚔️', name: 'Меч', value: 615, rarity: 'legend', chance: 0.1 },
+            { emoji: '🔘', name: 'Кнопка', value: 652, rarity: 'legend', chance: 0.08 },
+            { emoji: '👀', name: 'Глазки', value: 858, rarity: 'legend', chance: 0.05 },
+            { emoji: '🚬', name: 'Сигара', value: 1300, rarity: 'legend', chance: 0.03 },
+            { emoji: '💨', name: 'Фен', value: 1350, rarity: 'legend', chance: 0.02 },
+            { emoji: '🎨', name: 'Кнопка с узором', value: 1388, rarity: 'legend', chance: 0.01 },
+            { emoji: '🧑‍🦳', name: 'Парик', value: 2150, rarity: 'legend', chance: 0.01 },
+            { emoji: '💍', name: 'Кольцо', value: 3028, rarity: 'legend', chance: 0.005 },
+            { emoji: '🪖', name: 'Шлем', value: 3417, rarity: 'legend', chance: 0.005 },
+            { emoji: '🚬', name: 'Крутая сигара', value: 4508, rarity: 'legend', chance: 0.002 },
+            { emoji: '💍', name: 'Крутое кольцо', value: 5508, rarity: 'legend', chance: 0.001 },
+            { emoji: '🧴', name: 'Духи', value: 7122, rarity: 'legend', chance: 0.001 },
+            { emoji: '⌚', name: 'Часы', value: 8373, rarity: 'legend', chance: 0.0005 },
+            { emoji: '👜', name: 'Сумка', value: 12010, rarity: 'legend', chance: 0.0002 },
+            { emoji: '💚', name: 'Зелёный алмаз', value: 12600, rarity: 'legend', chance: 0.0001 },
+            { emoji: '🐱', name: 'Кот', value: 22045, rarity: 'legend', chance: 0.00005 }
+        ];
+
+        const btnFree = document.getElementById('openBtnFree');
+        const timerFree = document.getElementById('timerTextFree');
+        const btnPaid = document.getElementById('openBtnPaid');
+
+        // --- ЛОГИКА КУЛДАУНА ---
+        function checkCooldown() {
+            const now = Date.now();
+            const timePassed = now - lastOpenedFree;
+            if (timePassed < cooldown) {
+                btnFree.disabled = true;
+                btnFree.innerText = "Кейс недоступен";
+                updateTimer(cooldown - timePassed);
+            } else {
+                btnFree.disabled = false;
+                btnFree.innerText = "Открыть бесплатно";
+                timerFree.innerText = "Доступен прямо сейчас!";
+            }
+        }
+
+        function updateTimer(msLeft) {
+            const hours = Math.floor(msLeft / (1000 * 60 * 60));
+            const minutes = Math.floor((msLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((msLeft % (1000 * 60)) / 1000);
+            timerFree.innerText = `Следующее открытие через: ${hours}ч ${minutes}м ${seconds}с`;
+            setTimeout(() => {
+                if (Date.now() - lastOpenedFree < cooldown) updateTimer(cooldown - (Date.now() - lastOpenedFree));
+                else checkCooldown();
+            }, 1000);
+        }
+
+        // --- ВЫБОР ПРЕДМЕТА ---
+        function getRandomItem(itemsList) {
             const rand = Math.random() * 100;
             let cumulative = 0;
-            for (let item of items) {
+            for (let item of itemsList) {
                 cumulative += item.chance;
                 if (rand <= cumulative) return item;
             }
-            return items[0];
+            return itemsList[0];
         }
 
-        // Генерация ленты (50 элементов для прокрутки)
-        function generateRoulette(winningItem) {
-            const track = document.getElementById('roulette');
+        // --- ГЕНЕРАЦИЯ ЛЕНТЫ ---
+        function generateRoulette(trackId, winningItem, itemsList) {
+            const track = document.getElementById(trackId);
             track.innerHTML = '';
             track.style.transition = 'none';
             track.style.transform = 'translateX(0)';
 
-            // Генерируем 40 случайных предметов
             for (let i = 0; i < 40; i++) {
-                const randomItem = items[Math.floor(Math.random() * items.length)];
+                const randomItem = itemsList[Math.floor(Math.random() * itemsList.length)];
                 track.appendChild(createItemHTML(randomItem));
             }
-            
-            // Добавляем победный предмет (он будет 41-м)
             const winEl = createItemHTML(winningItem);
-            winEl.id = 'winning-item';
+            winEl.id = 'winning-item-' + trackId;
             track.appendChild(winEl);
-
-            // Еще 10 рандомных для красоты
             for (let i = 0; i < 10; i++) {
-                const randomItem = items[Math.floor(Math.random() * items.length)];
+                const randomItem = itemsList[Math.floor(Math.random() * itemsList.length)];
                 track.appendChild(createItemHTML(randomItem));
             }
         }
@@ -323,61 +334,91 @@
             return div;
         }
 
-        // Главная функция открытия
-        function openCase() {
-            if (btn.disabled) return;
+        // --- ОТКРЫТИЕ КЕЙСА ---
+        function openCase(type) {
+            if (type === 'free' && btnFree.disabled) return;
 
-            // Блокируем кнопку
+            let itemsList = type === 'free' ? itemsFree : itemsPaid;
+            let trackId = type === 'free' ? 'roulette-free' : 'roulette-paid';
+            let btn = type === 'free' ? btnFree : btnPaid;
+
+            if (type === 'paid') {
+                if (balance < 5) {
+                    tg.showAlert("Недостаточно звёзд! Нужно 5 💎");
+                    return;
+                }
+                balance -= 5;
+                localStorage.setItem('fox_balance_' + userId, balance);
+                document.getElementById('user-balance').innerText = balance;
+            }
+
             btn.disabled = true;
             btn.innerText = "Открываем...";
 
-            // Определяем победителя
-            const winningItem = getRandomItem();
+            const winningItem = getRandomItem(itemsList);
+            generateRoulette(trackId, winningItem, itemsList);
 
-            // Генерируем визуальную ленту
-            generateRoulette(winningItem);
-
-            // Даем прогрузиться DOM
             setTimeout(() => {
-                const track = document.getElementById('roulette');
-                const winEl = document.getElementById('winning-item');
+                const track = document.getElementById(trackId);
+                const winEl = document.getElementById('winning-item-' + trackId);
                 
-                // Вычисляем позицию для остановки (центр экрана)
-                // 41-й элемент (индекс 40) должен встать по центру
-                const itemWidth = 100 + 10; // ширина + отступ
+                // Расчет позиции
+                const itemWidth = 100 + 10;
                 const windowWidth = document.querySelector('.case-window').offsetWidth;
-                const centerOffset = windowWidth / 2 - 50; // 50 - половина ширины элемента
-                
-                // Расстояние, на которое нужно сдвинуть ленту
+                const centerOffset = windowWidth / 2 - 50;
                 const translateX = -(40 * itemWidth) + centerOffset;
 
-                // Запускаем анимацию
                 track.style.transition = 'transform 5s cubic-bezier(0.15, 0.9, 0.2, 1)';
                 track.style.transform = `translateX(${translateX}px)`;
 
-                // Ждем окончания анимации
                 setTimeout(() => {
-                    // Начисляем баланс
                     balance += winningItem.value;
                     localStorage.setItem('fox_balance_' + userId, balance);
                     document.getElementById('user-balance').innerText = balance;
 
-                    // Записываем время открытия
-                    lastOpened = Date.now();
-                    localStorage.setItem('fox_last_open_' + userId, lastOpened);
+                    if (type === 'free') {
+                        lastOpenedFree = Date.now();
+                        localStorage.setItem('fox_last_open_free_' + userId, lastOpenedFree);
+                        checkCooldown();
+                    } else {
+                        btn.disabled = false;
+                        btn.innerText = "Открыть за 5 💎";
+                    }
 
-                    // Всплывашка о выигрыше (используем встроенный alert телеграма)
                     tg.showAlert(`Вы выиграли: ${winningItem.emoji} ${winningItem.name} (${winningItem.value} ⭐)`);
-
-                    // Возвращаем кнопку в состояние кулдауна
-                    checkCooldown();
-                }, 5200); // 5 сек анимация + 200мс запас
+                }, 5200);
             }, 100);
         }
 
-        // Запуск проверки при старте
-        checkCooldown();
+        // --- ТЕСТОВАЯ ФУНКЦИЯ ДЛЯ БАЛАНСА (нажми на баланс сверху) ---
+        function addStarsTest() {
+            balance += 100;
+            localStorage.setItem('fox_balance_' + userId, balance);
+            document.getElementById('user-balance').innerText = balance;
+        }
 
+        // --- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ---
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+            if (tabName === 'cases') {
+                document.getElementById('tab-cases').classList.add('active-tab');
+                document.querySelectorAll('.nav-item')[1].classList.add('active');
+            } else if (tabName === 'games') {
+                document.getElementById('tab-games').classList.add('active-tab');
+                document.querySelectorAll('.nav-item')[0].classList.add('active');
+            } else if (tabName === 'earn') {
+                document.getElementById('tab-earn').classList.add('active-tab');
+                document.querySelectorAll('.nav-item')[2].classList.add('active');
+            } else if (tabName === 'bonus') {
+                document.getElementById('tab-bonus').classList.add('active-tab');
+                document.querySelectorAll('.nav-item')[3].classList.add('active');
+            }
+        }
+
+        // Запуск
+        checkCooldown();
     </script>
 </body>
-  </html>
+</html>

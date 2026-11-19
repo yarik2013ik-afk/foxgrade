@@ -1,568 +1,415 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>FOX Grade</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap');
-
-:root {
- --bg:#10131b;
- --panel:#191e2a;
- --panel2:#202737;
- --orange:#ff9417;
- --muted:#8992a6;
- --border:#30394b;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+:root{
+--bg:#090b10;--panel:#11151e;--panel2:#171d29;--line:#252d3b;
+--orange:#ff641e;--gold:#ffc45c;--muted:#778397;--white:#f4f6fa;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-body{
- background:var(--bg);color:#fff;
- font-family:Montserrat,sans-serif;
- padding-bottom:100px;
- min-height:100vh;
-}
-button{font-family:inherit;cursor:pointer}
-.header{
- height:68px;padding:0 17px;
- display:flex;align-items:center;
- justify-content:space-between;
- border-bottom:1px solid var(--border);
- background:#151923;
- position:sticky;top:0;z-index:20;
-}
-.logo{font-size:23px;font-weight:900;letter-spacing:-1px}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% -20%,#272033 0%,#090b10 55%);
+color:var(--white);font-family:Inter,Arial,sans-serif;padding-bottom:90px}
+button{font:inherit;cursor:pointer;border:0;color:white}
+.top{height:66px;display:flex;align-items:center;justify-content:space-between;padding:0 17px;
+background:#0c0f16eF;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;backdrop-filter:blur(15px)}
+.logo{font-size:21px;font-weight:900;letter-spacing:-1px}
 .logo span{color:var(--orange)}
-.balance{
- background:var(--panel2);
- border:1px solid var(--border);
- padding:10px 14px;border-radius:12px;
- font-size:13px;font-weight:800;
-}
-.balance b{color:var(--orange)}
-.container{max-width:650px;margin:auto;padding:18px 14px}
-.welcome{margin-bottom:20px}
-.welcome h2{font-size:21px;font-weight:900}
-.welcome p{font-size:11px;color:var(--muted);margin-top:6px}
-.section-title{
- display:flex;align-items:center;
- justify-content:space-between;
- margin:22px 0 13px;
- font-size:15px;font-weight:800;
-}
-.section-title small{font-size:10px;color:var(--muted)}
-.case-card{
- background:linear-gradient(145deg,#20283a,#171d29);
- border:1px solid var(--border);
- border-radius:18px;
- padding:15px;margin-bottom:15px;
- overflow:hidden;
-}
-.case-top{display:flex;justify-content:space-between;align-items:center}
-.case-name{font-size:16px;font-weight:900}
-.case-label{
- background:#30394b;color:var(--orange);
- padding:5px 9px;border-radius:7px;
- font-size:9px;font-weight:800;
-}
-.case-desc{color:var(--muted);font-size:10px;margin-top:6px}
-.case-art{
- height:130px;margin:15px 0;
- display:flex;align-items:center;justify-content:center;
- border-radius:13px;
- background:radial-gradient(ellipse,#343d55 0%,#20283a 55%,#191e2a 100%);
- font-size:75px;
- position:relative;overflow:hidden;
-}
-.case-art:after{
- content:"";position:absolute;
- width:170px;height:170px;
- border:1px solid #ffffff10;border-radius:50%;
-}
-.roulette{
- height:125px;position:relative;
- background:#111722;border-radius:12px;
- overflow:hidden;border:1px solid var(--border);
- margin:15px 0;
-}
-.roulette:before{
- content:"";position:absolute;z-index:5;
- left:50%;top:0;height:100%;width:3px;
- background:var(--orange);
- box-shadow:0 0 12px var(--orange);
-}
-.track{
- position:absolute;left:0;top:8px;
- display:flex;gap:8px;
- height:107px;will-change:transform;
-}
-.item{
- width:85px;height:105px;flex-shrink:0;
- background:#273044;border-radius:10px;
- border-bottom:4px solid #8992a6;
- display:flex;flex-direction:column;
- justify-content:center;align-items:center;
- gap:7px;
-}
-.item .emoji{font-size:34px}
-.item .value{font-size:10px;font-weight:800}
-.common{border-color:#8992a6}
-.rare{border-color:#3988ff;background:#1c2d4a}
-.epic{border-color:#ac55ed;background:#352047}
-.legend{border-color:#ff9b21;background:#45301b}
-.mythic{border-color:#ff405d;background:#49202c}
-.open-btn{
- width:100%;border:0;border-radius:12px;
- padding:15px;background:var(--orange);
- color:#171717;font-size:13px;font-weight:900;
- transition:.15s;
-}
-.open-btn:active{transform:scale(.98)}
-.open-btn:disabled{background:#41495a;color:#aab1bf}
-.case-price{text-align:center;color:var(--muted);font-size:10px;margin-top:10px}
-.tabs{
- display:none;
-}
-.page{display:none}
-.page.active{display:block}
-.nav{
- position:fixed;bottom:0;left:0;width:100%;
- height:75px;padding-bottom:env(safe-area-inset-bottom);
- background:#191e2a;border-top:1px solid var(--border);
- display:flex;justify-content:space-around;align-items:center;
- z-index:30;
-}
-.nav button{
- background:none;border:0;color:var(--muted);
- display:flex;flex-direction:column;gap:5px;
- align-items:center;font-size:10px;font-weight:800;
- min-width:65px;
-}
-.nav button .ico{font-size:21px}
-.nav button.active{color:var(--orange)}
-.stats{
- display:grid;grid-template-columns:1fr 1fr;gap:10px;
- margin:18px 0;
-}
-.stat{
- background:var(--panel);border:1px solid var(--border);
- padding:15px;border-radius:13px;
-}
-.stat small{font-size:10px;color:var(--muted)}
-.stat strong{display:block;margin-top:7px;font-size:20px}
-.inventory-item{
- background:var(--panel);border:1px solid var(--border);
- border-radius:12px;padding:13px;
- display:flex;align-items:center;gap:12px;
- margin-bottom:9px;
-}
-.inventory-emoji{font-size:34px}
-.inventory-info{flex:1}
-.inventory-info b{font-size:12px}
-.inventory-info small{display:block;color:var(--muted);font-size:10px;margin-top:5px}
-.sell{
- background:#293449;color:var(--orange);
- border:1px solid #414c63;border-radius:8px;
- padding:9px;font-size:10px;font-weight:800;
-}
-.empty{
- text-align:center;color:var(--muted);
- padding:45px 10px;font-size:12px;
-}
-.empty div{font-size:45px;margin-bottom:12px}
-.info{
- background:var(--panel);border:1px solid var(--border);
- padding:15px;border-radius:13px;
- margin-bottom:12px;
-}
-.info h3{font-size:13px;margin-bottom:8px}
-.info p{font-size:11px;line-height:1.8;color:var(--muted)}
-.result{
- position:fixed;inset:0;background:#000b;
- z-index:100;display:none;
- justify-content:center;align-items:center;padding:20px;
-}
-.result.show{display:flex}
-.result-box{
- width:100%;max-width:350px;
- background:#202737;border:1px solid var(--border);
- border-radius:20px;padding:25px;text-align:center;
-}
-.result-box h2{font-size:19px}
-.result-emoji{font-size:80px;margin:20px}
-.result-box p{font-size:12px;color:var(--muted);margin-bottom:20px}
-@media(max-width:380px){
- .logo{font-size:20px}
- .container{padding:13px 10px}
-}
+.balance{background:#1b202b;border:1px solid #333d4e;padding:10px 13px;border-radius:12px;font-weight:800;color:var(--gold)}
+main{max-width:720px;margin:auto;padding:17px}
+.page{display:none}.page.active{display:block}
+.hero{padding:22px;border-radius:20px;background:linear-gradient(120deg,#291b22,#171923 65%,#25202b);
+border:1px solid #49302d;position:relative;overflow:hidden;margin-bottom:20px}
+.hero:after{content:"FOX";position:absolute;right:-12px;bottom:-35px;font-size:110px;font-weight:900;color:#ffffff08}
+.eyebrow{color:var(--orange);font-size:10px;font-weight:900;letter-spacing:2px}
+h1{font-size:27px;margin:8px 0}h2{font-size:20px;margin:23px 0 13px}
+p{color:#9aa5b6;font-size:13px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:18px}
+.stat{background:#ffffff0c;padding:12px;border-radius:12px}
+.stat b{display:block;font-size:19px}.stat small{color:var(--muted);font-size:10px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.case{background:linear-gradient(145deg,#1a202c,#10141c);border:1px solid var(--line);border-radius:17px;padding:12px;overflow:hidden}
+.case-art{height:112px;border-radius:12px;display:grid;place-items:center;font-size:55px;
+background:radial-gradient(circle,#45404b,#1c202b 65%);margin-bottom:11px}
+.case:nth-child(2) .case-art{background:radial-gradient(circle,#51402d,#211d1c 70%)}
+.case:nth-child(3) .case-art{background:radial-gradient(circle,#243e50,#141c28 70%)}
+.case:nth-child(4) .case-art{background:radial-gradient(circle,#50314d,#201927 70%)}
+.case h3{margin:0 0 5px;font-size:14px}.case p{margin:0 0 10px;font-size:11px}
+.case-bottom{display:flex;align-items:center;justify-content:space-between;gap:5px}
+.price{color:var(--gold);font-weight:900;font-size:12px}
+.primary{background:linear-gradient(110deg,#ff792d,#ed451d);padding:11px 14px;border-radius:10px;font-weight:800}
+.secondary{background:#242c3a;padding:10px 13px;border-radius:10px;font-weight:700}
+.full{width:100%}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:#0d1119f5;border-top:1px solid var(--line);
+display:flex;justify-content:space-around;padding:9px 3px calc(9px + env(safe-area-inset-bottom));z-index:20}
+.tab{background:none;color:#7f8b9e;font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:55px}
+.tab i{font-style:normal;font-size:20px}.tab.active{color:var(--orange)}
+.section-head{display:flex;justify-content:space-between;align-items:center}
+.section-head h2{margin:22px 0 12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:13px}
+.roulette-wrap{background:#10151e;border:1px solid #303b4c;border-radius:17px;padding:13px;margin:14px 0}
+.roulette{height:126px;overflow:hidden;position:relative;border-radius:12px;background:#090d14;border:1px solid #30394a}
+.roulette:before,.roulette:after{content:"";position:absolute;top:0;bottom:0;width:60px;z-index:2;pointer-events:none}
+.roulette:before{left:0;background:linear-gradient(90deg,#090d14,transparent)}
+.roulette:after{right:0;background:linear-gradient(270deg,#090d14,transparent)}
+.pointer{position:absolute;z-index:4;left:50%;top:0;bottom:0;width:2px;background:var(--orange);box-shadow:0 0 12px var(--orange)}
+.pointer:before{content:"▼";position:absolute;top:0;left:-7px;color:var(--orange);font-size:13px}
+.rail{height:100%;display:flex;align-items:center;gap:7px;transform:translateX(0);will-change:transform}
+.loot{flex:0 0 100px;height:94px;border-radius:10px;background:#1b2431;border:1px solid #354052;
+display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px}
+.loot .emoji{font-size:34px}.loot small{font-size:9px;color:#aeb8c8;font-weight:800}
+.loot.common{border-bottom:3px solid #9ba6b5}
+.loot.rare{border-bottom:3px solid #46a6ff}
+.loot.epic{border-bottom:3px solid #b36cff}
+.loot.legendary{border-bottom:3px solid #ffad36}
+.loot.mythic{border-bottom:3px solid #ff526f}
+.loot.nft{border-bottom:3px solid #55f0cf}
+.possible{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.item{background:#171e29;border:1px solid #293345;border-radius:12px;padding:9px;text-align:center;min-width:0}
+.item .emoji{font-size:29px}.item b{font-size:10px;display:block;margin:5px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item small{font-size:9px;color:var(--muted)}
+.common{--rarity:#aeb9c8}.rare{--rarity:#4aaaff}.epic{--rarity:#ba78ff}
+.legendary{--rarity:#ffb13e}.mythic{--rarity:#ff5674}.nft{--rarity:#53e8ce}
+.item{border-bottom:2px solid var(--rarity)}
+.tag{font-size:9px;color:var(--rarity);font-weight:900;text-transform:uppercase}
+.inventory-card{display:flex;align-items:center;gap:11px;text-align:left}
+.inventory-card .emoji{font-size:31px}.inventory-card .info{flex:1;min-width:0}
+.inventory-card b{font-size:12px}.inventory-card small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+.empty{text-align:center;padding:35px 15px;color:var(--muted)}
+.empty div{font-size:42px;margin-bottom:10px}
+input,select{background:#0d121b;border:1px solid #303b4c;border-radius:10px;color:white;padding:12px;width:100%;outline:none}
+.progress{height:8px;background:#293140;border-radius:20px;overflow:hidden;margin:10px 0}
+.progress span{display:block;height:100%;background:linear-gradient(90deg,#ff8a34,#ff4e21);width:0}
+.profile-head{display:flex;gap:14px;align-items:center}
+.avatar{height:60px;width:60px;border-radius:18px;background:linear-gradient(135deg,#ff8a34,#a52c19);
+display:grid;place-items:center;font-size:29px}
+.modal{position:fixed;inset:0;background:#000b;z-index:40;display:none;align-items:center;justify-content:center;padding:17px}
+.modal.show{display:flex}
+.modal-box{width:100%;max-width:420px;background:#151b26;border:1px solid #394457;border-radius:19px;padding:20px;text-align:center}
+.modal-box .big{font-size:66px;margin:10px}
+.toast{position:fixed;top:76px;left:50%;transform:translateX(-50%);background:#252e3d;padding:12px 18px;
+border-radius:12px;z-index:60;font-size:12px;display:none;box-shadow:0 8px 30px #0008}
+@media(min-width:600px){.grid{grid-template-columns:repeat(3,1fr)}.possible{grid-template-columns:repeat(4,1fr)}}
 </style>
 </head>
 <body>
-
-<header class="header">
- <div class="logo"><span>FOX</span> GRADE</div>
- <div class="balance">💎 <b id="balance">100</b> FC</div>
+<header class="top">
+ <div class="logo">FOX <span>GRADE</span></div>
+ <div class="balance">🟡 <span id="balance">2500</span> FC</div>
 </header>
-
-<main class="container">
-
-<section id="cases" class="page active">
- <div class="welcome">
-  <h2>Добро пожаловать! 👋</h2>
-  <p>Открывай кейсы и собирай коллекцию предметов.</p>
- </div>
-
- <div class="stats">
-  <div class="stat"><small>ТВОЙ БАЛАНС</small><strong id="statBalance">100 FC</strong></div>
-  <div class="stat"><small>ПРЕДМЕТОВ</small><strong id="statItems">0</strong></div>
- </div>
-
- <div class="section-title">🔥 Популярные кейсы <small>FOX CASES</small></div>
-
- <div class="case-card">
-  <div class="case-top">
-   <div class="case-name">Стартовый кейс</div>
-   <div class="case-label">БЕСПЛАТНО</div>
+<main>
+<section class="page active" id="home">
+ <div class="hero">
+  <div class="eyebrow">FOX GRADE • SEASON 01</div>
+  <h1>Открывай. Собирай. Улучшай.</h1>
+  <p>Собери собственную коллекцию редких предметов и NFT-карточек.</p>
+  <div class="stats">
+   <div class="stat"><b id="statItems">0</b><small>ПРЕДМЕТОВ</small></div>
+   <div class="stat"><b id="statOpened">0</b><small>ОТКРЫТО КЕЙСОВ</small></div>
+   <div class="stat"><b id="statLevel">1</b><small>УРОВЕНЬ</small></div>
   </div>
-  <div class="case-desc">Доступен один раз в 24 часа</div>
-  <div class="case-art">🎁</div>
-  <div class="roulette"><div class="track" id="trackFree"></div></div>
-  <button class="open-btn" id="freeBtn" onclick="openCase('free')">ОТКРЫТЬ КЕЙС</button>
-  <div class="case-price" id="freeTimer">Можно открыть сейчас</div>
  </div>
-
- <div class="case-card">
-  <div class="case-top">
-   <div class="case-name">FOX Premium</div>
-   <div class="case-label">PREMIUM</div>
-  </div>
-  <div class="case-desc">Больше редких предметов</div>
-  <div class="case-art">💎</div>
-  <div class="roulette"><div class="track" id="trackPaid"></div></div>
-  <button class="open-btn" id="paidBtn" onclick="openCase('paid')">ОТКРЫТЬ ЗА 5 FC</button>
-  <div class="case-price">Используются только виртуальные очки</div>
- </div>
+ <div class="section-head"><h2>Популярные кейсы</h2><span class="tag">8 CASES</span></div>
+ <div class="grid" id="caseGrid"></div>
 </section>
 
-<section id="inventory" class="page">
- <div class="welcome"><h2>🎒 Инвентарь</h2><p>Все полученные тобой предметы</p></div>
- <div class="stats">
-  <div class="stat"><small>ПРЕДМЕТОВ</small><strong id="invCount">0</strong></div>
-  <div class="stat"><small>СТОИМОСТЬ</small><strong id="invValue">0 FC</strong></div>
+<section class="page" id="opening">
+ <button class="secondary" onclick="go('home')">← Назад к кейсам</button>
+ <div class="hero" style="margin-top:14px">
+  <div class="eyebrow">CASE OPENING</div><h1 id="openingTitle">Открытие кейса</h1>
+  <p id="openingDesc">Посмотри, что может выпасть из этого кейса.</p>
  </div>
+ <div class="roulette-wrap">
+  <div class="roulette"><div class="pointer"></div><div class="rail" id="rail"></div></div>
+  <p style="text-align:center;font-size:11px;margin:12px 0 0">Предмет остановится в центре рулетки</p>
+ </div>
+ <button class="primary full" id="openButton" onclick="openCase()">ОТКРЫТЬ КЕЙС</button>
+ <h2>Содержимое кейса</h2>
+ <p>Все предметы, доступные в этом кейсе:</p>
+ <div class="possible" id="possible"></div>
+</section>
+
+<section class="page" id="inventory">
+ <div class="section-head"><h2>Моя коллекция</h2><span class="tag" id="invCount">0 предметов</span></div>
+ <div class="panel"><input id="invSearch" placeholder="🔎 Найти предмет..." oninput="renderInventory()"></div>
  <div id="inventoryList"></div>
 </section>
 
-<section id="bonus" class="page">
- <div class="welcome"><h2>🎁 Бонусы</h2><p>Дополнительная информация</p></div>
- <div class="info">
-  <h3>⭐ Ежедневный кейс</h3>
-  <p>Каждые 24 часа ты можешь открыть бесплатный стартовый кейс.</p>
+<section class="page" id="upgrade">
+ <h2>Апгрейдер</h2>
+ <div class="hero"><div class="eyebrow">UPGRADE STATION</div><h1>Улучши свою коллекцию</h1>
+ <p>Выбери три одинаковых предмета и гарантированно получи один предмет следующей редкости.</p></div>
+ <div class="panel">
+  <label style="font-size:12px;color:#9aa5b6">Выбери предмет для улучшения</label>
+  <select id="upgradeSelect" onchange="showUpgradeInfo()"></select>
+  <div id="upgradeInfo" style="margin-top:14px"></div>
+  <button class="primary full" style="margin-top:13px" onclick="upgradeItem()">УЛУЧШИТЬ ПРЕДМЕТ</button>
  </div>
- <div class="info">
-  <h3>💎 Виртуальные очки</h3>
-  <p>FC — внутриигровые очки. Они не являются деньгами, не покупаются и не выводятся.</p>
- </div>
- <div class="info">
-  <h3>📦 Коллекция</h3>
-  <p>Собирай предметы и управляй своим инвентарём.</p>
- </div>
+ <div class="panel"><b>Как работает апгрейд?</b><p>Нужно 3 одинаковых предмета. Они будут объединены в один предмет следующей редкости. Результат гарантирован.</p></div>
 </section>
 
-<section id="profile" class="page">
- <div class="welcome"><h2>👤 Профиль</h2><p>Твоя статистика FOX Grade</p></div>
- <div class="info">
-  <h3>Твой аккаунт</h3>
-  <p id="userInfo">Игрок FOX Grade</p>
+<section class="page" id="nft">
+ <div class="hero"><div class="eyebrow">DIGITAL COLLECTION</div><h1>NFT Gallery</h1><p>Особые коллекционные карточки FOX Grade.</p></div>
+ <div class="grid" id="nftGrid"></div>
+</section>
+
+<section class="page" id="tasks">
+ <h2>Ежедневные задания</h2>
+ <p>Выполняй задания и забирай виртуальные FC.</p>
+ <div id="taskList"></div>
+</section>
+
+<section class="page" id="profile">
+ <h2>Профиль игрока</h2>
+ <div class="panel profile-head">
+  <div class="avatar">🦊</div>
+  <div><b id="playerName">FOX Player</b><p style="margin:5px 0">Уровень <span id="profileLevel">1</span></p></div>
+ </div>
+ <div class="panel">
+  <div class="section-head"><b>Опыт аккаунта</b><span id="xpText">0 / 100 XP</span></div>
+  <div class="progress"><span id="xpBar"></span></div>
  </div>
  <div class="stats">
-  <div class="stat"><small>БАЛАНС</small><strong id="profileBalance">100 FC</strong></div>
-  <div class="stat"><small>КОЛЛЕКЦИЯ</small><strong id="profileItems">0</strong></div>
+  <div class="stat"><b id="pOpened">0</b><small>КЕЙСОВ</small></div>
+  <div class="stat"><b id="pItems">0</b><small>ПРЕДМЕТОВ</small></div>
+  <div class="stat"><b id="pSold">0</b><small>ПРОДАНО</small></div>
  </div>
+ <div class="panel" style="margin-top:15px"><b>Настройки</b><p>Прогресс сохраняется на этом устройстве.</p>
+ <button class="secondary full" onclick="resetGame()">Сбросить прогресс</button></div>
 </section>
-
 </main>
 
-<nav class="nav">
- <button class="active" onclick="switchPage('cases',this)"><span class="ico">📦</span>Кейсы</button>
- <button onclick="switchPage('inventory',this)"><span class="ico">🎒</span>Инвентарь</button>
- <button onclick="switchPage('bonus',this)"><span class="ico">🎁</span>Бонусы</button>
- <button onclick="switchPage('profile',this)"><span class="ico">👤</span>Профиль</button>
+<nav class="tabs">
+ <button class="tab active" data-page="home" onclick="go('home')"><i>🏠</i>Главная</button>
+ <button class="tab" data-page="inventory" onclick="go('inventory')"><i>🎒</i>Коллекция</button>
+ <button class="tab" data-page="upgrade" onclick="go('upgrade')"><i>⚡</i>Апгрейд</button>
+ <button class="tab" data-page="nft" onclick="go('nft')"><i>💎</i>NFT</button>
+ <button class="tab" data-page="tasks" onclick="go('tasks')"><i>🎯</i>Задания</button>
+ <button class="tab" data-page="profile" onclick="go('profile')"><i>👤</i>Профиль</button>
 </nav>
 
-<div class="result" id="result">
- <div class="result-box">
-  <h2>ПОЗДРАВЛЯЕМ!</h2>
-  <div class="result-emoji" id="resultEmoji">💎</div>
-  <h3 id="resultName">Алмаз</h3>
-  <p id="resultValue">Вы получили предмет!</p>
-  <button class="open-btn" onclick="closeResult()">ЗАБРАТЬ</button>
+<div class="modal" id="resultModal">
+ <div class="modal-box">
+  <div class="eyebrow">ТВОЯ НАХОДКА</div>
+  <div class="big" id="resultEmoji">🎁</div>
+  <h2 id="resultName">Предмет</h2>
+  <div class="tag" id="resultRarity">RARE</div>
+  <p id="resultValue">Стоимость: 100 FC</p>
+  <button class="primary full" onclick="closeResult()">ЗАБРАТЬ В КОЛЛЕКЦИЮ</button>
  </div>
 </div>
+<div class="toast" id="toast"></div>
 
 <script>
-const tg=window.Telegram?.WebApp;
-if(tg){tg.ready();tg.expand();}
-
-const userId=tg?.initDataUnsafe?.user?.id||'demo';
-const saveKey='fox_grade_v2_'+userId;
-
-const defaultData={
- balance:100,
- lastFree:0,
- inventory:[],
- totalOpened:0
+const ITEMS=[
+ {id:'pistol',name:'Neon Pistol',emoji:'🔫',rarity:'common',value:35},
+ {id:'gloves',name:'Street Gloves',emoji:'🧤',rarity:'common',value:45},
+ {id:'spray',name:'Neon Spray',emoji:'🎨',rarity:'common',value:50},
+ {id:'mask',name:'Fox Mask',emoji:'🎭',rarity:'rare',value:110},
+ {id:'katana',name:'Cyber Katana',emoji:'⚔️',rarity:'rare',value:150},
+ {id:'helmet',name:'Chrome Helmet',emoji:'🪖',rarity:'rare',value:170},
+ {id:'dragon',name:'Dragon Blade',emoji:'🐉',rarity:'epic',value:350},
+ {id:'phantom',name:'Phantom',emoji:'👻',rarity:'epic',value:420},
+ {id:'crown',name:'Golden Crown',emoji:'👑',rarity:'legendary',value:850},
+ {id:'phoenix',name:'Phoenix',emoji:'🔥',rarity:'legendary',value:1100},
+ {id:'fox',name:'Golden Fox',emoji:'🦊',rarity:'mythic',value:2200},
+ {id:'cosmos',name:'Cosmos NFT',emoji:'🌌',rarity:'nft',value:5000}
+];
+const CASES=[
+ {id:'starter',name:'Стартовый',emoji:'📦',price:100,desc:'Начни свою коллекцию'},
+ {id:'neon',name:'Неоновый',emoji:'🌃',price:250,desc:'Яркие городские предметы'},
+ {id:'cyber',name:'Кибер',emoji:'🤖',price:400,desc:'Технологии будущего'},
+ {id:'gold',name:'Золотой',emoji:'👑',price:650,desc:'Золото и легендарки'},
+ {id:'dragon',name:'Драконий',emoji:'🐉',price:900,desc:'Редкие драконьи находки'},
+ {id:'phantom',name:'Призрачный',emoji:'👻',price:1200,desc:'Тёмная коллекция'},
+ {id:'mythic',name:'Мифический',emoji:'🔥',price:1800,desc:'Мифические предметы'},
+ {id:'nft',name:'NFT Vault',emoji:'💎',price:2500,desc:'Особая цифровая галерея'}
+];
+const CASE_ITEMS={
+ starter:['pistol','gloves','spray','mask','katana','dragon'],
+ neon:['spray','mask','helmet','phantom','crown'],
+ cyber:['pistol','helmet','katana','phantom','phoenix'],
+ gold:['gloves','katana','crown','phoenix','fox'],
+ dragon:['mask','dragon','phoenix','fox'],
+ phantom:['spray','phantom','crown','fox'],
+ mythic:['dragon','crown','phoenix','fox','cosmos'],
+ nft:['crown','phoenix','fox','cosmos']
 };
+const rarityNames={common:'Обычный',rare:'Редкий',epic:'Эпический',legendary:'Легендарный',mythic:'Мифический',nft:'NFT'};
+const rarityOrder=['common','rare','epic','legendary','mythic','nft'];
+let data=load();
+let selectedCase='starter',spinning=false,lastReward=null;
 
-let data;
-try{
- data=JSON.parse(localStorage.getItem(saveKey))||defaultData;
-}catch(e){data={...defaultData};}
-
-if(!Array.isArray(data.inventory))data.inventory=[];
-if(typeof data.balance!=='number')data.balance=100;
-if(typeof data.lastFree!=='number')data.lastFree=0;
-
-const freeItems=[
- {name:'1 звезда',emoji:'⭐',value:1,rarity:'common',chance:35},
- {name:'3 звезды',emoji:'🌟',value:3,rarity:'common',chance:25},
- {name:'5 звёзд',emoji:'✨',value:5,rarity:'common',chance:15},
- {name:'Мишка',emoji:'🧸',value:22,rarity:'rare',chance:10},
- {name:'Сердечко',emoji:'💖',value:22,rarity:'rare',chance:7},
- {name:'Роза',emoji:'🌹',value:36,rarity:'rare',chance:4},
- {name:'Ракета',emoji:'🚀',value:73,rarity:'epic',chance:2},
- {name:'Алмаз',emoji:'💎',value:145,rarity:'legend',chance:1.5},
- {name:'Кубок',emoji:'🏆',value:455,rarity:'mythic',chance:.5}
-];
-
-const paidItems=[
- {name:'1 звезда',emoji:'⭐',value:1,rarity:'common',chance:25},
- {name:'5 звёзд',emoji:'🌟',value:5,rarity:'common',chance:20},
- {name:'Мишка',emoji:'🧸',value:22,rarity:'rare',chance:15},
- {name:'Роза',emoji:'🌹',value:36,rarity:'rare',chance:12},
- {name:'Ракета',emoji:'🚀',value:73,rarity:'epic',chance:10},
- {name:'Алмаз',emoji:'💎',value:145,rarity:'epic',chance:7},
- {name:'Кубок',emoji:'🏆',value:377,rarity:'legend',chance:4},
- {name:'Кольцо',emoji:'💍',value:550,rarity:'legend',chance:3},
- {name:'Часы',emoji:'⌚',value:850,rarity:'legend',chance:2},
- {name:'Корона',emoji:'👑',value:1500,rarity:'mythic',chance:1.5},
- {name:'Зелёный алмаз',emoji:'💚',value:2500,rarity:'mythic',chance:.5}
-];
-
-let opening=false;
-let timerInterval=null;
-
-function save(){
- localStorage.setItem(saveKey,JSON.stringify(data));
- updateUI();
+function load(){
+ try{
+  return Object.assign({balance:2500,inventory:[],opened:0,sold:0,xp:0,level:1,completed:[],taskDate:''},
+   JSON.parse(localStorage.getItem('foxgrade_v2')||'{}'));
+ }catch(e){return {balance:2500,inventory:[],opened:0,sold:0,xp:0,level:1,completed:[],taskDate:''}}
 }
-
-function updateUI(){
- document.getElementById('balance').textContent=data.balance;
- document.getElementById('statBalance').textContent=data.balance+' FC';
- document.getElementById('statItems').textContent=data.inventory.length;
- document.getElementById('invCount').textContent=data.inventory.length;
- document.getElementById('invValue').textContent=
- data.inventory.reduce((s,x)=>s+x.value,0)+' FC';
- document.getElementById('profileBalance').textContent=data.balance+' FC';
- document.getElementById('profileItems').textContent=data.inventory.length;
- renderInventory();
+function save(){localStorage.setItem('foxgrade_v2',JSON.stringify(data));renderAll()}
+function item(id){return ITEMS.find(x=>x.id===id)}
+function getCase(id){return CASES.find(x=>x.id===id)}
+function toast(s){let t=document.getElementById('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2100)}
+function go(page){
+ document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+ document.getElementById(page).classList.add('active');
+ document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.page===page));
+ if(page==='inventory')renderInventory();
+ if(page==='upgrade')renderUpgrade();
+ if(page==='nft')renderNFT();
+ if(page==='tasks')renderTasks();
+ if(page==='profile')renderProfile();
+ window.scrollTo(0,0);
 }
-
-function switchPage(name,button){
- if(opening)return;
- document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
- document.getElementById(name).classList.add('active');
- document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
- button.classList.add('active');
+function renderCases(){
+ document.getElementById('caseGrid').innerHTML=CASES.map(c=>`
+ <div class="case"><div class="case-art">${c.emoji}</div><h3>${c.name} кейс</h3>
+ <p>${c.desc}</p><div class="case-bottom"><span class="price">🟡 ${c.price} FC</span>
+ <button class="primary" onclick="selectCase('${c.id}')">Открыть</button></div></div>`).join('');
 }
-
-function randomItem(list){
- const total=list.reduce((s,x)=>s+x.chance,0);
- let r=Math.random()*total;
- for(const item of list){
-  r-=item.chance;
-  if(r<=0)return item;
+function selectCase(id){
+ selectedCase=id;let c=getCase(id);
+ document.getElementById('openingTitle').textContent=c.name+' кейс';
+ document.getElementById('openingDesc').textContent=c.desc+' • '+c.price+' FC';
+ document.getElementById('openButton').textContent='ОТКРЫТЬ ЗА '+c.price+' FC';
+ renderPossible();document.getElementById('rail').innerHTML='';
+ go('opening');
+}
+function renderPossible(){
+ let ids=CASE_ITEMS[selectedCase];
+ document.getElementById('possible').innerHTML=ids.map(id=>itemCard(item(id))).join('');
+}
+function itemCard(x){return `<div class="item ${x.rarity}"><div class="emoji">${x.emoji}</div><b>${x.name}</b><small>${rarityNames[x.rarity]} • ${x.value} FC</small></div>`}
+function openCase(){
+ if(spinning)return;
+ let c=getCase(selectedCase);
+ if(data.balance<c.price){toast('Недостаточно FC!');return}
+ data.balance-=c.price;spinning=true;
+ let btn=document.getElementById('openButton');btn.disabled=true;btn.textContent='РУЛЕТКА КРУТИТСЯ...';
+ let ids=CASE_ITEMS[selectedCase],winner=item(ids[Math.floor(Math.random()*ids.length)]);
+ let rail=document.getElementById('rail');rail.innerHTML='';
+ let count=32,winnerIndex=27;
+ for(let i=0;i<count;i++){
+  let x=i===winnerIndex?winner:item(ids[Math.floor(Math.random()*ids.length)]);
+  rail.insertAdjacentHTML('beforeend',`<div class="loot ${x.rarity}"><div class="emoji">${x.emoji}</div><small>${x.name}</small></div>`);
  }
- return list[list.length-1];
-}
-
-function makeItem(item){
- const el=document.createElement('div');
- el.className='item '+item.rarity;
- const emoji=document.createElement('div');
- emoji.className='emoji';
- emoji.textContent=item.emoji;
- const value=document.createElement('div');
- value.className='value';
- value.textContent=item.value+' FC';
- el.append(emoji,value);
- return el;
-}
-
-function startRoulette(id,list,winner){
- const track=document.getElementById(id);
- track.innerHTML='';
- track.style.transition='none';
- track.style.transform='translateX(0px)';
-
- const winnerIndex=35;
- for(let i=0;i<50;i++){
-  const item=i===winnerIndex?winner:randomItem(list);
-  const el=makeItem(item);
-  if(i===winnerIndex)el.id='winner';
-  track.appendChild(el);
- }
-
- const win=document.getElementById('winner');
- const box=track.parentElement;
- const offset=box.clientWidth/2-(win.offsetLeft+win.offsetWidth/2);
-
- requestAnimationFrame(()=>{
-  requestAnimationFrame(()=>{
-   track.style.transition='transform 5s cubic-bezier(.12,.75,.12,1)';
-   track.style.transform=`translateX(${offset}px)`;
-  });
- });
-}
-
-function openCase(type){
- if(opening)return;
-
- const free=type==='free';
- const btn=document.getElementById(free?'freeBtn':'paidBtn');
-
- if(free){
-  if(Date.now()-data.lastFree<86400000){
-   updateCooldown();
-   return;
-  }
- }else{
-  if(data.balance<5){
-   alert('Недостаточно виртуальных очков!');
-   return;
-  }
-  data.balance-=5;
- }
-
- opening=true;
- btn.disabled=true;
- btn.textContent='ОТКРЫВАЕМ...';
-
- const list=free?freeItems:paidItems;
- const winner=randomItem(list);
- const trackId=free?'trackFree':'trackPaid';
-
- startRoulette(trackId,list,winner);
-
+ rail.style.transition='none';rail.style.transform='translateX(0)';
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  let box=document.querySelector('.roulette'),tile=rail.children[0];
+  let offset=winnerIndex*(tile.offsetWidth+7)-(box.clientWidth/2-tile.offsetWidth/2);
+  rail.style.transition='transform 5.5s cubic-bezier(.08,.72,.12,1)';
+  rail.style.transform=`translateX(-${offset}px)`;
+ }));
  setTimeout(()=>{
-  data.balance+=winner.value;
-  data.totalOpened++;
-  data.inventory.unshift({
-   ...winner,
-   id:Date.now()+'_'+Math.random()
-  });
-
-  if(free)data.lastFree=Date.now();
-
-  save();
-  opening=false;
-  btn.disabled=false;
-  btn.textContent=free?'ОТКРЫТЬ КЕЙС':'ОТКРЫТЬ ЗА 5 FC';
-
-  document.getElementById('resultEmoji').textContent=winner.emoji;
+  data.inventory.push({uid:Date.now()+Math.random(),id:winner.id});
+  data.opened++;data.xp+=20;checkLevel();lastReward=winner;
+  spinning=false;btn.disabled=false;btn.textContent='ОТКРЫТЬ ЗА '+c.price+' FC';
+  save();document.getElementById('resultEmoji').textContent=winner.emoji;
   document.getElementById('resultName').textContent=winner.name;
+  document.getElementById('resultRarity').textContent=rarityNames[winner.rarity];
   document.getElementById('resultValue').textContent='Стоимость: '+winner.value+' FC';
-  document.getElementById('result').classList.add('show');
-
-  updateCooldown();
- },5300);
+  document.getElementById('resultModal').classList.add('show');
+ },5700);
 }
-
-function closeResult(){
- document.getElementById('result').classList.remove('show');
-}
-
-function updateCooldown(){
- const btn=document.getElementById('freeBtn');
- const timer=document.getElementById('freeTimer');
- const left=86400000-(Date.now()-data.lastFree);
-
- if(left<=0){
-  btn.disabled=false;
-  btn.textContent='ОТКРЫТЬ КЕЙС';
-  timer.textContent='Можно открыть сейчас';
-  return;
- }
-
- btn.disabled=true;
- btn.textContent='КЕЙС НЕДОСТУПЕН';
-
- const h=Math.floor(left/3600000);
- const m=Math.floor(left%3600000/60000);
- const s=Math.floor(left%60000/1000);
-
- timer.textContent=`Следующий кейс через ${h}ч ${m}м ${s}с`;
-}
-
+function closeResult(){document.getElementById('resultModal').classList.remove('show');go('inventory')}
 function renderInventory(){
- const root=document.getElementById('inventoryList');
- if(!root)return;
-
- root.innerHTML='';
- if(data.inventory.length===0){
-  root.innerHTML='<div class="empty"><div>🎒</div>Инвентарь пока пуст</div>';
-  return;
- }
-
- data.inventory.forEach(item=>{
-  const row=document.createElement('div');
-  row.className='inventory-item';
-
-  const emoji=document.createElement('div');
-  emoji.className='inventory-emoji';
-  emoji.textContent=item.emoji;
-
-  const info=document.createElement('div');
-  info.className='inventory-info';
-
-  const name=document.createElement('b');
-  name.textContent=item.name;
-
-  const value=document.createElement('small');
-  value.textContent=item.value+' FC · '+item.rarity;
-
-  info.append(name,value);
-
-  const sell=document.createElement('button');
-  sell.className='sell';
-  sell.textContent='Продать';
-  sell.onclick=()=>sellItem(item.id);
-
-  row.append(emoji,info,sell);
-  root.appendChild(row);
- });
+ let q=(document.getElementById('invSearch')?.value||'').toLowerCase();
+ let arr=data.inventory.map((v,i)=>({v,i,x:item(v.id)})).filter(a=>a.x.name.toLowerCase().includes(q));
+ document.getElementById('invCount').textContent=data.inventory.length+' предметов';
+ document.getElementById('inventoryList').innerHTML=arr.length?arr.map(a=>`
+ <div class="panel inventory-card"><div class="emoji">${a.x.emoji}</div>
+ <div class="info"><b>${a.x.name}</b><small>${rarityNames[a.x.rarity]} • ${a.x.value} FC</small></div>
+ <button class="secondary" onclick="sellItem(${a.i})">Продать</button></div>`).join(''):
+ `<div class="empty"><div>🎒</div>Коллекция пока пуста.<br>Открой первый кейс!</div>`;
 }
-
-function sellItem(id){
- const index=data.inventory.findIndex(x=>x.id===id);
- if(index<0)return;
-
- const item=data.inventory[index];
- data.balance+=item.value;
- data.inventory.splice(index,1);
- save();
+function sellItem(index){
+ let x=item(data.inventory[index].id);if(!x)return;
+ data.inventory.splice(index,1);data.balance+=x.value;data.sold++;save();toast('Продано за '+x.value+' FC');
 }
-
-document.getElementById('userInfo').textContent=
- tg?.initDataUnsafe?.user?.first_name||'Игрок FOX Grade';
-
-updateUI();
-updateCooldown();
-
-timerInterval=setInterval(updateCooldown,1000);
+function renderUpgrade(){
+ let counts={};data.inventory.forEach(v=>counts[v.id]=(counts[v.id]||0)+1);
+ let available=ITEMS.filter(x=>counts[x.id]>=3&&rarityOrder.indexOf(x.rarity)<5);
+ let sel=document.getElementById('upgradeSelect'),old=sel.value;
+ sel.innerHTML=available.length?available.map(x=>`<option value="${x.id}">${x.emoji} ${x.name} (${counts[x.id]} шт.)</option>`).join(''):'<option value="">Нет подходящих предметов</option>';
+ if(available.some(x=>x.id===old))sel.value=old;
+ showUpgradeInfo();
+}
+function showUpgradeInfo(){
+ let id=document.getElementById('upgradeSelect').value,x=item(id);
+ let el=document.getElementById('upgradeInfo');
+ if(!x){el.innerHTML='<p>Нужно собрать три одинаковых предмета.</p>';return}
+ let next=rarityOrder[rarityOrder.i
+ndexOf(x.rarity)+1];
+ el.innerHTML=`<div class="item ${x.rarity}"><div class="emoji">${x.emoji}</div><b>${x.name}</b><small>3 предмета → 1 предмет редкости ${rarityNames[next]}</small></div>`;
+}
+function upgradeItem(){
+ let id=document.getElementById('upgradeSelect').value,x=item(id);
+ if(!x){toast('Нет предметов для улучшения');return}
+ let found=data.inventory.filter(v=>v.id===id);
+ if(found.length<3){toast('Нужно три одинаковых предмета');return}
+ data.inventory=data.inventory.filter(v=>v.id!==id);
+ let next=rarityOrder[rarityOrder.indexOf(x.rarity)+1];
+ let pool=ITEMS.filter(v=>v.rarity===next);
+ let reward=pool[Math.floor(Math.random()*pool.length)];
+ data.inventory.push({uid:Date.now()+Math.random(),id:reward.id});
+ data.xp+=15;checkLevel();save();renderUpgrade();
+ toast('Получен предмет: '+reward.name);
+}
+function renderNFT(){
+ let ids=['cosmos','fox','phoenix','crown'];
+ document.getElementById('nftGrid').innerHTML=ids.map(id=>{
+  let x=item(id),owned=data.inventory.some(v=>v.id===id);
+  return `<div class="case"><div class="case-art">${x.emoji}</div><h3>${x.name}</h3>
+  <p class="tag">NFT COLLECTION</p><p>${owned?'Есть в коллекции':'Пока не найден'}</p>
+  <div class="price">${x.value} FC</div></div>`;
+ }).join('');
+}
+const TASKS=[
+ {id:'open1',name:'Первое открытие',desc:'Открой один кейс',reward:100,check:()=>data.opened>=1},
+ {id:'open5',name:'Коллекционер',desc:'Открой пять кейсов',reward:250,check:()=>data.opened>=5},
+ {id:'items5',name:'Собиратель',desc:'Собери пять предметов',reward:200,check:()=>data.inventory.length>=5},
+ {id:'sell1',name:'Торговец',desc:'Продай один предмет',reward:100,check:()=>data.sold>=1}
+];
+function renderTasks(){
+ document.getElementById('taskList').innerHTML=TASKS.map(t=>{
+ let done=data.completed.includes(t.id),ready=t.check();
+ return `<div class="panel"><div class="section-head"><b>${t.name}</b><span class="price">+${t.reward} FC</span></div>
+ <p>${t.desc}</p><button class="${done?'secondary':'primary'} full" ${done?'disabled':''} onclick="claimTask('${t.id}')">${done?'Выполнено':ready?'Забрать награду':'Ещё не выполнено'}</button></div>`;
+ }).join('');
+}
+function claimTask(id){
+ let t=TASKS.find(x=>x.id===id);
+ if(!t||data.completed.includes(id)||!t.check()){toast('Задание пока не выполнено');return}
+ data.completed.push(id);data.balance+=t.reward;save();renderTasks();toast('Получено '+t.reward+' FC');
+}
+function checkLevel(){while(data.xp>=data.level*100){data.xp-=data.level*100;data.level++}}
+function renderProfile(){
+ document.getElementById('profileLevel').textContent=data.level;
+ document.getElementById('statLevel').textContent=data.level;
+ document.getElementById('xpText').textContent=data.xp+' / '+(data.level*100)+' XP';
+ document.getElementById('xpBar').style.width=(data.xp/(data.level*100)*100)+'%';
+ document.getElementById('pOpened').textContent=data.opened;
+ document.getElementById('pItems').textContent=data.inventory.length;
+ document.getElementById('pSold').textContent=data.sold;
+}
+function renderAll(){
+ document.getElementById('balance').textContent=data.balance.toLocaleString('ru-RU');
+ document.getElementById('statItems').textContent=data.inventory.length;
+ document.getElementById('statOpened').textContent=data.opened;
+ document.getElementById('statLevel').textContent=data.level;
+ renderProfile();
+}
+function resetGame(){
+ if(!confirm('Точно сбросить весь прогресс?'))return;
+ localStorage.removeItem('foxgrade_v2');data=load();save();go('home');toast('Прогресс сброшен');
+}
+renderCases();renderAll();
+if(window.Telegram?.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand()}
 </script>
 </body>
 </html>
-

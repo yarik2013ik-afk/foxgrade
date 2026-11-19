@@ -2,424 +2,1253 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FOX GRADE</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#090b12">
+<title>FOX GRADE 2.0</title>
+
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root{
+ --bg:#090b12;
+ --panel:#111522;
+ --panel2:#171d2c;
+ --line:#252d40;
+ --text:#f5f6fa;
+ --muted:#8993a8;
+ --orange:#ff9f32;
+ --orange2:#ffbd59;
+ --blue:#4e9fff;
+ --green:#45d69a;
+ --purple:#a779ff;
+ --red:#ff6177;
+}
 *{box-sizing:border-box}
-body{margin:0;background:#090d16;color:#f5f7ff;font-family:Arial,sans-serif}
-button{cursor:pointer;border:0;color:white;font-weight:bold}
-header{padding:18px;background:#111827;display:flex;justify-content:space-between;align-items:center}
-.logo{font-size:23px;font-weight:900;color:#ffad32}
-.balance{background:#202c40;padding:10px 14px;border-radius:12px}
-nav{display:flex;gap:7px;padding:10px;overflow-x:auto;background:#101827}
-nav button{padding:12px 15px;border-radius:10px;background:#202c40;white-space:nowrap}
-nav button.active{background:#ff9f24;color:#111}
-main{padding:14px;max-width:950px;margin:auto}
-h2{font-size:21px}
-.page{display:none}
-.page.active{display:block}
-.cases{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.case{background:linear-gradient(145deg,#1c2940,#101725);border:1px solid #34445f;border-radius:15px;padding:14px;text-align:center}
-.case-art{height:105px;display:grid;place-items:center;font-size:65px}
-.case h3{margin:7px}
-.case p{color:#aab6c9;font-size:13px}
-.action{background:linear-gradient(90deg,#ff9c25,#ffbd4b);color:#17110a;padding:12px;border-radius:10px;width:100%;margin-top:8px}
-.secondary{background:#26364f;color:white;padding:11px;border-radius:10px}
-.panel{background:#141e30;border:1px solid #293951;border-radius:15px;padding:15px;margin:12px 0}
-.roulette{height:125px;overflow:hidden;background:#0b1220;border:2px solid #394b67;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:15px 0}
-.roulette-inner{font-size:55px;text-align:center}
-.inventory{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.item{background:#17243a;border:1px solid #354760;padding:12px;border-radius:12px;text-align:center}
-.item-icon{font-size:42px}
-.common{color:#b9c4d5}.rare{color:#55aaff}.epic{color:#c17aff}.legendary{color:#ffbd43}
-input,select{background:#0c1422;color:white;border:1px solid #40516c;padding:12px;border-radius:9px;width:100%;margin:7px 0}
-.modal{display:none;position:fixed;inset:0;background:#000c;z-index:10;align-items:center;justify-content:center;padding:20px}
-.modal.show{display:flex}
-.modal-box{background:#17243a;border:1px solid #526784;border-radius:18px;padding:22px;text-align:center;width:100%;max-width:350px}
-.big{font-size:75px}
-small{color:#9caec5}
-@media(min-width:650px){.cases{grid-template-columns:repeat(4,minmax(0,1fr))}.inventory{grid-template-columns:repeat(4,minmax(0,1fr))}}
+html{scroll-behavior:smooth}
+body{
+ margin:0;background:var(--bg);color:var(--text);
+ font-family:Inter,Arial,sans-serif;
+ min-height:100vh;overflow-x:hidden;
+}
+button{font:inherit;cursor:pointer}
+button:active{transform:scale(.97)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.app{max-width:1100px;margin:auto;padding-bottom:95px}
+.topbar{
+ position:sticky;top:0;z-index:20;
+ display:flex;align-items:center;justify-content:space-between;
+ padding:14px 16px;
+ background:rgba(9,11,18,.92);
+ backdrop-filter:blur(18px);
+ border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-icon{
+ width:39px;height:39px;border-radius:13px;
+ display:grid;place-items:center;
+ background:linear-gradient(145deg,#ffbd59,#ef7621);
+ font-size:23px;box-shadow:0 5px 22px #ff932c33;
+}
+.brand-name{font-weight:900;font-size:19px;letter-spacing:-.7px}
+.brand-name span{color:var(--orange)}
+.wallet{
+ background:#171e2d;border:1px solid #303b51;
+ padding:9px 12px;border-radius:12px;
+ display:flex;align-items:center;gap:7px;font-weight:800;
+ font-size:13px;
+}
+.wallet b{color:var(--orange)}
+.wallet-icon{font-size:17px}
+.page{display:none;padding:17px}
+.page.active{display:block;animation:pageIn .25s ease}
+@keyframes pageIn{
+ from{opacity:0;transform:translateY(8px)}
+ to{opacity:1;transform:translateY(0)}
+}
+.hero{
+ position:relative;overflow:hidden;
+ min-height:175px;border-radius:22px;
+ padding:22px;margin-bottom:22px;
+ background:
+ radial-gradient(circle at 85% 15%,#ff9e3240,transparent 38%),
+ linear-gradient(120deg,#222b43,#121827 70%);
+ border:1px solid #343d52;
+}
+.hero:after{
+ content:"";position:absolute;width:180px;height:180px;
+ right:-45px;top:0;border-radius:50%;
+ border:1px solid #ffffff13;
+ box-shadow:0 0 0 22px #ffffff08,0 0 0 44px #ffffff05;
+}
+.hero-label{
+ color:var(--orange2);font-size:11px;font-weight:900;
+ letter-spacing:2px;text-transform:uppercase;
+}
+.hero h1{font-size:29px;line-height:1.12;margin:12px 0 8px;max-width:260px}
+.hero p{font-size:12px;color:#aab5ca;max-width:250px;line-height:1.5}
+.hero-fox{
+ position:absolute;right:20px;bottom:12px;
+ font-size:100px;filter:drop-shadow(0 10px 18px #ff9d3155);
+ animation:foxFloat 3s ease-in-out infinite;
+}
+@keyframes foxFloat{
+ 0%,100%{transform:translateY(0) rotate(-4deg)}
+ 50%{transform:translateY(-10px) rotate(4deg)}
+}
+.section-head{
+ display:flex;align-items:center;justify-content:space-between;
+ margin:22px 0 13px;gap:10px;
+}
+.section-head h2{font-size:18px;margin:0;font-weight:900}
+.section-head small{color:var(--muted);font-size:11px}
+.mini-link{border:0;background:none;color:var(--orange);font-size:12px;font-weight:800}
+.navbar{
+ position:fixed;bottom:0;left:0;right:0;z-index:30;
+ display:flex;justify-content:space-around;gap:3px;
+ padding:9px 5px calc(9px + env(safe-area-inset-bottom));
+ background:rgba(13,17,27,.96);
+ border-top:1px solid var(--line);backdrop-filter:blur(20px);
+}
+.nav-btn{
+ flex:1;max-width:100px;border:0;background:none;color:#778198;
+ display:flex;flex-direction:column;align-items:center;gap:4px;
+ font-size:9px;font-weight:800;padding:5px 1px;
+}
+.nav-btn .nav-icon{font-size:20px;transition:.2s}
+.nav-btn.active{color:var(--orange)}
+.nav-btn.active .nav-icon{transform:translateY(-3px)}
+.case-grid{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;
+}
+.case-card{
+ position:relative;overflow:hidden;
+ min-width:0;border-radius:17px;padding:13px;
+ background:linear-gradient(145deg,#1a2335,#111725);
+ border:1px solid #303c52;transition:.2s;
+}
+.case-card:active{transform:scale(.98)}
+.case-card.featured{border-color:#a56d35}
+.case-art{
+ height:116px;display:grid;place-items:center;
+ position:relative;overflow:hidden;
+ background:radial-gradient(ellipse,#ffffff12,transparent 68%);
+}
+.case-art:before{
+ content:"";position:absolute;width:90px;height:90px;
+ border-radius:50%;background:#ffffff0a;filter:blur(12px);
+}
+.case-emoji{
+ position:relative;font-size:65px;
+ filter:drop-shadow(0 10px 12px #0009);
+ animation:caseFloat 3s ease-in-out infinite;
+}
+@keyframes caseFloat{
+ 0%,100%{transform:translateY(0) rotate(-3deg)}
+ 50%{transform:translateY(-7px) rotate(3deg)}
+}
+.case-card h3{font-size:14px;margin:5px 0}
+.case-card p{font-size:10px;color:var(--muted);margin:5px 0 11px}
+.case-bottom{display:flex;align-items:center;justify-content:space-between;gap:5px}
+.price{font-weight:900;color:var(--orange);font-size:12px}
+.primary-btn{
+ border:0;border-radius:10px;padding:11px 13px;
+ color:#211507;font-weight:900;font-size:11px;
+ background:linear-gradient(110deg,var(--orange),var(--orange2));
+ box-shadow:0 4px 15px #ff9c3222;
+}
+.primary-btn.full{width:100%}
+.dark-btn{
+ border:1px solid #39465d;background:#222d42;
+ color:#eaf0fa;border-radius:10px;padding:10px 12px;
+ font-weight:800;font-size:11px;
+}
+.panel{
+ background:var(--panel);border:1px solid var(--line);
+ border-radius:17px;padding:15px;margin-bottom:13px;
+}
+.panel-title{font-size:14px;font-weight:900;margin:0 0 12px}
+.stats-grid{
+ display:grid;grid-template-columns:repeat(3,1fr);gap:9px;
+}
+.stat{
+ background:#192235;border-radius:12px;padding:12px 7px;text-align:center;
+}
+.stat strong{display:block;font-size:17px;margin-bottom:5px}
+.stat span{font-size:9px;color:var(--muted)}
+.gift-grid{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;
+}
+.gift-card{
+ position:relative;overflow:hidden;text-align:center;
+ border-radius:16px;padding:13px 10px;
+ background:linear-gradient(145deg,#1b263c,#111725);
+ border:1px solid #34415b;
+}
+.gift-card.rare{border-color:#398cbd}
+.gift-card.epic{border-color:#9461d5}
+.gift-card.legendary{border-color:#b8873d}
+.gift-art{
+ height:100px;display:grid;place-items:center;
+ font-size:61px;
+ filter:drop-shadow(0 8px 12px #0009);
+ animation:giftGlow 3s ease-in-out infinite;
+}
+@keyframes giftGlow{
+ 0%,100%{transform:scale(1)}
+ 50%{transform:scale(1.08)}
+}
+.gift-card h3{font-size:12px;margin:6px 0}
+.gift-card p{font-size:10px;color:var(--muted);margin:5px 0 10px}
+.rarity{
+ display:inline-block;border-radius:6px;padding:4px 7px;
+ font-size:8px;font-weight:900;letter-spacing:.5px;
+ background:#ffffff12;color:#cbd4e5;
+}
+.rarity.rare{color:#67bdff;background:#348dff18}
+.rarity.epic{color:#c69aff;background:#a36bff1c}
+.rarity.legendary{color:#ffca6d;background:#ffad321c}
+.roulette-box{
+ overflow:hidden;border-radius:18px;padding:14px;
+ background:linear-gradient(145deg,#19243a,#101522);
+ border:1px solid #34415b;
+}
+.roulette-window{
+ height:125px;position:relative;overflow:hidden;
+ border:1px solid #53627d;border-radius:13px;
+ background:#090f1c;
+ display:flex;align-items:center;
+}
+.roulette-window:before{
+ content:"";position:absolute;z-index:2;left:50%;
+ top:0;bottom:0;width:3px;
+ background:var(--orange);
+ box-shadow:0 0 15px var(--orange);
+}
+.roulette-window:after{
+ content:"";position:absolute;inset:0;pointer-events:none;
+ background:linear-gradient(90deg,#090f1c 0%,transparent 20%,transparent 80%,#090f1c 100%);
+}
+.roulette-track{
+ display:flex;align-items:center;gap:7px;
+ height:100%;padding:0 45%;
+ transform:translateX(0);
+}
+.roulette-item{
+ flex:0 0 83px;height:91px;border-radius:11px;
+ display:grid;place-items:center;
+ background:#1b2940;border:1px solid #344966;
+ font-size:42px;
+}
+.roulette-item span{font-size:9px;color:#c2cde0}
+.roulette-hint{text-align:center;color:var(--muted);font-size:11px;margin:12px 0 2px}
+.inventory-grid{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;
+}
+.inventory-card{
+ background:#151e30;border:1px solid #303e56;
+ border-radius:14px;padding:12px;text-align:center;
+}
+.inventory-card .gift-art{height:75px;font-size:45px}
+.inventory-card h3{font-size:11px;margin:5px}
+.inventory-card p{font-size:10px;color:var(--orange)}
+.empty-state{
+ text-align:center;padding:35px 15px;color:var(--muted);
+ background:#111725;border:1px dashed #35415a;border-radius:15px;
+}
+.empty-state div{font-size:42px;margin-bottom:10px}
+.empty-state strong{display:block;color:#e5eaf4;font-size:13px;margin-bottom:6px}
+.upgrade-stage{
+ min-height:190px;border-radius:17px;
+ background:radial-gradient(circle,#263b5b,#101725 70%);
+ display:flex;align-items:center;justify-content:center;gap:22px;
+ border:1px solid #34445f;margin-bottom:15px;
+}
+.upgrade-slot{
+ width:105px;height:115px;border-radius:15px;
+ border:1px dashed #61728f;background:#ffffff08;
+ display:grid;place-items:center;text-align:center;
+ font-size:43px;
+}
+.upgrade-slot small{font-size:9px;display:block;color:var(--muted)}
+.upgrade-arrow{font-size:24px;color:var(--orange)}
+.progress{
+ height:8px;border-radius:20px;background:#273249;overflow:hidden;margin:12px 0;
+}
+.progress-fill{
+ height:100%;width:0%;
+ background:linear-gradient(90deg,#ff8e29,#ffcf67);
+ transition:width .4s;
+}
+.profile-head{display:flex;align-items:center;gap:13px}
+.avatar{
+ width:65px;height:65px;border-radius:20px;
+ display:grid;place-items:center;font-size:36px;
+ background:linear-gradient(145deg,#ffb64c,#d96d20);
+}
+.profile-head h2{font-size:17px;margin:0 0 5px}
+.profile-head p{font-size:11px;color:var(--muted);margin:0}
+.task-row{
+ display:flex;align-items:center;gap:11px;padding:12px 0;
+ border-bottom:1px solid var(--line);
+}
+.task-row:last-child{border-bottom:0}
+.task-icon{font-size:25px}
+.task-info{flex:1;min-width:0}
+.task-info b{font-size:11px;display:block}
+.task-info small{font-size:9px;color:var(--muted)}
+.task-reward{font-size:10px;color:var(--orange);font-weight:900}
+.modal{
+ display:none;position:fixed;inset:0;z-index:100;
+ background:#000c;backdrop-filter:blur(8px);
+ align-items:center;justify-content:center;padding:18px;
+}
+.modal.show{display:flex;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-card{
+ width:100%;max-width:370px;padding:23px;
+ text-align:center;border-radius:22px;
+ background:linear-gradient(145deg,#202d45,#111725);
+ border:1px solid #65718a;
+ box-shadow:0 20px 80px #000b;
+ animation:modalPop .3s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes modalPop{
+ from{transform:scale(.75) translateY(20px);opacity:0}
+ to{transform:scale(1);opacity:1}
+}
+.modal-item{font-size:95px;filter:drop-shadow(0 8px 20px #ffad3266)}
+.modal-card h2{font-size:19px}
+.modal-card p{font-size:12px;color:var(--muted)}
+.toast{
+ position:fixed;z-index:200;left:50%;bottom:90px;
+ transform:translate(-50%,20px);opacity:0;pointer-events:none;
+ background:#26344c;border:1px solid #53617a;
+ border-radius:12px;padding:12px 17px;
+ font-size:12px;font-weight:800;transition:.25s;
+ max-width:90%;text-align:center;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.badge{
+ position:absolute;top:9px;right:9px;
+ background:#ff9f32;color:#211507;
+ border-radius:6px;padding:4px 6px;font-size:8px;font-weight:900;
+}
+.nft-card{
+ position:relative;overflow:hidden;
+ border-radius:17px;padding:15px;text-align:center;
+ background:linear-gradient(145deg,#252047,#15152b);
+ border:1px solid #805ed0;
+}
+.nft-art{font-size:75px;margin:10px 0;filter:drop-shadow(0 0 18px #a779ff88)}
+.nft-card h3{font-size:13px;margin:5px}
+.nft-card p{font-size:10px;color:#b8afd5}
+.shop-row{
+ display:flex;align-items:center;gap:12px;
+ padding:12px 0;border-bottom:1px solid var(--line);
+}
+.shop-row:last-child{border:0}
+.shop-icon{font-size:34px;width:45px;text-align:center}
+.shop-info{flex:1}
+.shop-info b{font-size:12px;display:block}
+.shop-info small{font-size:10px;color:var(--muted)}
+@media(min-width:700px){
+ .page{padding:25px}
+ .case-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .gift-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .inventory-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .hero{min-height:210px;padding:30px}
+ .hero h1{font-size:36px}
+ .hero-fox{font-size:130px;right:55px}
+ .navbar{left:50%;right:auto;transform:translateX(-50%);width:min(700px,100%);border:1px solid var(--line);border-bottom:0;border-radius:17px 17px 0 0}
+}
 </style>
 </head>
-<body>
 
-<header>
- <div class="logo">🦊 FOX GRADE</div>
- <div class="balance">🪙 <span id="balance">2500</span> FC</div>
+<body>
+<div class="app">
+
+<header class="topbar">
+ <div class="brand">
+  <div class="brand-icon">🦊</div>
+  <div class="brand-name">FOX <span>GRADE</span></div>
+ </div>
+ <div class="wallet">
+  <span class="wallet-icon">🪙</span>
+  <b id="balance">2 500</b>
+  <span>FC</span>
+ </div>
 </header>
 
-<nav>
- <button class="active" data-page="cases">Кейсы</button>
- <button data-page="inventory">Инвентарь</button>
- <button data-page="upgrade">Апгрейд</button>
- <button data-page="nft">NFT</button>
- <button data-page="profile">Профиль</button>
+<!-- ГЛАВНАЯ -->
+<section class="page active" id="home">
+ <div class="hero">
+  <div class="hero-label">FOX GRADE • SEASON 2</div>
+  <h1>Открой свою<br>коллекцию</h1>
+  <p>Кейсы, редкие подарки, коллекции и апгрейды ждут тебя.</p>
+  <div class="hero-fox">🦊</div>
+ </div>
+
+ <div class="stats-grid">
+  <div class="stat"><strong id="statOpened">0</strong><span>Открыто кейсов</span></div>
+  <div class="stat"><strong id="statItems">0</strong><span>Предметов</span></div>
+  <div class="stat"><strong id="statNFT">0</strong><span>NFT коллекция</span></div>
+ </div>
+
+ <div class="section-head">
+  <h2>🔥 Популярные кейсы</h2>
+  <button class="mini-link" data-page="cases">Все кейсы →</button>
+ </div>
+ <div class="case-grid" id="homeCases"></div>
+
+ <div class="section-head">
+  <h2>🎁 Подарки недели</h2>
+  <button class="mini-link" data-page="gifts">Коллекция →</button>
+ </div>
+ <div class="gift-grid" id="homeGifts"></div>
+
+ <div class="panel" style="margin-top:18px">
+  <h3 class="panel-title">🎯 Ежедневная награда</h3>
+  <p style="font-size:11px;color:var(--muted)">Заходи каждый день и забирай игровые FC.</p>
+  <button class="primary-btn full" id="homeDaily">ЗАБРАТЬ НАГРАДУ</button>
+ </div>
+</section>
+
+<!-- КЕЙСЫ -->
+<section class="page" id="cases">
+ <div class="section-head">
+  <h2>📦 Все кейсы</h2>
+  <small>Выбирай свой кейс</small>
+ </div>
+ <div class="case-grid" id="allCases"></div>
+
+ <div class="section-head"><h2>🎰 Рулетка</h2></div>
+ <div class="roulette-box">
+  <div class="roulette-window">
+   <div class="roulette-track" id="rouletteTrack">
+    <div class="roulette-item">🎁</div>
+    <div class="roulette-item">💎</div>
+    <div class="roulette-item">🦊</div>
+    <div class="roulette-item">👑</div>
+    <div class="roulette-item">🎭</div>
+   </div>
+  </div>
+  <p class="roulette-hint" id="rouletteHint">Открой кейс, чтобы запустить рулетку</p>
+ </div>
+</section>
+
+<!-- ПОДАРКИ -->
+<section class="page" id="gifts">
+ <div class="section-head">
+  <h2>🎁 Подарки</h2>
+  <small>Коллекция FOX</small>
+ </div>
+ <div class="gift-grid" id="giftCatalog"></div>
+</section>
+
+<!-- ИНВЕНТАРЬ -->
+<section class="page" id="inventory">
+ <div class="section-head">
+  <h2>🎒 Инвентарь</h2>
+  <small id="inventoryCount">0 предметов</small>
+ </div>
+ <div class="inventory-grid" id="inventoryGrid"></div>
+</section>
+
+<!-- АПГРЕЙД -->
+<section class="page" id="upgrade">
+ <div class="section-head"><h2>⚡ Апгрейд</h2></div>
+ <div class="panel">
+  <div class="upgrade-stage">
+   <div class="upgrade-slot" id="upgradeSource">📦<small>Твой предмет</small></div>
+   <div class="upgrade-arrow">➜</div>
+   <div class="upgrade-slot" id="upgradeTarget">❔<small>Новая награда</small></div>
+  </div>
+  <p style="font-size:11px;color:var(--muted)">Выбери предмет из инвентаря и попробуй улучшить его.</p>
+  <select id="upgradeSelect" style="width:100%;padding:13px;background:#101827;color:white;border:1px solid #394760;border-radius:10px">
+   <option value="">Выбери предмет</option>
+  </select>
+  <div class="section-head">
+   <h2 style="font-size:13px">Шанс улучшения</h2>
+   <strong id="chanceLabel" style="color:var(--orange)">40%</strong>
+  </div>
+  <input id="chanceSlider" type="range" min="10" max="80" value="40" style="width:100%;accent-color:#ff9f32">
+  <div class="progress"><div class="progress-fill" id="chanceProgress"></div></div>
+  <button class="primary-btn full" id="upgradeAction">⚡ ПОПРОБОВАТЬ АПГРЕЙД</button>
+  <p id="upgradeMessage" style="font-size:11px;text-align:center;color:var(--muted)"></p>
+ </div>
+</section>
+
+<!-- NFT -->
+<section class="page" id="nft">
+ <div class="section-head">
+  <h2>💎 NFT коллекция</h2>
+  <small>FOX DIGITAL</small>
+ </div>
+ <div class="panel">
+  <h3 class="panel-title">Коллекционные предметы</h3>
+  <p style="font-size:11px;color:var(--muted);line-height:1.6">
+   Собирай виртуальные коллекционные карточки FOX. Это внутриигровые предметы, не реальные блокчейн-NFT.
+  </p>
+ </div>
+ <div class="gift-grid" id="nftCatalog"></div>
+ <div class="section-head"><h2>Моя коллекция</h2></div>
+ <div class="inventory-grid" id="myNFTs"></div>
+</section>
+
+<!-- МАГАЗИН -->
+<section class="page" id="shop">
+ <div class="section-head"><h2>🛒 Магазин</h2></div>
+ <div class="panel">
+  <h3 class="panel-title">Игровые монеты</h3>
+  <p style="font-size:11px;color:var(--muted)">Получай FC за игровые задания и ежедневные награды.</p>
+  <div class="shop-row">
+   <div class="shop-icon">🪙</div>
+   <div class="shop-info"><b>500 FC</b><small>Игровая награда</small></div>
+   <button class="dark-btn" data-free-reward="500">Получить</button>
+  </div>
+  <div class="shop-row">
+   <div class="shop-icon">💰</div>
+   <div class="shop-info"><b>1 000 FC</b><small>Игровая награда</small></div>
+   <button class="dark-btn" data-free-reward="1000">Получить</button>
+  </div>
+ </div>
+</section>
+
+<!-- ПРОФИЛЬ -->
+<section class="page" id="profile">
+ <div class="panel">
+  <div class="profile-head">
+   <div class="avatar">🦊</div>
+   <div>
+    <h2>FOX PLAYER</h2>
+    <p>Участник FOX GRADE</p>
+   </div>
+  </div>
+ </div>
+ <div class="stats-grid">
+  <div class="stat"><strong id="profileBalance">2500</strong><span>Баланс FC</span></div>
+  <div class="stat"><strong id="profileOpened">0</strong><span>Кейсы</span></div>
+  <div class="stat"><strong id="profileItems">0</strong><span>Предметы</span></div>
+ </div>
+ <div class="section-head"><h2>📋 Задания</h2></div>
+ <div class="panel" id="taskList">
+  <div class="task-row">
+   <div class="task-icon">📦</div>
+   <div class="task-info"><b>Открой первый кейс</b><small>Награда за выполнение</small></div>
+   <span class="task-reward">+100 FC</span>
+  </div>
+  <div class="task-row">
+   <div class="task-icon">🎁</div>
+   <div class="task-info"><b>Получи подарок</b><small>Награда за выполнение</small></div>
+   <span class="task-reward">+150 FC</span>
+  </div>
+ </div>
+ <button class="dark-btn" id="resetGame" style="width:100%">Сбросить игровой прогресс</button>
+</section>
+
+</div>
+
+<nav class="navbar">
+ <button class="nav-btn active" data-page="home"><span class="nav-icon">🏠</span>Главная</button>
+ <button class="nav-btn" data-page="cases"><span class="nav-icon">📦</span>Кейсы</button>
+ <button class="nav-btn" data-page="gifts"><span class="nav-icon">🎁</span>Подарки</button>
+ <button class="nav-btn" data-page="inventory"><span class="nav-icon">🎒</span>Склад</button>
+ <button class="nav-btn" data-page="profile"><span class="nav-icon">👤</span>Профиль</button>
 </nav>
 
-<main>
-<section class="page active" id="cases">
- <h2>🎁 Кейсы</h2>
- <div class="cases" id="caseList"></div>
- <div class="panel">
-  <h3>🎰 Рулетка</h3>
-  <div class="roulette"><div class="roulette-inner" id="roulette">🎁</div></div>
-  <p id="rouletteStatus">Выбери кейс и нажми «Открыть».</p>
- </div>
-</section>
-
-<section class="page" id="inventory">
- <h2>🎒 Инвентарь</h2>
- <div id="inventoryList" class="inventory"></div>
-</section>
-
-<section class="page" id="upgrade">
- <h2>⚡ Апгрейд</h2>
- <div class="panel">
-  <p>Выбери предмет из инвентаря:</p>
-  <select id="upgradeItem"></select>
-  <p>Шанс улучшения:</p>
-  <select id="upgradeChance">
-   <option value="50">50%</option>
-   <option value="35">35%</option>
-   <option value="25">25%</option>
-   <option value="15">15%</option>
-  </select>
-  <button class="action" id="upgradeButton">УЛУЧШИТЬ</button>
-  <p id="upgradeStatus"></p>
- </div>
-</section>
-
-<section class="page" id="nft">
- <h2>💎 NFT коллекция</h2>
- <div class="panel">
-  <div class="big">🦊</div>
-  <h3>FOX NFT</h3>
-  <p>Коллекционные виртуальные предметы.</p>
-  <button class="action" id="nftButton">Получить NFT за 500 FC</button>
-  <p id="nftStatus"></p>
- </div>
- <div id="nftList" class="inventory"></div>
-</section>
-
-<section class="page" id="profile">
- <h2>👤 Профиль</h2>
- <div class="panel">
-  <h3>Игрок FOX GRADE</h3>
-  <p>Баланс: <b id="profileBalance">2500 FC</b></p>
-  <p>Открыто кейсов: <b id="openedCount">0</b></p>
-  <p>Предметов: <b id="itemCount">0</b></p>
-  <button class="secondary" id="dailyButton">🎁 Ежедневная награда</button>
-  <p id="dailyStatus"></p>
- </div>
-</section>
-</main>
-
 <div class="modal" id="rewardModal">
- <div class="modal-box">
-  <h2>ТВОЙ ВЫИГРЫШ!</h2>
-  <div class="big" id="rewardIcon">🎁</div>
-  <h3 id="rewardName">Предмет</h3>
-  <p id="rewardPrice"></p>
-  <button class="action" id="closeReward">ЗАБРАТЬ</button>
+ <div class="modal-card">
+  <div style="color:var(--orange);font-size:10px;font-weight:900;letter-spacing:2px">ПОЗДРАВЛЯЕМ!</div>
+  <div class="modal-item" id="rewardIcon">🎁</div>
+  <h2 id="rewardName">Твой предмет</h2>
+  <p id="rewardDescription">Предмет добавлен в инвентарь</p>
+  <button class="primary-btn full" id="rewardClose">ЗАБРАТЬ</button>
  </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
+
+ 
 "use strict";
 
+/* =========================
+   ДАННЫЕ ИГРЫ
+========================= */
+
 const CASES=[
- {id:"starter",name:"Стартовый",icon:"📦",price:100},
- {id:"silver",name:"Серебряный",icon:"🥈",price:250},
- {id:"gold",name:"Золотой",icon:"🥇",price:500},
- {id:"dragon",name:"Драконий",icon:"🐉",price:900},
- {id:"cyber",name:"Кибер",icon:"🤖",price:1200},
- {id:"diamond",name:"Алмазный",icon:"💎",price:1800},
- {id:"legend",name:"Легендарный",icon:"👑",price:2500},
- {id:"fox",name:"FOX ELITE",icon:"🦊",price:4000}
+ {id:"wood",name:"Деревянный",icon:"📦",price:100,desc:"Начни свою коллекцию"},
+ {id:"silver",name:"Серебряный",icon:"🥈",price:250,desc:"Больше редких предметов"},
+ {id:"gold",name:"Золотой",icon:"🥇",price:500,desc:"Ценные находки"},
+ {id:"cyber",name:"Кибер",icon:"🤖",price:850,desc:"Цифровая коллекция"},
+ {id:"dragon",name:"Драконий",icon:"🐉",price:1200,desc:"Мощные коллекционные вещи"},
+ {id:"diamond",name:"Алмазный",icon:"💎",price:1800,desc:"Эпические награды"},
+ {id:"royal",name:"Королевский",icon:"👑",price:2600,desc:"Премиальные предметы"},
+ {id:"fox",name:"FOX ELITE",icon:"🦊",price:4000,desc:"Особая коллекция"}
 ];
 
 const ITEMS=[
- {id:1,name:"Синий нож",icon:"🔪",price:180,rarity:"common"},
- {id:2,name:"Красные перчатки",icon:"🧤",price:300,rarity:"common"},
- {id:3,name:"Неоновый пистолет",icon:"🔫",price:500,rarity:"rare"},
- {id:4,name:"Кибер-маска",icon:"🎭",price:750,rarity:"rare"},
- {id:5,name:"Фиолетовый клинок",icon:"⚔️",price:1200,rarity:"epic"},
- {id:6,name:"Драконий шлем",icon:"🐲",price:1800,rarity:"epic"},
- {id:7,name:"Золотая корона",icon:"👑",price:3500,rarity:"legendary"},
- {id:8,name:"FOX легенда",icon:"🦊",price:6000,rarity:"legendary"},
- {id:9,name:"Алмазный куб",icon:"💠",price:900,rarity:"rare"},
- {id:10,name:"Золотой сундук",icon:"🧰",price:2200,rarity:"epic"}
+ {id:"i1",name:"Ледяной куб",icon:"🧊",price:80,rarity:"common"},
+ {id:"i2",name:"Золотая монета",icon:"🪙",price:120,rarity:"common"},
+ {id:"i3",name:"Неоновая маска",icon:"🎭",price:250,rarity:"rare"},
+ {id:"i4",name:"Синий кристалл",icon:"🔷",price:320,rarity:"rare"},
+ {id:"i5",name:"Кибер-бот",icon:"🤖",price:500,rarity:"rare"},
+ {id:"i6",name:"Космический шар",icon:"🔮",price:700,rarity:"epic"},
+ {id:"i7",name:"Фиолетовый дракон",icon:"🐉",price:950,rarity:"epic"},
+ {id:"i8",name:"Магический сундук",icon:"🧰",price:1200,rarity:"epic"},
+ {id:"i9",name:"Золотая корона",icon:"👑",price:1800,rarity:"legendary"},
+ {id:"i10",name:"Алмазный лев",icon:"🦁",price:2500,rarity:"legendary"},
+ {id:"i11",name:"FOX легенда",icon:"🦊",price:4000,rarity:"legendary"},
+ {id:"i12",name:"Звёздный куб",icon:"🌌",price:6000,rarity:"legendary"},
+ {id:"i13",name:"Розовый подарок",icon:"🎀",price:180,rarity:"common"},
+ {id:"i14",name:"Серебряная звезда",icon:"🌟",price:400,rarity:"rare"},
+ {id:"i15",name:"Огненный шар",icon:"🔥",price:850,rarity:"epic"},
+ {id:"i16",name:"Золотой феникс",icon:"🦅",price:5000,rarity:"legendary"}
 ];
 
-let game={
+const GIFTS=[
+ {id:"g1",name:"Мишка",icon:"🧸",price:150,rarity:"common"},
+ {id:"g2",name:"Роза",icon:"🌹",price:250,rarity:"common"},
+ {id:"g3",name:"Сердце",icon:"💝",price:400,rarity:"rare"},
+ {id:"g4",name:"Звезда",icon:"⭐",price:650,rarity:"rare"},
+ {id:"g5",name:"Ракета",icon:"🚀",price:1000,rarity:"epic"},
+ {id:"g6",name:"Алмаз",icon:"💎",price:1600,rarity:"epic"},
+ {id:"g7",name:"Корона",icon:"👑",price:2500,rarity:"legendary"},
+ {id:"g8",name:"Золотой лис",icon:"🦊",price:4000,rarity:"legendary"}
+];
+
+const NFTS=[
+ {id:"n1",name:"FOX Genesis",icon:"🦊",price:1000,rarity:"rare"},
+ {id:"n2",name:"Cyber Ghost",icon:"👻",price:1800,rarity:"epic"},
+ {id:"n3",name:"Golden Dragon",icon:"🐉",price:3000,rarity:"legendary"},
+ {id:"n4",name:"Diamond Crown",icon:"👑",price:5000,rarity:"legendary"}
+];
+
+const DEFAULT_GAME={
  balance:2500,
  inventory:[],
+ gifts:[],
  nfts:[],
  opened:0,
- daily:false
+ dailyDate:"",
+ completedTasks:[],
+ rewardClaims:[]
 };
 
-let selectedCase="starter";
-let busy=false;
+let game={...DEFAULT_GAME};
+let selectedCase=null;
+let spinning=false;
+let selectedUpgrade=null;
+let toastTimer=null;
 
-function saveGame(){
- localStorage.setItem("foxgrade_ultimate",JSON.stringify(game));
- renderAll();
-}
+/* =========================
+   СОХРАНЕНИЕ
+========================= */
 
 function loadGame(){
  try{
-  const saved=JSON.parse(localStorage.getItem("foxgrade_ultimate"));
-  if(saved && typeof saved.balance==="number")game={...game,...saved};
- }catch(e){
-  console.warn("Ошибка сохранения:",e);
+  const saved=JSON.parse(localStorage.getItem("foxgrade_2_save"));
+  if(saved&&typeof saved==="object"){
+   game={...DEFAULT_GAME,...saved};
+  }
+ }catch(error){
+  console.warn("Не удалось загрузить сохранение",error);
  }
 }
 
-function showPage(id){
- document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
- document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===id));
+function saveGame(){
+ try{
+  localStorage.setItem("foxgrade_2_save",JSON.stringify(game));
+ }catch(error){
+  console.warn("Не удалось сохранить игру",error);
+ }
+}
+
+function formatNumber(value){
+ return Math.floor(Number(value)||0).toLocaleString("ru-RU");
+}
+
+function toast(message){
+ const el=document.getElementById("toast");
+ el.textContent=message;
+ el.classList.add("show");
+ clearTimeout(toastTimer);
+ toastTimer=setTimeout(()=>el.classList.remove("show"),2300);
+}
+
+/* =========================
+   НАВИГАЦИЯ
+========================= */
+
+function openPage(id){
  const page=document.getElementById(id);
- if(page)page.classList.add("active");
+ if(!page)return;
+
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ page.classList.add("active");
+
+ document.querySelectorAll("[data-page]").forEach(btn=>{
+  btn.classList.toggle("active",btn.dataset.page===id);
+ });
+
+ window.scrollTo({top:0,behavior:"smooth"});
  renderAll();
 }
 
-document.querySelectorAll("nav button").forEach(button=>{
- button.addEventListener("click",()=>showPage(button.dataset.page));
+document.querySelectorAll("[data-page]").forEach(button=>{
+ button.addEventListener("click",()=>{
+  openPage(button.dataset.page);
+ });
 });
 
+/* =========================
+   ВЫБОР ПРЕДМЕТА
+========================= */
+
+function getItemById(id){
+ return ITEMS.find(item=>item.id===id);
+}
+
+function getGiftById(id){
+ return GIFTS.find(item=>item.id===id);
+}
+
+function rarityName(rarity){
+ const names={
+  common:"ОБЫЧНЫЙ",
+  rare:"РЕДКИЙ",
+  epic:"ЭПИЧЕСКИЙ",
+  legendary:"ЛЕГЕНДАРНЫЙ"
+ };
+ return names[rarity]||"ПРЕДМЕТ";
+}
+
+function randomItem(){
+ const roll=Math.random()*100;
+ let rarity="common";
+
+ if(roll<3)rarity="legendary";
+ else if(roll<13)rarity="epic";
+ else if(roll<43)rarity="rare";
+
+ const pool=ITEMS.filter(item=>item.rarity===rarity);
+ const item=pool[Math.floor(Math.random()*pool.length)];
+ return {...item,uid:makeUID()};
+}
+
+function randomGift(){
+ const roll=Math.random()*100;
+ let rarity="common";
+
+ if(roll<5)rarity="legendary";
+ else if(roll<20)rarity="epic";
+ else if(roll<50)rarity="rare";
+
+ const pool=GIFTS.filter(item=>item.rarity===rarity);
+ return {...pool[Math.floor(Math.random()*pool.length)],uid:makeUID()};
+}
+
+function makeUID(){
+ return "fox_"+Date.now()+"_"+Math.random().toString(36).slice(2,8);
+}
+
+/* =========================
+   КАРТОЧКИ КЕЙСОВ
+========================= */
+
+function caseCardHTML(item){
+ return `
+ <article class="case-card ${item.price>=1800?"featured":""}">
+  ${item.price>=1800?'<span class="badge">PREMIUM</span>':""}
+  <div class="case-art">
+   <span class="case-emoji">${item.icon}</span>
+  </div>
+  <h3>${item.name}</h3>
+  <p>${item.desc}</p>
+  <div class="case-bottom">
+   <span class="price">${formatNumber(item.price)} FC</span>
+   <button class="primary-btn" data-open-case="${item.id}">Открыть</button>
+  </div>
+ </article>`;
+}
+
 function renderCases(){
- const list=document.getElementById("caseList");
- list.innerHTML="";
- CASES.forEach(c=>{
-  const el=document.createElement("div");
-  el.className="case";
-  el.innerHTML=`
-   <div class="case-art">${c.icon}</div>
-   <h3>${c.name}</h3>
-   <p>${c.price} FC</p>
-   <button class="action" data-case="${c.id}">Открыть</button>
-  `;
-  el.querySelector("button").addEventListener("click",()=>openCase(c.id));
-  list.appendChild(el);
+ const home=document.getElementById("homeCases");
+ const all=document.getElementById("allCases");
+
+ home.innerHTML=CASES.slice(0,4).map(caseCardHTML).join("");
+ all.innerHTML=CASES.map(caseCardHTML).join("");
+
+ document.querySelectorAll("[data-open-case]").forEach(button=>{
+  button.addEventListener("click",()=>{
+   openCase(button.dataset.openCase);
+  });
  });
 }
+
+/* =========================
+   ПОДАРКИ
+========================= */
+
+function giftCardHTML(gift){
+ return `
+ <article class="gift-card ${gift.rarity}">
+  <div class="gift-art">${gift.icon}</div>
+  <h3>${gift.name}</h3>
+  <span class="rarity ${gift.rarity}">${rarityName(gift.rarity)}</span>
+  <p>${formatNumber(gift.price)} FC</p>
+  <button class="dark-btn" data-buy-gift="${gift.id}">Получить</button>
+ </article>`;
+}
+
+function renderGifts(){
+ document.getElementById("homeGifts").innerHTML=
+  GIFTS.slice(0,2).map(giftCardHTML).join("");
+
+ document.getElementById("giftCatalog").innerHTML=
+  GIFTS.map(giftCardHTML).join("");
+
+ document.querySelectorAll("[data-buy-gift]").forEach(button=>{
+  button.addEventListener("click",()=>{
+   buyGift(button.dataset.buyGift);
+  });
+ });
+}
+
+function buyGift(id){
+ const gift=GIFTS.find(g=>g.id===id);
+ if(!gift)return;
+
+ if(game.balance<gift.price){
+  toast("Недостаточно FC!");
+  return;
+ }
+
+ game.balance-=gift.price;
+ game.gifts.push({...gift,uid:makeUID()});
+ saveGame();
+ renderAll();
+ showReward(gift,"Подарок добавлен в твою коллекцию!");
+}
+
+/* =========================
+   ИНВЕНТАРЬ
+========================= */
 
 function renderInventory(){
- const list=document.getElementById("inventoryList");
- list.innerHTML="";
+ const grid=document.getElementById("inventoryGrid");
+ const count=document.getElementById("inventoryCount");
+
+ count.textContent=game.inventory.length+" предметов";
+
  if(!game.inventory.length){
-  list.innerHTML="<p>Инвентарь пока пуст.</p>";
+  grid.innerHTML=`
+   <div class="empty-state" style="grid-column:1/-1">
+    <div>🎒</div>
+    <strong>Инвентарь пуст</strong>
+    <span>Открой кейс, чтобы получить первый предмет</span>
+   </div>`;
  }else{
-  game.inventory.forEach((item,index)=>{
-   const el=document.createElement("div");
-   el.className="item";
-   el.innerHTML=`
-    <div class="item-icon">${item.icon}</div>
-    <b class="${item.rarity}">${item.name}</b>
-    <p>${item.price} FC</p>
-    <button class="secondary" data-sell="${index}">Продать</button>
-   `;
-   el.querySelector("button").addEventListener("click",()=>sellItem(index));
-   list.appendChild(el);
-  });
+  grid.innerHTML=game.inventory.map(item=>`
+   <div class="inventory-card">
+    <div class="gift-art">${item.icon}</div>
+    <h3>${item.name}</h3>
+    <span class="rarity ${item.rarity}">${rarityName(item.rarity)}</span>
+    <p>${formatNumber(item.price)} FC</p>
+    <button class="dark-btn" data-sell="${item.uid}">Продать</button>
+   </div>
+  `).join("");
  }
- const select=document.getElementById("upgradeItem");
- const old=select.value;
- select.innerHTML="";
- game.inventory.forEach((item,index)=>{
-  const option=document.createElement("option");
-  option.value=index;
-  option.textContent=item.name+" — "+item.price+" FC";
-  select.appendChild(option);
+
+ document.querySelectorAll("[data-sell]").forEach(button=>{
+  button.addEventListener("click",()=>{
+   sellItem(button.dataset.sell);
+  });
  });
- if(old<select.options.length)select.value=old;
 }
 
-function renderAll(){
- document.getElementById("balance").textContent=game.balance;
- document.getElementById("profileBalance").textContent=game.balance+" FC";
- document.getElementById("openedCount").textContent=game.opened;
- document.getElementById("itemCount").textContent=game.inventory.length;
- renderInventory();
- renderNFTs();
+function sellItem(uid){
+ const index=game.inventory.findIndex(item=>item.uid===uid);
+ if(index<0)return;
+
+ const item=game.inventory[index];
+ game.balance+=item.price;
+ game.inventory.splice(index,1);
+
+ saveGame();
+ renderAll();
+ toast("Продано за "+formatNumber(item.price)+" FC");
 }
- function randomItem(){
- const weights=[
-  {rarity:"common",weight:50},
-  {rarity:"rare",weight:30},
-  {rarity:"epic",weight:15},
-  {rarity:"legendary",weight:5}
- ];
- let roll=Math.random()*100;
- let rarity="common";
- for(const w of weights){
-  roll-=w.weight;
-  if(roll<0){rarity=w.rarity;break;}
+
+/* =========================
+   РУЛЕТКА
+========================= */
+
+function buildRoulette(reward){
+ const track=document.getElementById("rouletteTrack");
+ const items=[];
+
+ for(let i=0;i<35;i++){
+  items.push(i===29?reward:randomItem());
  }
- const pool=ITEMS.filter(i=>i.rarity===rarity);
- return {...pool[Math.floor(Math.random()*pool.length)]};
+
+ track.innerHTML=items.map(item=>`
+  <div class="roulette-item">
+   <div>${item.icon}</div>
+   <span>${item.name}</span>
+  </div>
+ `).join("");
+
+ track.style.transition="none";
+ track.style.transform="translateX(0)";
+ void track.offsetWidth;
+
+ const windowEl=track.parentElement;
+ const target=track.children[29];
+
+ const center=windowEl.clientWidth/2;
+ const targetCenter=target.offsetLeft+target.offsetWidth/2;
+ const distance=targetCenter-center;
+
+ track.style.transition="transform 6s cubic-bezier(.12,.75,.12,1)";
+ track.style.transform=`translateX(-${distance}px)`;
 }
 
 function openCase(id){
- if(busy)return;
- const c=CASES.find(x=>x.id===id);
- if(!c)return;
- if(game.balance<c.price){
-  document.getElementById("rouletteStatus").textContent="Недостаточно FC!";
+ if(spinning)return;
+
+ const box=CASES.find(c=>c.id===id);
+ if(!box)return;
+
+ if(game.balance<box.price){
+  toast("Не хватает FC для открытия кейса");
   return;
  }
 
- busy=true;
- selectedCase=id;
- game.balance-=c.price;
- document.getElementById("rouletteStatus").textContent="Рулетка запускается...";
+ game.balance-=box.price;
+ game.opened++;
+ spinning=true;
  saveGame();
+ renderAll();
 
- const roulette=document.getElementById("roulette");
- let count=0;
- const timer=setInterval(()=>{
-  const item=randomItem();
-  roulette.textContent=item.icon;
-  count++;
-  if(count>=18){
-   clearInterval(timer);
-   const reward=randomItem();
-   game.inventory.push(reward);
-   game.opened++;
-   busy=false;
-   saveGame();
-   document.getElementById("rouletteStatus").textContent="Выпал предмет: "+reward.name;
-   showReward(reward);
-  }
- },100);
+ const reward=randomItem();
+ const hint=document.getElementById("rouletteHint");
+ hint.textContent="🎰 Рулетка вращается...";
+
+ buildRoulette(reward);
+
+ setTimeout(()=>{
+  game.inventory.push(reward);
+  spinning=false;
+  saveGame();
+  renderAll();
+  hint.textContent="Выпал предмет: "+reward.name;
+  showReward(reward,"Предмет добавлен в инвентарь!");
+ },6300);
 }
 
-function showReward(item){
+/* =========================
+   ОКНО НАГРАДЫ
+========================= */
+
+function showReward(item,description){
  document.getElementById("rewardIcon").textContent=item.icon;
  document.getElementById("rewardName").textContent=item.name;
- document.getElementById("rewardPrice").textContent="Стоимость: "+item.price+" FC";
+ document.getElementById("rewardDescription").textContent=
+  description||"Предмет добавлен в коллекцию";
  document.getElementById("rewardModal").classList.add("show");
 }
 
-document.getElementById("closeReward").addEventListener("click",()=>{
+document.getElementById("rewardClose").addEventListener("click",()=>{
  document.getElementById("rewardModal").classList.remove("show");
 });
 
-function sellItem(index){
- const item=game.inventory[index];
- if(!item)return;
- game.balance+=item.price;
- game.inventory.splice(index,1);
- saveGame();
-}
-
-document.getElementById("upgradeButton").addEventListener("click",()=>{
- const index=Number(document.getElementById("upgradeItem").value);
- const chance=Number(document.getElementById("upgradeChance").value);
- const status=document.getElementById("upgradeStatus");
-
- if(!game.inventory.length){
-  status.textContent="Сначала получи предмет из кейса.";
-  return;
- }
-
- const item=game.inventory[index];
- if(!item){
-  status.textContent="Выбери предмет.";
-  return;
- }
-
- const targetPrice=Math.ceil(item.price*1.8);
- const candidates=ITEMS.filter(x=>x.price>=targetPrice);
-
- if(!candidates.length){
-  status.textContent="Для этого предмета нет следующего уровня.";
-  return;
- }
-
- const target=candidates[Math.floor(Math.random()*candidates.length)];
-
- if(Math.random()*100<chance){
-  game.inventory.splice(index,1,target);
-  status.textContent="Успех! Получен предмет: "+target.name;
- }else{
-  game.inventory.splice(index,1);
-  status.textContent="Неудача! Предмет потерян.";
- }
-
- saveGame();
-});
-
-document.getElementById("nftButton").addEventListener("click",()=>{
- const status=document.getElementById("nftStatus");
-
- if(game.balance<500){
-  status.textContent="Недостаточно FC.";
-  return;
- }
-
- game.balance-=500;
- const nft={
-  name:"FOX NFT #"+(game.nfts.length+1),
-  icon:["🦊","💎","👑","🐉"][Math.floor(Math.random()*4)]
- };
- game.nfts.push(nft);
- status.textContent="NFT добавлен в коллекцию!";
- saveGame();
-});
+/* =========================
+   NFT КОЛЛЕКЦИЯ
+========================= */
 
 function renderNFTs(){
- const list=document.getElementById("nftList");
- list.innerHTML="";
+ const catalog=document.getElementById("nftCatalog");
+ const mine=document.getElementById("myNFTs");
+
+ catalog.innerHTML=NFTS.map(nft=>`
+  <div class="nft-card">
+   <div class="nft-art">${nft.icon}</div>
+   <h3>${nft.name}</h3>
+   <span class="rarity ${nft.rarity}">${rarityName(nft.rarity)}</span>
+   <p>${formatNumber(nft.price)} FC</p>
+   <button class="primary-btn full" data-buy-nft="${nft.id}">Получить</button>
+  </div>
+ `).join("");
 
  if(!game.nfts.length){
-  list.innerHTML="<p>Коллекция пока пустая.</p>";
-  return;
+  mine.innerHTML=`
+   <div class="empty-state" style="grid-column:1/-1">
+    <div>💎</div>
+    <strong>Коллекция пока пуста</strong>
+    <span>Получи свою первую карточку</span>
+   </div>`;
+ }else{
+  mine.innerHTML=game.nfts.map(nft=>`
+   <div class="inventory-card">
+    <div class="gift-art">${nft.icon}</div>
+    <h3>${nft.name}</h3>
+    <span class="rarity ${nft.rarity}">${rarityName(nft.rarity)}</span>
+    <p>Коллекция FOX</p>
+   </div>
+  `).join("");
  }
 
- game.nfts.forEach(nft=>{
-  const el=document.createElement("div");
-  el.className="item";
-  el.innerHTML=`
-   <div class="item-icon">${nft.icon}</div>
-   <b>${nft.name}</b>
-   <p>Коллекционный предмет</p>
-  `;
-  list.appendChild(el);
+ document.querySelectorAll("[data-buy-nft]").forEach(button=>{
+  button.addEventListener("click",()=>{
+   buyNFT(button.dataset.buyNft);
+  });
  });
 }
 
-document.getElementById("dailyButton").addEventListener("click",()=>{
- const status=document.getElementById("dailyStatus");
+function buyNFT(id){
+ const nft=NFTS.find(n=>n.id===id);
+ if(!nft)return;
 
- if(game.daily){
-  status.textContent="Сегодня награда уже получена.";
+ if(game.nfts.some(n=>n.id===id)){
+  toast("Этот NFT уже есть в коллекции");
   return;
  }
 
- game.balance+=300;
- game.daily=true;
- status.textContent="Получено 300 FC!";
- saveGame();
-});
-
-function resetDaily(){
- // Сброс ежедневной награды по новой календарной дате.
- const today=new Date().toLocaleDateString();
- const previous=localStorage.getItem("foxgrade_daily_date");
-
- if(previous!==today){
-  game.daily=false;
-  localStorage.setItem("foxgrade_daily_date",today);
-  saveGame();
+ if(game.balance<nft.price){
+  toast("Недостаточно FC");
+  return;
  }
+
+ game.balance-=nft.price;
+ game.nfts.push({...nft,uid:makeUID()});
+ saveGame();
+ renderAll();
+ showReward(nft,"Коллекционная карточка добавлена!");
 }
 
-function startGame(){
+/* =========================
+   АПГРЕЙД
+========================= */
+
+const chanceSlider=document.getElementById("chanceSlider");
+
+chanceSlider.addEventListener("input",()=>{
+ const value=Number(chanceSlider.value);
+ document.getElementById("chanceLabel").textContent=value+"%";
+ document.getElementById("chanceProgress").style.width=value+"%";
+});
+
+document.getElementById("upgradeSelect").addEventListener("change",()=>{
+ const uid=document.getElementById("upgradeSelect").value;
+ selectedUpgrade=game.inventory.find(item=>item.uid===uid)||null;
+
+ document.getElementById("upgradeSource").innerHTML=
+ selectedUpgrade
+ ?`${selectedUpgrade.icon}<small>${selectedUpgrade.name}</small>`
+ :"📦<small>Твой предмет</small>";
+});
+
+function renderUpgrade(){
+ const select=document.getElementById("upgradeSelect");
+ const old=select.value;
+
+ select.innerHTML='<option value="">Выбери предмет</option>';
+
+ game.inventory.forEach(item=>{
+  const option=document.createElement("option");
+  option.value=item.uid;
+  option.textContent=item.name+" — "+item.price+" FC";
+  select.appendChild(option);
+ });
+
+ if(game.inventory.some(item=>item.uid===old)){
+  select.value=old;
+ }else{
+  select.value="";
+  selectedUpgrade=null;
+ }
+
+ const item=game.inventory.find(i=>i.uid===select.value);
+ document.getElementById("upgradeSource").innerHTML=
+ item?`${item.icon}<small>${item.name}</small>`:"📦<small>Твой предмет</small>";
+}
+
+document.getElementById("upgradeAction").addEventListener("click",()=>{
+ const uid=document.getElementById("upgradeSelect").value;
+ const index=game.inventory.findIndex(item=>item.uid===uid);
+ const message=document.getElementById("upgradeMessage");
+
+ if(index<0){
+  message.textContent="Сначала выбери предмет.";
+  return;
+ }
+
+ const item=game.inventory[index];
+ const chance=Number(chanceSlider.value);
+ const targetPool=ITEMS.filter(i=>i.price>item.price*1.5);
+
+ if(!targetPool.length){
+  message.textContent="Для этого предмета нет следующего уровня.";
+  return;
+ }
+
+ const target=targetPool[Math.floor(Math.random()*targetPool.length)];
+ const button=document.getElementById("upgradeAction");
+
+ button.disabled=true;
+ message.textContent="⚡ Апгрейд запускается...";
+ document.getElementById("upgradeTarget").innerHTML="✨<small>Проверяем шанс...</small>";
+
+ setTimeout(()=>{
+  if(Math.random()*100<chance){
+   game.inventory.splice(index,1,{...target,uid:makeUID()});
+   message.textContent="Успех! Новый предмет: "+target.name;
+   document.getElementById("upgradeTarget").innerHTML=
+    `${target.icon}<small>${target.name}</small>`;
+   showReward(target,"Апгрейд успешно завершён!");
+  }else{
+   game.inventory.splice(index,1);
+   message.textContent="Неудача! Предмет не удалось улучшить.";
+   document.getElementById("upgradeTarget").innerHTML="❌<small>Неудача</small>";
+  }
+
+  button.disabled=false;
+  saveGame();
+  renderAll();
+ },1600);
+});
+
+/* =========================
+   ЕЖЕДНЕВНАЯ НАГРАДА
+========================= */
+
+function claimDaily(){
+ const today=new Date().toLocaleDateString("en-CA");
+
+ if(game.dailyDate===today){
+  toast("Сегодня награда уже получена");
+  return;
+ }
+
+ game.dailyDate=today;
+ game.balance+=300;
+ saveGame();
+ renderAll();
+ toast("Получено 300 FC!");
+}
+
+document.getElementById("homeDaily").addEventListener("click",claimDaily);
+
+/* =========================
+   МАГАЗИН
+========================= */
+
+document.querySelectorAll("[data-free-reward]").forEach(button=>{
+ button.addEventListener("click",()=>{
+  const amount=Number(button.dataset.freeReward);
+  const key="shop_"+amount;
+
+  if(game.rewardClaims.includes(key)){
+   toast("Эта награда уже получена");
+   return;
+  }
+
+  game.rewardClaims.push(key);
+  game.balance+=amount;
+  saveGame();
+  renderAll();
+  toast("Получено "+formatNumber(amount)+" FC");
+ });
+});
+
+/* =========================
+   ПРОФИЛЬ И ЗАДАНИЯ
+========================= */
+
+function renderTasks(){
+ const tasks=[
+  {id:"firstcase",icon:"📦",name:"Открой первый кейс",reward:100,done:game.opened>=1},
+  {id:"firstgift",icon:"🎁",name:"Получи первый подарок",reward:150,done:game.gifts.length>=1},
+  {id:"collector",icon:"🎒",name:"Собери 3 предмета",reward:200,done:game.inventory.length>=3},
+  {id:"nft",icon:"💎",name:"Получи первый NFT",reward:300,done:game.nfts.length>=1}
+ ];
+
+ document.getElementById("taskList").innerHTML=tasks.map(task=>{
+  const claimed=game.completedTasks.includes(task.id);
+  return `
+   <div class="task-row">
+    <div class="task-icon">${task.icon}</div>
+    <div class="task-info">
+     <b>${task.name}</b>
+     <small>${claimed?"Награда получена":task.done?"Задание выполнено":"Выполни условие"}</small>
+    </div>
+    <button class="dark-btn" data-task="${task.id}" ${!task.done||claimed?"disabled":""}>
+     ${claimed?"✓":"+"+task.reward+" FC"}
+    </button>
+   </div>`;
+ }).join("");
+
+ document.querySelectorAll("[data-task]").forEach(button=>{
+  button.addEventListener("click",()=>{
+   const task=tasks.find(t=>t.id===button.dataset.task);
+   if(!task||!task.done||game.completedTasks.includes(task.id))return;
+
+   game.completedTasks.push(task.id);
+   game.balance+=task.reward;
+   saveGame();
+   renderAll();
+   toast("Получено "+task.reward+" FC!");
+  });
+ });
+}
+
+function renderProfile(){
+ document.getElementById("profileBalance").textContent=formatNumber(game.balance);
+ document.getElementById("profileOpened").textContent=game.opened;
+ document.getElementById("profileItems").textContent=game.inventory.length;
+ renderTasks();
+}
+
+/* =========================
+   СБРОС ПРОГРЕССА
+========================= */
+
+document.getElementById("resetGame").addEventListener("click",()=>{
+ const accepted=confirm("Точно сбросить весь игровой прогресс?");
+ if(!accepted)return;
+
+ game={...DEFAULT_GAME,inventory:[],gifts:[],nfts:[],completedTasks:[],rewardClaims:[]};
+ saveGame();
+ renderAll();
+ toast("Прогресс сброшен");
+});
+
+/* =========================
+   ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
+========================= */
+
+function renderAll(){
+ document.getElementById("balance").textContent=formatNumber(game.balance);
+ document.getElementById("statOpened").textContent=game.opened;
+ document.getElementById("statItems").textContent=game.inventory.length;
+ document.getElementById("statNFT").textContent=game.nfts.length;
+
+ renderInventory();
+ renderUpgrade();
+ renderNFTs();
+ renderProfile();
+}
+
+/* =========================
+   ЗАПУСК
+========================= */
+
+function initGame(){
  loadGame();
- resetDaily();
  renderCases();
+ renderGifts();
  renderAll();
 
  if(window.Telegram&&window.Telegram.WebApp){
@@ -428,7 +1257,210 @@ function startGame(){
  }
 }
 
-startGame();
+initGame();
+
+/* =========================
+   ЧАСТЬ 3 — ДОПОЛНЕНИЯ
+========================= */
+
+// Защита от повторного нажатия на кнопки открытия кейсов
+document.querySelectorAll(".case-card button").forEach(button => {
+    button.addEventListener("click", () => {
+        button.disabled = true;
+        setTimeout(() => {
+            button.disabled = false;
+        }, 6500);
+    });
+});
+
+// Более точное центрирование рулетки
+function buildRoulette(reward) {
+    const track = document.getElementById("rouletteTrack");
+    const windowBox = track?.parentElement;
+
+    if (!track || !windowBox) return;
+
+    track.innerHTML = "";
+
+    const pool = [...ITEMS, ...ITEMS, ...ITEMS];
+    const total = 35;
+    const winningIndex = 29;
+
+    for (let i = 0; i < total; i++) {
+        const item = i === winningIndex
+            ? reward
+            : pool[Math.floor(Math.random() * pool.length)];
+
+        const card = document.createElement("div");
+        card.className = "roulette-item";
+        card.innerHTML = `
+            <div class="roulette-item-image">${item.icon || "🎁"}</div>
+            <div class="roulette-item-name">${item.name}</div>
+        `;
+
+        track.appendChild(card);
+    }
+
+    track.style.transition = "none";
+    track.style.transform = "translateX(0)";
+
+    requestAnimationFrame(() => {
+        const target = track.children[winningIndex];
+        const targetRect = target.getBoundingClientRect();
+        const windowRect = windowBox.getBoundingClientRect();
+
+        const targetCenter = targetRect.left + targetRect.width / 2;
+        const windowCenter = windowRect.left + windowRect.width / 2;
+        const distance = targetCenter - windowCenter;
+
+        requestAnimationFrame(() => {
+            track.style.transition = "transform 6s cubic-bezier(.08,.75,.12,1)";
+            track.style.transform = `translateX(-${distance}px)`;
+        });
+    });
+}
+
+// Коллекция приобретённых подарков
+(function setupOwnedGifts() {
+    const page = document.getElementById("gifts");
+    if (!page || document.getElementById("ownedGiftSection")) return;
+
+    const section = document.createElement("section");
+    section.id = "ownedGiftSection";
+    section.innerHTML = `
+        <div class="section-head">
+            <div>
+                <div class="eyebrow">COLLECTION</div>
+                <h2>Мои подарки</h2>
+            </div>
+        </div>
+        <div class="gift-grid" id="ownedGiftGrid"></div>
+    `;
+
+    page.appendChild(section);
+})();
+
+function renderOwnedGifts() {
+    const grid = document.getElementById("ownedGiftGrid");
+    if (!grid) return;
+
+    const gifts = Array.isArray(game.gifts) ? game.gifts : [];
+
+    if (!gifts.length) {
+        grid.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">🎁</div>
+                <h3>Пока пусто</h3>
+                <p>Покупай подарки, чтобы собрать коллекцию</p>
+            </div>
+        `;
+        return;
+    }
+
+    grid.innerHTML = gifts.map((gift, index) => `
+        <div class="gift-card">
+            <div class="gift-image">${gift.icon || "🎁"}</div>
+            <div class="gift-name">${gift.name || "Подарок"}</div>
+            <div class="gift-price">В коллекции</div>
+            <button class="btn btn-secondary"
+                onclick="sellOwnedGift(${index})">
+                Продать
+            </button>
+        </div>
+    `).join("");
+}
+
+function sellOwnedGift(index) {
+    if (!Array.isArray(game.gifts) || !game.gifts[index]) return;
+
+    const gift = game.gifts[index];
+    const value = Math.max(1, Math.floor((gift.price || 100) * 0.7));
+
+    game.gifts.splice(index, 1);
+    game.balance += value;
+
+    saveGame();
+    renderAll();
+    showToast(`Подарок продан за ${value} FC`);
+}
+
+// Подключаем коллекцию к основному обновлению
+const previousRenderAll = renderAll;
+
+renderAll = function() {
+    previousRenderAll();
+    renderOwnedGifts();
+};
+
+// Закрытие окна награды по нажатию на фон
+const rewardModal = document.getElementById("rewardModal");
+
+if (rewardModal) {
+    rewardModal.addEventListener("click", event => {
+        if (event.target === rewardModal) {
+            rewardModal.classList.remove("active");
+        }
+    });
+}
+
+// Закрытие окна клавишей Escape
+document.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+        document.querySelectorAll(".modal.active").forEach(modal => {
+            modal.classList.remove("active");
+        });
+    }
+});
+
+// Дополнительная кнопка магазина на главной странице
+(function addShopButton() {
+    const home = document.getElementById("home");
+    if (!home || home.querySelector("#homeShopButton")) return;
+
+    const button = document.createElement("button");
+    button.id = "homeShopButton";
+    button.className = "btn btn-secondary";
+    button.textContent = "🛒 Открыть магазин";
+
+    button.addEventListener("click", () => {
+        openPage("shop");
+    });
+
+    const hero = home.querySelector(".hero");
+    if (hero) hero.appendChild(button);
+})();
+
+// Анимация появления карточек
+const appearanceObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+        }
+    });
+}, { threshold: 0.08 });
+
+function observeCards() {
+    document.querySelectorAll(
+        ".case-card, .gift-card, .nft-card, .item-card"
+    ).forEach(card => {
+        appearanceObserver.observe(card);
+    });
+}
+
+observeCards();
+
+const oldRenderForEffects = renderAll;
+
+renderAll = function() {
+    oldRenderForEffects();
+    observeCards();
+};
+
+// Финальное обновление
+renderAll();
+renderOwnedGifts();
+
+console.log("FOX GRADE 2.0 успешно загружен");
 </script>
 </body>
 </html>

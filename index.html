@@ -1,424 +1,568 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FOX Grade</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800;900&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background-color: #141824;
-            color: white;
-            font-family: 'Montserrat', sans-serif;
-            padding-bottom: 80px;
-            user-select: none;
-            overflow-x: hidden;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-        }
-        .logo { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; text-transform: uppercase; }
-        .logo .fox { color: #ff8c00; }
-        .logo .grade { color: #ffffff; }
-        .balance {
-            background: #232838;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            border: 1px solid #333a4e;
-            cursor: pointer;
-        }
-        .balance:active { background: #2a3146; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>FOX Grade</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap');
 
-        /* Контейнер кейса */
-        .case-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 10px;
-            padding: 0 15px;
-        }
-        .case-title {
-            font-size: 18px;
-            color: #8b92a5;
-            margin-bottom: 15px;
-            font-weight: 600;
-            text-align: center;
-        }
-        .case-window {
-            width: 100%;
-            height: 160px;
-            background: #1c2233;
-            border-radius: 20px;
-            border: 1px solid #333a4e;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
-        }
-        .center-marker {
-            position: absolute;
-            left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: #ff8c00;
-            transform: translateX(-50%);
-            z-index: 10;
-            box-shadow: 0 0 10px #ff8c00;
-        }
-        .center-marker::before, .center-marker::after {
-            content: '';
-            position: absolute;
-            left: -6px;
-            border-left: 7px solid transparent;
-            border-right: 7px solid transparent;
-        }
-        .center-marker::before { top: 0; border-top: 10px solid #ff8c00; }
-        .center-marker::after { bottom: 0; border-bottom: 10px solid #ff8c00; }
-
-        .roulette-track {
-            display: flex;
-            gap: 10px;
-            padding-left: calc(50% - 55px);
-            transition: transform 5s cubic-bezier(0.15, 0.9, 0.2, 1);
-        }
-        .item {
-            width: 100px;
-            height: 120px;
-            background: #2a3146;
-            border-radius: 15px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            flex-shrink: 0;
-            border-bottom: 4px solid #ff8c00;
-            position: relative;
-            font-size: 40px;
-        }
-        .item .stars { position: absolute; bottom: 5px; font-size: 12px; color: #ff8c00; font-weight: 800; }
-        .item.rare { border-bottom-color: #3b82f6; }
-        .item.epic { border-bottom-color: #a855f7; }
-        .item.legend { border-bottom-color: #ef4444; background: linear-gradient(180deg, #2a3146 0%, #3b1b2b 100%); }
-
-        /* Кнопки */
-        .btn-open {
-            margin-top: 30px;
-            background: #ff8c00;
-            color: black;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 15px;
-            font-size: 18px;
-            font-weight: 900;
-            font-family: inherit;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(255, 140, 0, 0.3);
-            transition: 0.2s;
-            width: 90%;
-        }
-        .btn-open:active { transform: scale(0.95); }
-        .btn-open:disabled { background: #4a5568; color: #8b92a5; box-shadow: none; }
-
-        .timer-text { margin-top: 15px; color: #8b92a5; font-size: 14px; font-weight: 600; }
-
-        /* Нижняя панель */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 0; width: 100%;
-            background: #1c2233;
-            display: flex;
-            justify-content: space-around;
-            padding: 15px 0;
-            border-top: 1px solid #333a4e;
-            padding-bottom: max(15px, env(safe-area-inset-bottom));
-            z-index: 100;
-        }
-        .nav-item { color: #8b92a5; font-size: 12px; font-weight: 800; text-decoration: none; text-transform: uppercase; cursor: pointer; }
-        .nav-item.active { color: white; }
-
-        /* Скрытые блоки для переключения вкладок */
-        .tab-content { display: none; width: 100%; }
-        .tab-content.active-tab { display: block; }
-    </style>
+:root {
+ --bg:#10131b;
+ --panel:#191e2a;
+ --panel2:#202737;
+ --orange:#ff9417;
+ --muted:#8992a6;
+ --border:#30394b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+ background:var(--bg);color:#fff;
+ font-family:Montserrat,sans-serif;
+ padding-bottom:100px;
+ min-height:100vh;
+}
+button{font-family:inherit;cursor:pointer}
+.header{
+ height:68px;padding:0 17px;
+ display:flex;align-items:center;
+ justify-content:space-between;
+ border-bottom:1px solid var(--border);
+ background:#151923;
+ position:sticky;top:0;z-index:20;
+}
+.logo{font-size:23px;font-weight:900;letter-spacing:-1px}
+.logo span{color:var(--orange)}
+.balance{
+ background:var(--panel2);
+ border:1px solid var(--border);
+ padding:10px 14px;border-radius:12px;
+ font-size:13px;font-weight:800;
+}
+.balance b{color:var(--orange)}
+.container{max-width:650px;margin:auto;padding:18px 14px}
+.welcome{margin-bottom:20px}
+.welcome h2{font-size:21px;font-weight:900}
+.welcome p{font-size:11px;color:var(--muted);margin-top:6px}
+.section-title{
+ display:flex;align-items:center;
+ justify-content:space-between;
+ margin:22px 0 13px;
+ font-size:15px;font-weight:800;
+}
+.section-title small{font-size:10px;color:var(--muted)}
+.case-card{
+ background:linear-gradient(145deg,#20283a,#171d29);
+ border:1px solid var(--border);
+ border-radius:18px;
+ padding:15px;margin-bottom:15px;
+ overflow:hidden;
+}
+.case-top{display:flex;justify-content:space-between;align-items:center}
+.case-name{font-size:16px;font-weight:900}
+.case-label{
+ background:#30394b;color:var(--orange);
+ padding:5px 9px;border-radius:7px;
+ font-size:9px;font-weight:800;
+}
+.case-desc{color:var(--muted);font-size:10px;margin-top:6px}
+.case-art{
+ height:130px;margin:15px 0;
+ display:flex;align-items:center;justify-content:center;
+ border-radius:13px;
+ background:radial-gradient(ellipse,#343d55 0%,#20283a 55%,#191e2a 100%);
+ font-size:75px;
+ position:relative;overflow:hidden;
+}
+.case-art:after{
+ content:"";position:absolute;
+ width:170px;height:170px;
+ border:1px solid #ffffff10;border-radius:50%;
+}
+.roulette{
+ height:125px;position:relative;
+ background:#111722;border-radius:12px;
+ overflow:hidden;border:1px solid var(--border);
+ margin:15px 0;
+}
+.roulette:before{
+ content:"";position:absolute;z-index:5;
+ left:50%;top:0;height:100%;width:3px;
+ background:var(--orange);
+ box-shadow:0 0 12px var(--orange);
+}
+.track{
+ position:absolute;left:0;top:8px;
+ display:flex;gap:8px;
+ height:107px;will-change:transform;
+}
+.item{
+ width:85px;height:105px;flex-shrink:0;
+ background:#273044;border-radius:10px;
+ border-bottom:4px solid #8992a6;
+ display:flex;flex-direction:column;
+ justify-content:center;align-items:center;
+ gap:7px;
+}
+.item .emoji{font-size:34px}
+.item .value{font-size:10px;font-weight:800}
+.common{border-color:#8992a6}
+.rare{border-color:#3988ff;background:#1c2d4a}
+.epic{border-color:#ac55ed;background:#352047}
+.legend{border-color:#ff9b21;background:#45301b}
+.mythic{border-color:#ff405d;background:#49202c}
+.open-btn{
+ width:100%;border:0;border-radius:12px;
+ padding:15px;background:var(--orange);
+ color:#171717;font-size:13px;font-weight:900;
+ transition:.15s;
+}
+.open-btn:active{transform:scale(.98)}
+.open-btn:disabled{background:#41495a;color:#aab1bf}
+.case-price{text-align:center;color:var(--muted);font-size:10px;margin-top:10px}
+.tabs{
+ display:none;
+}
+.page{display:none}
+.page.active{display:block}
+.nav{
+ position:fixed;bottom:0;left:0;width:100%;
+ height:75px;padding-bottom:env(safe-area-inset-bottom);
+ background:#191e2a;border-top:1px solid var(--border);
+ display:flex;justify-content:space-around;align-items:center;
+ z-index:30;
+}
+.nav button{
+ background:none;border:0;color:var(--muted);
+ display:flex;flex-direction:column;gap:5px;
+ align-items:center;font-size:10px;font-weight:800;
+ min-width:65px;
+}
+.nav button .ico{font-size:21px}
+.nav button.active{color:var(--orange)}
+.stats{
+ display:grid;grid-template-columns:1fr 1fr;gap:10px;
+ margin:18px 0;
+}
+.stat{
+ background:var(--panel);border:1px solid var(--border);
+ padding:15px;border-radius:13px;
+}
+.stat small{font-size:10px;color:var(--muted)}
+.stat strong{display:block;margin-top:7px;font-size:20px}
+.inventory-item{
+ background:var(--panel);border:1px solid var(--border);
+ border-radius:12px;padding:13px;
+ display:flex;align-items:center;gap:12px;
+ margin-bottom:9px;
+}
+.inventory-emoji{font-size:34px}
+.inventory-info{flex:1}
+.inventory-info b{font-size:12px}
+.inventory-info small{display:block;color:var(--muted);font-size:10px;margin-top:5px}
+.sell{
+ background:#293449;color:var(--orange);
+ border:1px solid #414c63;border-radius:8px;
+ padding:9px;font-size:10px;font-weight:800;
+}
+.empty{
+ text-align:center;color:var(--muted);
+ padding:45px 10px;font-size:12px;
+}
+.empty div{font-size:45px;margin-bottom:12px}
+.info{
+ background:var(--panel);border:1px solid var(--border);
+ padding:15px;border-radius:13px;
+ margin-bottom:12px;
+}
+.info h3{font-size:13px;margin-bottom:8px}
+.info p{font-size:11px;line-height:1.8;color:var(--muted)}
+.result{
+ position:fixed;inset:0;background:#000b;
+ z-index:100;display:none;
+ justify-content:center;align-items:center;padding:20px;
+}
+.result.show{display:flex}
+.result-box{
+ width:100%;max-width:350px;
+ background:#202737;border:1px solid var(--border);
+ border-radius:20px;padding:25px;text-align:center;
+}
+.result-box h2{font-size:19px}
+.result-emoji{font-size:80px;margin:20px}
+.result-box p{font-size:12px;color:var(--muted);margin-bottom:20px}
+@media(max-width:380px){
+ .logo{font-size:20px}
+ .container{padding:13px 10px}
+}
+</style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="logo"><span class="fox">FOX</span> <span class="grade">Grade</span></div>
-        <div class="balance" onclick="addStarsTest()"><span>💎</span> <span id="user-balance">0</span></div>
-    </div>
+<header class="header">
+ <div class="logo"><span>FOX</span> GRADE</div>
+ <div class="balance">💎 <b id="balance">100</b> FC</div>
+</header>
 
-    <!-- Вкладка "Кейсы" -->
-    <div id="tab-cases" class="tab-content active-tab">
-        <div class="case-container">
-            <div class="case-title">Бесплатный кейс (раз в 24ч)</div>
-            <div class="case-window">
-                <div class="center-marker"></div>
-                <div class="roulette-track" id="roulette-free"></div>
-            </div>
-            <button class="btn-open" id="openBtnFree" onclick="openCase('free')">Открыть бесплатно</button>
-            <div class="timer-text" id="timerTextFree">Доступен прямо сейчас!</div>
-            
-            <div style="height: 30px;"></div>
+<main class="container">
 
-            <div class="case-title">Кейс за 5 звёзд</div>
-            <div class="case-window">
-                <div class="center-marker"></div>
-                <div class="roulette-track" id="roulette-paid"></div>
-            </div>
-            <button class="btn-open" id="openBtnPaid" onclick="openCase('paid')">Открыть за 5 💎</button>
-        </div>
-    </div>
+<section id="cases" class="page active">
+ <div class="welcome">
+  <h2>Добро пожаловать! 👋</h2>
+  <p>Открывай кейсы и собирай коллекцию предметов.</p>
+ </div>
 
-    <!-- Вкладка "Игры" (заглушка) -->
-    <div id="tab-games" class="tab-content">
-        <div class="case-container"><h2 style="color:#8b92a5; margin-top:50px;">Игры скоро будут!</h2></div>
-    </div>
-    <!-- Вкладка "Заработок" (заглушка) -->
-    <div id="tab-earn" class="tab-content">
-        <div class="case-container"><h2 style="color:#8b92a5; margin-top:50px;">Заработок скоро будет!</h2></div>
-    </div>
-    <!-- Вкладка "Бонусы" (заглушка) -->
-    <div id="tab-bonus" class="tab-content">
-        <div class="case-container"><h2 style="color:#8b92a5; margin-top:50px;">Бонусы скоро будут!</h2></div>
-    </div>
+ <div class="stats">
+  <div class="stat"><small>ТВОЙ БАЛАНС</small><strong id="statBalance">100 FC</strong></div>
+  <div class="stat"><small>ПРЕДМЕТОВ</small><strong id="statItems">0</strong></div>
+ </div>
 
-    <div class="bottom-nav">
-        <a href="#" class="nav-item" onclick="switchTab('games')">Игры</a>
-        <a href="#" class="nav-item active" onclick="switchTab('cases')">Кейсы</a>
-        <a href="#" class="nav-item" onclick="switchTab('earn')">Заработок</a>
-        <a href="#" class="nav-item" onclick="switchTab('bonus')">Бонусы</a>
-    </div>
+ <div class="section-title">🔥 Популярные кейсы <small>FOX CASES</small></div>
 
-    <script>
-        // --- ИНИЦИАЛИЗАЦИЯ ---
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        const userId = tg.initDataUnsafe?.user?.id || 'test_user';
+ <div class="case-card">
+  <div class="case-top">
+   <div class="case-name">Стартовый кейс</div>
+   <div class="case-label">БЕСПЛАТНО</div>
+  </div>
+  <div class="case-desc">Доступен один раз в 24 часа</div>
+  <div class="case-art">🎁</div>
+  <div class="roulette"><div class="track" id="trackFree"></div></div>
+  <button class="open-btn" id="freeBtn" onclick="openCase('free')">ОТКРЫТЬ КЕЙС</button>
+  <div class="case-price" id="freeTimer">Можно открыть сейчас</div>
+ </div>
 
-        // Баланс (в звёздах)
-        let balance = parseInt(localStorage.getItem('fox_balance_' + userId) || '0');
-        document.getElementById('user-balance').innerText = balance;
+ <div class="case-card">
+  <div class="case-top">
+   <div class="case-name">FOX Premium</div>
+   <div class="case-label">PREMIUM</div>
+  </div>
+  <div class="case-desc">Больше редких предметов</div>
+  <div class="case-art">💎</div>
+  <div class="roulette"><div class="track" id="trackPaid"></div></div>
+  <button class="open-btn" id="paidBtn" onclick="openCase('paid')">ОТКРЫТЬ ЗА 5 FC</button>
+  <div class="case-price">Используются только виртуальные очки</div>
+ </div>
+</section>
 
-        // Время последнего открытия бесплатного кейса
-        let lastOpenedFree = parseInt(localStorage.getItem('fox_last_open_free_' + userId) || '0');
-        const cooldown = 24 * 60 * 60 * 1000; // 24 часа
+<section id="inventory" class="page">
+ <div class="welcome"><h2>🎒 Инвентарь</h2><p>Все полученные тобой предметы</p></div>
+ <div class="stats">
+  <div class="stat"><small>ПРЕДМЕТОВ</small><strong id="invCount">0</strong></div>
+  <div class="stat"><small>СТОИМОСТЬ</small><strong id="invValue">0 FC</strong></div>
+ </div>
+ <div id="inventoryList"></div>
+</section>
 
-        // --- ПРЕДМЕТЫ ---
-        // Бесплатный кейс (как ты просил)
-        const itemsFree = [
-            { emoji: '⭐', name: '1 Звезда', value: 1, rarity: 'common', chance: 35 },
-            { emoji: '🌟', name: '3 Звезды', value: 3, rarity: 'common', chance: 25 },
-            { emoji: '✨', name: '5 Звёзд', value: 5, rarity: 'common', chance: 15 },
-            { emoji: '🧸', name: 'Мишка', value: 22, rarity: 'rare', chance: 10 },
-            { emoji: '💖', name: 'Сердечко', value: 22, rarity: 'rare', chance: 7 },
-            { emoji: '🌹', name: 'Роза', value: 36, rarity: 'rare', chance: 4 },
-            { emoji: '🍾', name: 'Шампанское', value: 73, rarity: 'epic', chance: 2 },
-            { emoji: '🚀', name: 'Ракета', value: 73, rarity: 'epic', chance: 1 },
-            { emoji: '💎', name: 'Алмаз', value: 145, rarity: 'legend', chance: 0.8 },
-            { emoji: '🏆', name: 'Факел', value: 455, rarity: 'legend', chance: 0.2 }
-        ];
+<section id="bonus" class="page">
+ <div class="welcome"><h2>🎁 Бонусы</h2><p>Дополнительная информация</p></div>
+ <div class="info">
+  <h3>⭐ Ежедневный кейс</h3>
+  <p>Каждые 24 часа ты можешь открыть бесплатный стартовый кейс.</p>
+ </div>
+ <div class="info">
+  <h3>💎 Виртуальные очки</h3>
+  <p>FC — внутриигровые очки. Они не являются деньгами, не покупаются и не выводятся.</p>
+ </div>
+ <div class="info">
+  <h3>📦 Коллекция</h3>
+  <p>Собирай предметы и управляй своим инвентарём.</p>
+ </div>
+</section>
 
-        // Платный кейс (за 5 звёзд) - твой новый список
-        // Названия и цены я взял примерные, но структура готова.
-        const itemsPaid = [
-            { emoji: '⭐', name: '1 Звезда', value: 1, rarity: 'common', chance: 30 },
-            { emoji: '🌟', name: '5 Звёзд', value: 5, rarity: 'common', chance: 20 },
-            { emoji: '🧸', name: 'Мишка', value: 22, rarity: 'rare', chance: 12 },
-            { emoji: '🌹', name: 'Роза', value: 36, rarity: 'rare', chance: 8 },
-            { emoji: '🎂', name: 'Торт', value: 73, rarity: 'epic', chance: 5 },
-            { emoji: '💎', name: 'Алмаз', value: 145, rarity: 'epic', chance: 3 },
-            { emoji: '🏆', name: 'Факел', value: 377, rarity: 'legend', chance: 1 },
-            { emoji: '🍦', name: 'Мороженка', value: 384, rarity: 'legend', chance: 0.8 },
-            { emoji: '📖', name: 'Книга', value: 422, rarity: 'legend', chance: 0.6 },
-            { emoji: '🎒', name: 'Рюкзак', value: 437, rarity: 'legend', chance: 0.5 },
-            { emoji: '💩', name: 'Какашка', value: 462, rarity: 'legend', chance: 0.4 },
-            { emoji: '🥫', name: 'Банка', value: 498, rarity: 'legend', chance: 0.3 },
-            { emoji: '🐶', name: 'Мопс', value: 527, rarity: 'legend', chance: 0.2 },
-            { emoji: '👑', name: 'Статуя', value: 577, rarity: 'legend', chance: 0.15 },
-            { emoji: '⚔️', name: 'Меч', value: 615, rarity: 'legend', chance: 0.1 },
-            { emoji: '🔘', name: 'Кнопка', value: 652, rarity: 'legend', chance: 0.08 },
-            { emoji: '👀', name: 'Глазки', value: 858, rarity: 'legend', chance: 0.05 },
-            { emoji: '🚬', name: 'Сигара', value: 1300, rarity: 'legend', chance: 0.03 },
-            { emoji: '💨', name: 'Фен', value: 1350, rarity: 'legend', chance: 0.02 },
-            { emoji: '🎨', name: 'Кнопка с узором', value: 1388, rarity: 'legend', chance: 0.01 },
-            { emoji: '🧑‍🦳', name: 'Парик', value: 2150, rarity: 'legend', chance: 0.01 },
-            { emoji: '💍', name: 'Кольцо', value: 3028, rarity: 'legend', chance: 0.005 },
-            { emoji: '🪖', name: 'Шлем', value: 3417, rarity: 'legend', chance: 0.005 },
-            { emoji: '🚬', name: 'Крутая сигара', value: 4508, rarity: 'legend', chance: 0.002 },
-            { emoji: '💍', name: 'Крутое кольцо', value: 5508, rarity: 'legend', chance: 0.001 },
-            { emoji: '🧴', name: 'Духи', value: 7122, rarity: 'legend', chance: 0.001 },
-            { emoji: '⌚', name: 'Часы', value: 8373, rarity: 'legend', chance: 0.0005 },
-            { emoji: '👜', name: 'Сумка', value: 12010, rarity: 'legend', chance: 0.0002 },
-            { emoji: '💚', name: 'Зелёный алмаз', value: 12600, rarity: 'legend', chance: 0.0001 },
-            { emoji: '🐱', name: 'Кот', value: 22045, rarity: 'legend', chance: 0.00005 }
-        ];
+<section id="profile" class="page">
+ <div class="welcome"><h2>👤 Профиль</h2><p>Твоя статистика FOX Grade</p></div>
+ <div class="info">
+  <h3>Твой аккаунт</h3>
+  <p id="userInfo">Игрок FOX Grade</p>
+ </div>
+ <div class="stats">
+  <div class="stat"><small>БАЛАНС</small><strong id="profileBalance">100 FC</strong></div>
+  <div class="stat"><small>КОЛЛЕКЦИЯ</small><strong id="profileItems">0</strong></div>
+ </div>
+</section>
 
-        const btnFree = document.getElementById('openBtnFree');
-        const timerFree = document.getElementById('timerTextFree');
-        const btnPaid = document.getElementById('openBtnPaid');
+</main>
 
-        // --- ЛОГИКА КУЛДАУНА ---
-        function checkCooldown() {
-            const now = Date.now();
-            const timePassed = now - lastOpenedFree;
-            if (timePassed < cooldown) {
-                btnFree.disabled = true;
-                btnFree.innerText = "Кейс недоступен";
-                updateTimer(cooldown - timePassed);
-            } else {
-                btnFree.disabled = false;
-                btnFree.innerText = "Открыть бесплатно";
-                timerFree.innerText = "Доступен прямо сейчас!";
-            }
-        }
+<nav class="nav">
+ <button class="active" onclick="switchPage('cases',this)"><span class="ico">📦</span>Кейсы</button>
+ <button onclick="switchPage('inventory',this)"><span class="ico">🎒</span>Инвентарь</button>
+ <button onclick="switchPage('bonus',this)"><span class="ico">🎁</span>Бонусы</button>
+ <button onclick="switchPage('profile',this)"><span class="ico">👤</span>Профиль</button>
+</nav>
 
-        function updateTimer(msLeft) {
-            const hours = Math.floor(msLeft / (1000 * 60 * 60));
-            const minutes = Math.floor((msLeft % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((msLeft % (1000 * 60)) / 1000);
-            timerFree.innerText = `Следующее открытие через: ${hours}ч ${minutes}м ${seconds}с`;
-            setTimeout(() => {
-                if (Date.now() - lastOpenedFree < cooldown) updateTimer(cooldown - (Date.now() - lastOpenedFree));
-                else checkCooldown();
-            }, 1000);
-        }
+<div class="result" id="result">
+ <div class="result-box">
+  <h2>ПОЗДРАВЛЯЕМ!</h2>
+  <div class="result-emoji" id="resultEmoji">💎</div>
+  <h3 id="resultName">Алмаз</h3>
+  <p id="resultValue">Вы получили предмет!</p>
+  <button class="open-btn" onclick="closeResult()">ЗАБРАТЬ</button>
+ </div>
+</div>
 
-        // --- ВЫБОР ПРЕДМЕТА ---
-        function getRandomItem(itemsList) {
-            const rand = Math.random() * 100;
-            let cumulative = 0;
-            for (let item of itemsList) {
-                cumulative += item.chance;
-                if (rand <= cumulative) return item;
-            }
-            return itemsList[0];
-        }
+<script>
+const tg=window.Telegram?.WebApp;
+if(tg){tg.ready();tg.expand();}
 
-        // --- ГЕНЕРАЦИЯ ЛЕНТЫ ---
-        function generateRoulette(trackId, winningItem, itemsList) {
-            const track = document.getElementById(trackId);
-            track.innerHTML = '';
-            track.style.transition = 'none';
-            track.style.transform = 'translateX(0)';
+const userId=tg?.initDataUnsafe?.user?.id||'demo';
+const saveKey='fox_grade_v2_'+userId;
 
-            for (let i = 0; i < 40; i++) {
-                const randomItem = itemsList[Math.floor(Math.random() * itemsList.length)];
-                track.appendChild(createItemHTML(randomItem));
-            }
-            const winEl = createItemHTML(winningItem);
-            winEl.id = 'winning-item-' + trackId;
-            track.appendChild(winEl);
-            for (let i = 0; i < 10; i++) {
-                const randomItem = itemsList[Math.floor(Math.random() * itemsList.length)];
-                track.appendChild(createItemHTML(randomItem));
-            }
-        }
+const defaultData={
+ balance:100,
+ lastFree:0,
+ inventory:[],
+ totalOpened:0
+};
 
-        function createItemHTML(item) {
-            const div = document.createElement('div');
-            div.className = `item ${item.rarity}`;
-            div.innerHTML = `${item.emoji} <div class="stars">${item.value} ⭐</div>`;
-            return div;
-        }
+let data;
+try{
+ data=JSON.parse(localStorage.getItem(saveKey))||defaultData;
+}catch(e){data={...defaultData};}
 
-        // --- ОТКРЫТИЕ КЕЙСА ---
-        function openCase(type) {
-            if (type === 'free' && btnFree.disabled) return;
+if(!Array.isArray(data.inventory))data.inventory=[];
+if(typeof data.balance!=='number')data.balance=100;
+if(typeof data.lastFree!=='number')data.lastFree=0;
 
-            let itemsList = type === 'free' ? itemsFree : itemsPaid;
-            let trackId = type === 'free' ? 'roulette-free' : 'roulette-paid';
-            let btn = type === 'free' ? btnFree : btnPaid;
+const freeItems=[
+ {name:'1 звезда',emoji:'⭐',value:1,rarity:'common',chance:35},
+ {name:'3 звезды',emoji:'🌟',value:3,rarity:'common',chance:25},
+ {name:'5 звёзд',emoji:'✨',value:5,rarity:'common',chance:15},
+ {name:'Мишка',emoji:'🧸',value:22,rarity:'rare',chance:10},
+ {name:'Сердечко',emoji:'💖',value:22,rarity:'rare',chance:7},
+ {name:'Роза',emoji:'🌹',value:36,rarity:'rare',chance:4},
+ {name:'Ракета',emoji:'🚀',value:73,rarity:'epic',chance:2},
+ {name:'Алмаз',emoji:'💎',value:145,rarity:'legend',chance:1.5},
+ {name:'Кубок',emoji:'🏆',value:455,rarity:'mythic',chance:.5}
+];
 
-            if (type === 'paid') {
-                if (balance < 5) {
-                    tg.showAlert("Недостаточно звёзд! Нужно 5 💎");
-                    return;
-                }
-                balance -= 5;
-                localStorage.setItem('fox_balance_' + userId, balance);
-                document.getElementById('user-balance').innerText = balance;
-            }
+const paidItems=[
+ {name:'1 звезда',emoji:'⭐',value:1,rarity:'common',chance:25},
+ {name:'5 звёзд',emoji:'🌟',value:5,rarity:'common',chance:20},
+ {name:'Мишка',emoji:'🧸',value:22,rarity:'rare',chance:15},
+ {name:'Роза',emoji:'🌹',value:36,rarity:'rare',chance:12},
+ {name:'Ракета',emoji:'🚀',value:73,rarity:'epic',chance:10},
+ {name:'Алмаз',emoji:'💎',value:145,rarity:'epic',chance:7},
+ {name:'Кубок',emoji:'🏆',value:377,rarity:'legend',chance:4},
+ {name:'Кольцо',emoji:'💍',value:550,rarity:'legend',chance:3},
+ {name:'Часы',emoji:'⌚',value:850,rarity:'legend',chance:2},
+ {name:'Корона',emoji:'👑',value:1500,rarity:'mythic',chance:1.5},
+ {name:'Зелёный алмаз',emoji:'💚',value:2500,rarity:'mythic',chance:.5}
+];
 
-            btn.disabled = true;
-            btn.innerText = "Открываем...";
+let opening=false;
+let timerInterval=null;
 
-            const winningItem = getRandomItem(itemsList);
-            generateRoulette(trackId, winningItem, itemsList);
+function save(){
+ localStorage.setItem(saveKey,JSON.stringify(data));
+ updateUI();
+}
 
-            setTimeout(() => {
-                const track = document.getElementById(trackId);
-                const winEl = document.getElementById('winning-item-' + trackId);
-                
-                // Расчет позиции
-                const itemWidth = 100 + 10;
-                const windowWidth = document.querySelector('.case-window').offsetWidth;
-                const centerOffset = windowWidth / 2 - 50;
-                const translateX = -(40 * itemWidth) + centerOffset;
+function updateUI(){
+ document.getElementById('balance').textContent=data.balance;
+ document.getElementById('statBalance').textContent=data.balance+' FC';
+ document.getElementById('statItems').textContent=data.inventory.length;
+ document.getElementById('invCount').textContent=data.inventory.length;
+ document.getElementById('invValue').textContent=
+ data.inventory.reduce((s,x)=>s+x.value,0)+' FC';
+ document.getElementById('profileBalance').textContent=data.balance+' FC';
+ document.getElementById('profileItems').textContent=data.inventory.length;
+ renderInventory();
+}
 
-                track.style.transition = 'transform 5s cubic-bezier(0.15, 0.9, 0.2, 1)';
-                track.style.transform = `translateX(${translateX}px)`;
+function switchPage(name,button){
+ if(opening)return;
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ document.getElementById(name).classList.add('active');
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+ button.classList.add('active');
+}
 
-                setTimeout(() => {
-                    balance += winningItem.value;
-                    localStorage.setItem('fox_balance_' + userId, balance);
-                    document.getElementById('user-balance').innerText = balance;
+function randomItem(list){
+ const total=list.reduce((s,x)=>s+x.chance,0);
+ let r=Math.random()*total;
+ for(const item of list){
+  r-=item.chance;
+  if(r<=0)return item;
+ }
+ return list[list.length-1];
+}
 
-                    if (type === 'free') {
-                        lastOpenedFree = Date.now();
-                        localStorage.setItem('fox_last_open_free_' + userId, lastOpenedFree);
-                        checkCooldown();
-                    } else {
-                        btn.disabled = false;
-                        btn.innerText = "Открыть за 5 💎";
-                    }
+function makeItem(item){
+ const el=document.createElement('div');
+ el.className='item '+item.rarity;
+ const emoji=document.createElement('div');
+ emoji.className='emoji';
+ emoji.textContent=item.emoji;
+ const value=document.createElement('div');
+ value.className='value';
+ value.textContent=item.value+' FC';
+ el.append(emoji,value);
+ return el;
+}
 
-                    tg.showAlert(`Вы выиграли: ${winningItem.emoji} ${winningItem.name} (${winningItem.value} ⭐)`);
-                }, 5200);
-            }, 100);
-        }
+function startRoulette(id,list,winner){
+ const track=document.getElementById(id);
+ track.innerHTML='';
+ track.style.transition='none';
+ track.style.transform='translateX(0px)';
 
-        // --- ТЕСТОВАЯ ФУНКЦИЯ ДЛЯ БАЛАНСА (нажми на баланс сверху) ---
-        function addStarsTest() {
-            balance += 100;
-            localStorage.setItem('fox_balance_' + userId, balance);
-            document.getElementById('user-balance').innerText = balance;
-        }
+ const winnerIndex=35;
+ for(let i=0;i<50;i++){
+  const item=i===winnerIndex?winner:randomItem(list);
+  const el=makeItem(item);
+  if(i===winnerIndex)el.id='winner';
+  track.appendChild(el);
+ }
 
-        // --- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ---
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+ const win=document.getElementById('winner');
+ const box=track.parentElement;
+ const offset=box.clientWidth/2-(win.offsetLeft+win.offsetWidth/2);
 
-            if (tabName === 'cases') {
-                document.getElementById('tab-cases').classList.add('active-tab');
-                document.querySelectorAll('.nav-item')[1].classList.add('active');
-            } else if (tabName === 'games') {
-                document.getElementById('tab-games').classList.add('active-tab');
-                document.querySelectorAll('.nav-item')[0].classList.add('active');
-            } else if (tabName === 'earn') {
-                document.getElementById('tab-earn').classList.add('active-tab');
-                document.querySelectorAll('.nav-item')[2].classList.add('active');
-            } else if (tabName === 'bonus') {
-                document.getElementById('tab-bonus').classList.add('active-tab');
-                document.querySelectorAll('.nav-item')[3].classList.add('active');
-            }
-        }
+ requestAnimationFrame(()=>{
+  requestAnimationFrame(()=>{
+   track.style.transition='transform 5s cubic-bezier(.12,.75,.12,1)';
+   track.style.transform=`translateX(${offset}px)`;
+  });
+ });
+}
 
-        // Запуск
-        checkCooldown();
-    </script>
+function openCase(type){
+ if(opening)return;
+
+ const free=type==='free';
+ const btn=document.getElementById(free?'freeBtn':'paidBtn');
+
+ if(free){
+  if(Date.now()-data.lastFree<86400000){
+   updateCooldown();
+   return;
+  }
+ }else{
+  if(data.balance<5){
+   alert('Недостаточно виртуальных очков!');
+   return;
+  }
+  data.balance-=5;
+ }
+
+ opening=true;
+ btn.disabled=true;
+ btn.textContent='ОТКРЫВАЕМ...';
+
+ const list=free?freeItems:paidItems;
+ const winner=randomItem(list);
+ const trackId=free?'trackFree':'trackPaid';
+
+ startRoulette(trackId,list,winner);
+
+ setTimeout(()=>{
+  data.balance+=winner.value;
+  data.totalOpened++;
+  data.inventory.unshift({
+   ...winner,
+   id:Date.now()+'_'+Math.random()
+  });
+
+  if(free)data.lastFree=Date.now();
+
+  save();
+  opening=false;
+  btn.disabled=false;
+  btn.textContent=free?'ОТКРЫТЬ КЕЙС':'ОТКРЫТЬ ЗА 5 FC';
+
+  document.getElementById('resultEmoji').textContent=winner.emoji;
+  document.getElementById('resultName').textContent=winner.name;
+  document.getElementById('resultValue').textContent='Стоимость: '+winner.value+' FC';
+  document.getElementById('result').classList.add('show');
+
+  updateCooldown();
+ },5300);
+}
+
+function closeResult(){
+ document.getElementById('result').classList.remove('show');
+}
+
+function updateCooldown(){
+ const btn=document.getElementById('freeBtn');
+ const timer=document.getElementById('freeTimer');
+ const left=86400000-(Date.now()-data.lastFree);
+
+ if(left<=0){
+  btn.disabled=false;
+  btn.textContent='ОТКРЫТЬ КЕЙС';
+  timer.textContent='Можно открыть сейчас';
+  return;
+ }
+
+ btn.disabled=true;
+ btn.textContent='КЕЙС НЕДОСТУПЕН';
+
+ const h=Math.floor(left/3600000);
+ const m=Math.floor(left%3600000/60000);
+ const s=Math.floor(left%60000/1000);
+
+ timer.textContent=`Следующий кейс через ${h}ч ${m}м ${s}с`;
+}
+
+function renderInventory(){
+ const root=document.getElementById('inventoryList');
+ if(!root)return;
+
+ root.innerHTML='';
+ if(data.inventory.length===0){
+  root.innerHTML='<div class="empty"><div>🎒</div>Инвентарь пока пуст</div>';
+  return;
+ }
+
+ data.inventory.forEach(item=>{
+  const row=document.createElement('div');
+  row.className='inventory-item';
+
+  const emoji=document.createElement('div');
+  emoji.className='inventory-emoji';
+  emoji.textContent=item.emoji;
+
+  const info=document.createElement('div');
+  info.className='inventory-info';
+
+  const name=document.createElement('b');
+  name.textContent=item.name;
+
+  const value=document.createElement('small');
+  value.textContent=item.value+' FC · '+item.rarity;
+
+  info.append(name,value);
+
+  const sell=document.createElement('button');
+  sell.className='sell';
+  sell.textContent='Продать';
+  sell.onclick=()=>sellItem(item.id);
+
+  row.append(emoji,info,sell);
+  root.appendChild(row);
+ });
+}
+
+function sellItem(id){
+ const index=data.inventory.findIndex(x=>x.id===id);
+ if(index<0)return;
+
+ const item=data.inventory[index];
+ data.balance+=item.value;
+ data.inventory.splice(index,1);
+ save();
+}
+
+document.getElementById('userInfo').textContent=
+ tg?.initDataUnsafe?.user?.first_name||'Игрок FOX Grade';
+
+updateUI();
+updateCooldown();
+
+timerInterval=setInterval(updateCooldown,1000);
+</script>
 </body>
 </html>
+

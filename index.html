@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FOX Grade</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800;900&display=swap');
+
+        body {
+            background-color: #141824; /* Темный фон как на скринах */
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            padding-bottom: 80px; /* Отступ для нижней панели */
+            user-select: none;
+        }
+
+        /* --- Шапка --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+        }
+        .logo .fox { color: #ff8c00; }
+        .logo .grade { color: #ffffff; }
+        
+        .balance {
+            background: #232838;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            border: 1px solid #333a4e;
+        }
+
+        /* --- Кейс --- */
+        .case-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .case-title {
+            font-size: 18px;
+            color: #8b92a5;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .case-window {
+            width: 90%;
+            height: 160px;
+            background: #1c2233;
+            border-radius: 20px;
+            border: 1px solid #333a4e;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* Маркер по центру */
+        .center-marker {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #ff8c00;
+            transform: translateX(-50%);
+            z-index: 10;
+            box-shadow: 0 0 10px #ff8c00;
+        }
+        .center-marker::before, .center-marker::after {
+            content: '';
+            position: absolute;
+            left: -6px;
+            border-left: 7px solid transparent;
+            border-right: 7px solid transparent;
+        }
+        .center-marker::before { top: 0; border-top: 10px solid #ff8c00; }
+        .center-marker::after { bottom: 0; border-bottom: 10px solid #ff8c00; }
+
+        /* Лента с подарками */
+        .roulette-track {
+            display: flex;
+            gap: 10px;
+            padding-left: calc(50% - 55px); /* Чтобы первый элемент был по центру */
+            transition: transform 5s cubic-bezier(0.15, 0.9, 0.2, 1);
+        }
+
+        .item {
+            width: 100px;
+            height: 120px;
+            background: #2a3146;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            border-bottom: 4px solid #ff8c00;
+            position: relative;
+            font-size: 40px; /* Размер эмодзи */
+        }
+        .item .stars {
+            position: absolute;
+            bottom: 5px;
+            font-size: 12px;
+            color: #ff8c00;
+            font-weight: 800;
+        }
+        
+        /* Разные цвета для редкости */
+        .item.rare { border-bottom-color: #3b82f6; }
+        .item.epic { border-bottom-color: #a855f7; }
+        .item.legend { border-bottom-color: #ef4444; background: linear-gradient(180deg, #2a3146 0%, #3b1b2b 100%); }
+
+        /* Кнопка */
+        .btn-open {
+            margin-top: 30px;
+            background: #ff8c00;
+            color: black;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 900;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 140, 0, 0.3);
+            transition: 0.2s;
+            width: 80%;
+        }
+        .btn-open:active { transform: scale(0.95); }
+        .btn-open:disabled { background: #4a5568; color: #8b92a5; box-shadow: none; }
+
+        .timer-text {
+            margin-top: 15px;
+            color: #8b92a5;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* --- Нижняя панель --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #1c2233;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            border-top: 1px solid #333a4e;
+            padding-bottom: max(15px, env(safe-area-inset-bottom)); /* Для iPhone */
+        }
+        .nav-item {
+            color: #8b92a5;
+            font-size: 12px;
+            font-weight: 800;
+            text-decoration: none;
+            text-transform: uppercase;
+        }
+        .nav-item.active { color: white; }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">
+            <span class="fox">FOX</span> <span class="grade">Grade</span>
+        </div>
+        <div class="balance">
+            <span>💎</span> <span id="user-balance">0</span>
+        </div>
+    </div>
+
+    <div class="case-container">
+        <div class="case-title">Бесплатный кейс (NFT)</div>
+        
+        <div class="case-window">
+            <div class="center-marker"></div>
+            <div class="roulette-track" id="roulette">
+                <!-- Сюда будут генерироваться элементы -->
+            </div>
+        </div>
+
+        <button class="btn-open" id="openBtn" onclick="openCase()">Открыть бесплатно</button>
+        <div class="timer-text" id="timerText">Доступен прямо сейчас!</div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="#" class="nav-item">Игры</a>
+        <a href="#" class="nav-item active">Кейсы</a>
+        <a href="#" class="nav-item">Заработок</a>
+        <a href="#" class="nav-item">Бонусы</a>
+    </div>
+
+    <script>
+        // Инициализация Telegram
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        // Данные из Telegram
+        const userId = tg.initDataUnsafe?.user?.id || 'test_user';
+        
+        // Баланс из локального хранилища (чтобы не сбрасывался)
+        let balance = parseInt(localStorage.getItem('fox_balance_' + userId) || '0');
+        document.getElementById('user-balance').innerText = balance;
+
+        // Время последнего открытия
+        let lastOpened = parseInt(localStorage.getItem('fox_last_open_' + userId) || '0');
+        const cooldown = 24 * 60 * 60 * 1000; // 24 часа в миллисекундах
+
+        const btn = document.getElementById('openBtn');
+        const timerText = document.getElementById('timerText');
+
+        // Проверка кулдауна при загрузке
+        function checkCooldown() {
+            const now = Date.now();
+            const timePassed = now - lastOpened;
+
+            if (timePassed < cooldown) {
+                // Кнопка заблокирована
+                btn.disabled = true;
+                btn.innerText = "Кейс недоступен";
+                updateTimer(cooldown - timePassed);
+            } else {
+                btn.disabled = false;
+                btn.innerText = "Открыть бесплатно";
+                timerText.innerText = "Доступен прямо сейчас!";
+            }
+        }
+
+        // Таймер обратного отсчета
+        function updateTimer(msLeft) {
+            const hours = Math.floor(msLeft / (1000 * 60 * 60));
+            const minutes = Math.floor((msLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((msLeft % (1000 * 60)) / 1000);
+            
+            timerText.innerText = `Следующее открытие через: ${hours}ч ${minutes}м ${seconds}с`;
+            
+            setTimeout(() => {
+                if (Date.now() - lastOpened < cooldown) {
+                    updateTimer(cooldown - (Date.now() - lastOpened));
+                } else {
+                    checkCooldown();
+                }
+            }, 1000);
+        }
+
+        // Список возможных выпадений (Шансы подобраны под твои запросы)
+        const items = [
+            { emoji: '⭐', name: '1 Звезда', value: 1, rarity: 'common', chance: 40 },
+            { emoji: '🌟', name: '3 Звезды', value: 3, rarity: 'common', chance: 25 },
+            { emoji: '✨', name: '5 Звезд', value: 5, rarity: 'common', chance: 15 },
+            { emoji: '🧸', name: 'Мишка', value: 22, rarity: 'rare', chance: 8 },
+            { emoji: '💖', name: 'Сердечко', value: 22, rarity: 'rare', chance: 5 },
+            { emoji: '🌹', name: 'Роза', value: 36, rarity: 'rare', chance: 3 },
+            { emoji: '🍾', name: 'Шампанское', value: 73, rarity: 'epic', chance: 2 },
+            { emoji: '🚀', name: 'Ракета', value: 73, rarity: 'epic', chance: 1 },
+            { emoji: '💎', name: 'Алмаз', value: 145, rarity: 'legend', chance: 0.8 },
+            { emoji: '🏆', name: 'Факел', value: 455, rarity: 'legend', chance: 0.2 }
+        ];
+
+        // Функция для определения выпавшего предмета
+        function getRandomItem() {
+            const rand = Math.random() * 100;
+            let cumulative = 0;
+            for (let item of items) {
+                cumulative += item.chance;
+                if (rand <= cumulative) return item;
+            }
+            return items[0];
+        }
+
+        // Генерация ленты (50 элементов для прокрутки)
+        function generateRoulette(winningItem) {
+            const track = document.getElementById('roulette');
+            track.innerHTML = '';
+            track.style.transition = 'none';
+            track.style.transform = 'translateX(0)';
+
+            // Генерируем 40 случайных предметов
+            for (let i = 0; i < 40; i++) {
+                const randomItem = items[Math.floor(Math.random() * items.length)];
+                track.appendChild(createItemHTML(randomItem));
+            }
+            
+            // Добавляем победный предмет (он будет 41-м)
+            const winEl = createItemHTML(winningItem);
+            winEl.id = 'winning-item';
+            track.appendChild(winEl);
+
+            // Еще 10 рандомных для красоты
+            for (let i = 0; i < 10; i++) {
+                const randomItem = items[Math.floor(Math.random() * items.length)];
+                track.appendChild(createItemHTML(randomItem));
+            }
+        }
+
+        function createItemHTML(item) {
+            const div = document.createElement('div');
+            div.className = `item ${item.rarity}`;
+            div.innerHTML = `${item.emoji} <div class="stars">${item.value} ⭐</div>`;
+            return div;
+        }
+
+        // Главная функция открытия
+        function openCase() {
+            if (btn.disabled) return;
+
+            // Блокируем кнопку
+            btn.disabled = true;
+            btn.innerText = "Открываем...";
+
+            // Определяем победителя
+            const winningItem = getRandomItem();
+
+            // Генерируем визуальную ленту
+            generateRoulette(winningItem);
+
+            // Даем прогрузиться DOM
+            setTimeout(() => {
+                const track = document.getElementById('roulette');
+                const winEl = document.getElementById('winning-item');
+                
+                // Вычисляем позицию для остановки (центр экрана)
+                // 41-й элемент (индекс 40) должен встать по центру
+                const itemWidth = 100 + 10; // ширина + отступ
+                const windowWidth = document.querySelector('.case-window').offsetWidth;
+                const centerOffset = windowWidth / 2 - 50; // 50 - половина ширины элемента
+                
+                // Расстояние, на которое нужно сдвинуть ленту
+                const translateX = -(40 * itemWidth) + centerOffset;
+
+                // Запускаем анимацию
+                track.style.transition = 'transform 5s cubic-bezier(0.15, 0.9, 0.2, 1)';
+                track.style.transform = `translateX(${translateX}px)`;
+
+                // Ждем окончания анимации
+                setTimeout(() => {
+                    // Начисляем баланс
+                    balance += winningItem.value;
+                    localStorage.setItem('fox_balance_' + userId, balance);
+                    document.getElementById('user-balance').innerText = balance;
+
+                    // Записываем время открытия
+                    lastOpened = Date.now();
+                    localStorage.setItem('fox_last_open_' + userId, lastOpened);
+
+                    // Всплывашка о выигрыше (используем встроенный alert телеграма)
+                    tg.showAlert(`Вы выиграли: ${winningItem.emoji} ${winningItem.name} (${winningItem.value} ⭐)`);
+
+                    // Возвращаем кнопку в состояние кулдауна
+                    checkCooldown();
+                }, 5200); // 5 сек анимация + 200мс запас
+            }, 100);
+        }
+
+        // Запуск проверки при старте
+        checkCooldown();
+
+    </script>
+</body>
+  </html>

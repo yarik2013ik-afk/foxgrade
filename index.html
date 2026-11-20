@@ -1,23 +1,223 @@
-<!DOCTYPE html>
+const express = require('express');
+const cors = require('cors');
+const crypto = require('crypto');
+const app = express();
+
+app.use(express.json());
+app.use(cors()); // Для бета-теста разрешаем все домены. В проде укажи свой GitHub Pages URL.
+
+const BOT_TOKEN = process.env.BOT_TOKEN || "ТВОЙ_ТОКЕН_БОТА";
+const ADMIN_ID = process.env.ADMIN_TELEGRAM_ID || "ТВОЙ_ТЕЛЕГРАМ_ID";
+
+// Имитация базы данных (для беты в памяти). Для продакшена используй SQLite/Postgres.
+const db = {
+  users: {}, // { tgId: { balance_micro, clicks, upgrades, ... } }
+  withdrawRequests: [],
+  online: {} // { tgId: timestamp }
+};
+
+// --- БЕЗОПАСНОСТЬ ---
+// Проверка подлинности данных от Telegram WebApp
+function validateTelegramData(initData) {
+  if (!initData || !BOT_TOKEN) return null;
+  try {
+    const params = new URLSearchParams(initData);
+    const hash = params.get('hash');
+    if (!hash) return null;
+    params.delete('hash');
+    
+    const dataCheckString = Array.from(params.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([k, v]) => `${k}=${v}`).join('\n');
+    
+    const secretKey = crypto.createHmac('sha256', 'WebAppData').update(BOT_TOKEN).digest();
+    const calculatedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
+    
+    if (calculatedHash !== hash) return null;
+    return JSON.parse(params.get('user') || 'null');
+  } catch (e) { return null; }
+}
+
+function auth(req, res, next) {
+  const initData = req.headers['authorization']?.replace('tma ', '');
+  const user = validateTelegramData(initData);
+  
+  if (!user) {
+    // Для локальной разработки без Telegram (чтобы ты мог тестить в браузере)
+    if (process.env.NODE_ENV === 'development') {
+      req.user = { id: 12345678, first_name: "TestUser", username: "test" };
+      return next();
+    }
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  req.user = user;
+  next();
+}
+
+function adminAuth(req, res, next) {
+  if (String(req.user.id) !== String(ADMIN_ID)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
+  next();
+}
+
+// --- ИНИЦИАЛИЗАЦИЯ ИГРОКА ---
+app.post('/api/auth', auth, (req, res) => {
+  const uid = req.user.id;
+  const now = Date.now();
+
+  if (!db.users[uid]) {
+    // НОВЫЙ ИГРОК
+    db.users[uid] = {
+      id: uid,
+      name: req.user.first_name || "Игрок",
+      username: req.user.username || "",
+      photo: req.user.photo_url || "",
+      balance_micro: 0,
+      total_clicks: 0,
+      total_earned_micro: 0,
+      energy: 1000,
+      max_energy: 1000,
+      upgrades: { click: 0, regen: 0, max_energy: 0, crit: 0, multiplier: 0, auto: 0, combo: 0 },
+      daily_streak: 0,
+      last_daily: 0,
+      last_update: now,
+      start_date: now
+    };
+  }
+
+  db.online[uid] = now;
+
+  // Восстановление энергии оффлайн
+  const user = db.users[uid];
+  const timePassed = now - user.last_update;
+  if (timePassed > 0 && user.energy < user.max_energy) {
+    const regenMs = [3000, 2500, 2000, 1500, 1000, 500][user.upgrades.regen] || 3000;
+    const regenAmount = Math.floor(timePassed / regenMs);
+    user.energy = Math.min(user.max_energy, user.energy + regenAmount);
+    user.last_update = now;
+  }
+
+  res.json({ success: true, user });
+});
+
+// --- ГЛАВНЫЕ ДЕЙСТВИЯ ---
+app.post('/api/tap', auth, (req, res) => {
+  const user = db.users[req.user.id];
+  if (!user) return res.status(404).json({ error: "Not found" });
+  
+  if (user.energy < 1) return res.status(400).json({ error: "No energy" });
+
+  user.energy -= 1;
+  user.total_clicks += 1;
+  
+  const base = [0.001, 0.002, 0.003, 0.005, 0.008, 0.012, 0.020, 0.035, 0.060, 0.100][user.upgrades.click] || 0.001;
+  const mult = [1, 1.2, 1.5, 2][user.upgrades.multiplier] || 1;
+  let reward = base * mult;
+
+  // Крит
+  const critChance = [0, 5, 10, 20][user.upgrades.crit] || 0;
+  if (Math.random() * 100 < critChance) reward *= 2;
+
+  const micro = Math.floor(reward * 1000000);
+  user.balance_micro += micro;
+  user.total_earned_micro += micro;
+  user.last_update = Date.now();
+  db.online[req.user.id] = Date.now();
+
+  res.json({ balance_micro: user.balance_micro, energy: user.energy });
+});
+
+// --- ОНЛАЙН ---
+app.get('/api/online', (req, res) => {
+  const now = Date.now();
+  const activeUsers = Object.keys(db.online).filter(uid => now - db.online[uid] < 60000); // Активен, если был < 60 сек назад
+  res.json({ online: activeUsers.length });
+});
+
+// --- ВЫВОД ---
+app.post('/api/withdraw', auth, (req, res) => {
+  const user = db.users[req.user.id];
+  const { amount_micro } = req.body;
+  
+  if (!amount_micro || amount_micro < 1000000) return res.status(400).json({ error: "Min 1.000" });
+  if (user.balance_micro < amount_micro) return res.status(400).json({ error: "Not enough balance" });
+
+  // Заморозка
+  user.balance_micro -= amount_micro;
+  
+  const reqId = "#" + Math.floor(1000 + Math.random() * 9000);
+  const request = {
+    id: reqId,
+    userId: user.id,
+    username: user.username || user.name,
+    amount_micro,
+    status: 'pending',
+    date: Date.now()
+  };
+  
+  db.withdrawRequests.push(request);
+
+  // Уведомление админу
+  if (BOT_TOKEN && ADMIN_ID) {
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: ADMIN_ID,
+        text: `🔔 ЗАЯВКА НА ВЫВОД\nИгрок: @${user.username}\nСумма: ${amount_micro/1000000} ⭐\nID: ${reqId}`
+      })
+    }).catch(console.error);
+  }
+
+  res.json({ success: true, request });
+});
+
+app.get('/api/withdraw/history', auth, (req, res) => {
+  const history = db.withdrawRequests.filter(r => r.userId === req.user.id).reverse();
+  res.json(history);
+});
+
+// --- АДМИН ПАНЕЛЬ ---
+app.get('/api/admin/requests', auth, adminAuth, (req, res) => {
+  res.json(db.withdrawRequests);
+});
+
+app.post('/api/admin/withdraw/:id', auth, adminAuth, (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body; // 'approved' | 'rejected' | 'completed'
+  
+  const request = db.withdrawRequests.find(r => r.id === id);
+  if (!request) return res.status(404).json({ error: "Not found" });
+
+  if (request.status !== 'pending') return res.status(400).json({ error: "Already processed" });
+
+  request.status = status;
+
+  // Если отклонили — возвращаем баланс
+  if (status === 'rejected') {
+    const user = db.users[request.userId];
+    if (user) user.balance_micro += request.amount_micro;
+  }
+
+  res.json({ success: true });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`AURIX Server on port ${PORT}`));
+
+  <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AURIX | Idle Clicker</title>
+<title>AURIX | V1.0 Beta</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root {
-  --bg: #050508;
-  --panel: #0f111a;
-  --panel-light: #1a1d2d;
-  --line: #2a2e45;
-  --accent: #ffaa00;
-  --accent-glow: rgba(255, 170, 0, 0.4);
-  --purple: #7b61ff;
-  --text: #ffffff;
-  --muted: #8b93b0;
-  --gold: #ffd36a;
-  --success: #00ff88;
+  --bg: #050508; --panel: #0f111a; --panel-light: #1a1d2d; --line: #2a2e45;
+  --accent: #ffaa00; --accent-glow: rgba(255, 170, 0, 0.4); --purple: #7b61ff;
+  --text: #ffffff; --muted: #8b93b0; --gold: #ffd36a; --success: #00ff88;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
 body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; background-image: radial-gradient(circle at 50% 0%, #15102a 0%, transparent 50%); }
@@ -45,6 +245,7 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
 .stat-item .label { font-size: 11px; color: var(--muted); text-transform: uppercase; }
 .stat-item .value { font-size: 16px; font-weight: 800; color: var(--text); }
 
+/* КРУГЛАЯ КНОПКА */
 .tap-button { width: 240px; height: 240px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #2a2e40, #161922); border: 4px solid var(--accent); box-shadow: 0 0 50px var(--accent-glow), inset 0 0 30px rgba(255, 170, 0, 0.2); display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.1s, box-shadow 0.2s; position: relative; animation: pulseBtn 3s infinite alternate; }
 .tap-button:active { transform: scale(0.92); box-shadow: 0 0 80px var(--accent-glow), inset 0 0 50px rgba(255, 170, 0, 0.5); }
 @keyframes pulseBtn { 0% { box-shadow: 0 0 40px var(--accent-glow); } 100% { box-shadow: 0 0 60px var(--accent-glow); } }
@@ -60,19 +261,14 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
 .card-title { font-size: 15px; font-weight: 800; }
 .card-reward { font-size: 14px; font-weight: 900; color: var(--gold); }
 .card-desc { font-size: 12px; color: var(--muted); }
-.task-progress-bg { width: 100%; height: 6px; background: var(--panel-light); border-radius: 4px; overflow: hidden; margin-top: 4px; }
-.task-progress-fill { height: 100%; background: var(--success); width: 0%; border-radius: 4px; transition: width 0.3s; }
 .btn-claim { background: var(--panel-light); border: 1px solid var(--line); padding: 6px 14px; border-radius: 8px; font-weight: 800; font-size: 12px; color: var(--text); cursor: pointer; }
 .btn-claim.ready { background: var(--success); color: #000; border-color: var(--success); }
 .btn-claim:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ВЫВОД */
 .withdraw-box { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 20px; margin: 16px; display: flex; flex-direction: column; gap: 15px; }
-.input-group { display: flex; flex-direction: column; gap: 8px; }
-.input-group label { font-size: 13px; color: var(--muted); }
-.input-group input { background: var(--panel-light); border: 1px solid var(--line); padding: 14px; border-radius: 12px; color: #fff; font-size: 18px; font-weight: 700; outline: none; }
+.input-group input { background: var(--panel-light); border: 1px solid var(--line); padding: 14px; border-radius: 12px; color: #fff; font-size: 18px; font-weight: 700; outline: none; width: 100%; margin-top: 8px; }
 .btn-primary { background: linear-gradient(135deg, var(--accent), #e67300); padding: 16px; border-radius: 12px; font-weight: 900; font-size: 16px; color: #000; border: 0; cursor: pointer; }
-.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* МЕНЮ */
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: rgba(15, 17, 26, 0.95); backdrop-filter: blur(15px); border-top: 1px solid var(--line); display: flex; justify-content: space-around; align-items: center; z-index: 50; padding: 0 4px; }
@@ -80,15 +276,13 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
 .nav-btn .icon { font-size: 20px; }
 .nav-btn.active { color: var(--accent); text-shadow: 0 0 10px var(--accent-glow); }
 
-/* ТОСТ */
-.toast { position: fixed; bottom: 95px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--panel-light); border: 1px solid var(--line); padding: 12px 24px; border-radius: 30px; font-weight: 700; font-size: 13px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 200; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* ЧАСТИЦЫ */
+/* ЧАСТИЦЫ И ЭФФЕКТЫ */
 .particle { position: absolute; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; pointer-events: none; animation: particleAnim 0.6s ease-out forwards; z-index: 100; }
 @keyframes particleAnim { 0% { opacity: 1; transform: translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); } }
 .floating-text { position: absolute; color: var(--gold); font-weight: 900; font-size: 20px; pointer-events: none; animation: floatUp 0.8s ease-out forwards; text-shadow: 0 0 10px var(--gold); z-index: 100; }
 @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-100px) scale(1.5); } }
+.toast { position: fixed; bottom: 95px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--panel-light); border: 1px solid var(--line); padding: 12px 24px; border-radius: 30px; font-weight: 700; font-size: 13px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 200; text-align: center; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
@@ -96,7 +290,7 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
 <header class="top-profile">
   <div class="avatar" id="user-avatar">🦊</div>
   <div class="profile-info">
-    <div class="profile-name" id="user-name">Игрок</div>
+    <div class="profile-name" id="user-name">Загрузка...</div>
     <div class="profile-lvl" id="user-level">Уровень 1</div>
   </div>
   <div class="balance-header">
@@ -116,31 +310,22 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
       <div class="tap-subtitle">ТАПАЙ</div>
       <div class="tap-star">⭐</div>
     </div>
-    <div class="hint-text" id="hint-text">Твой баланс растет с каждым тапом!</div>
+    <div class="hint-text" id="hint-text">Бета-тест V1.0</div>
   </div>
 </main>
 
-<main id="page-shop" class="page">
-  <div class="list-container" id="shop-list"></div>
-</main>
-
-<main id="page-tasks" class="page">
-  <div class="list-container" id="tasks-list"></div>
-</main>
-
-<main id="page-daily" class="page">
-  <div class="list-container" id="daily-list"></div>
-</main>
+<main id="page-shop" class="page"><div class="list-container" id="shop-list"></div></main>
+<main id="page-tasks" class="page"><div class="list-container" id="tasks-list"></div></main>
+<main id="page-daily" class="page"><div class="list-container" id="daily-list"></div></main>
 
 <main id="page-withdraw" class="page">
   <div class="withdraw-box">
     <h2 style="font-size:20px; text-align:center;">Вывод звёзд</h2>
     <div class="input-group">
-      <label>Доступно для вывода: <span id="ui-withdraw-balance">0.000</span> ⭐</label>
-      <input type="number" id="withdraw-amount" placeholder="Введите сумму" step="0.001">
+      <label>Доступно: <span id="ui-withdraw-balance">0.000</span> ⭐</label>
+      <input type="number" id="withdraw-amount" placeholder="Сумма (мин. 1.000)" step="0.001">
     </div>
-    <button class="btn-primary" id="btn-withdraw" onclick="createWithdrawRequest()">Создать заявку</button>
-    <div style="font-size:12px; color:var(--muted); text-align:center; margin-top:10px;">Минимум: 1.000 ⭐</div>
+    <button class="btn-primary" onclick="createWithdrawRequest()">Создать заявку</button>
   </div>
   <div class="list-container" id="withdraw-history"></div>
 </main>
@@ -149,12 +334,10 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
   <div class="list-container">
     <div class="card" style="align-items:center; text-align:center; padding:30px;">
       <div class="avatar" style="width:80px; height:80px; font-size:40px; margin-bottom:10px;" id="prof-avatar">🦊</div>
-      <div class="profile-name" id="prof-name">Игрок</div>
-      <div class="profile-lvl" id="prof-lvl" style="margin-top:5px;">Уровень 1</div>
+      <div class="profile-name" id="prof-name">...</div>
       <div style="margin-top:20px; width:100%; display:flex; flex-direction:column; gap:8px;">
         <div style="display:flex; justify-content:space-between; padding:10px; background:var(--panel-light); border-radius:8px;"><span>Всего кликов</span><strong id="prof-clicks">0</strong></div>
         <div style="display:flex; justify-content:space-between; padding:10px; background:var(--panel-light); border-radius:8px;"><span>Заработано</span><strong id="prof-earned">0.000</strong></div>
-        <div style="display:flex; justify-content:space-between; padding:10px; background:var(--panel-light); border-radius:8px;"><span>Дата старта</span><strong id="prof-date">-</strong></div>
       </div>
     </div>
   </div>
@@ -172,101 +355,111 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
 <div class="toast" id="toast"></div>
 
 <script>
+const API_URL = "https://ТВОЙ_СЕРВЕР.onrender.com"; // Сюда ссылку из Render!
+  </script>
 
-"use strict";
+let tg = window.Telegram?.WebApp;
+let initData = "";
+let userState = null;
 
-const SAVE_KEY = "aurix_full_save_v2";
-
-const CONFIG = {
-  click: { prices: [0, 2, 5, 12, 25, 50, 100, 200, 400, 800], values: [0.001, 0.002, 0.003, 0.005, 0.008, 0.012, 0.020, 0.035, 0.060, 0.100] },
-  regen: { prices: [0, 5, 15, 40, 100, 250], values: [3000, 2500, 2000, 1500, 1000, 500] },
-  max_energy: { prices: [0, 10, 30, 80, 200, 500], values: [1000, 1500, 2000, 3000, 4000, 5000] },
-  crit: { prices: [0, 50, 150, 500], chance: [0, 5, 10, 20], mult: [0, 2, 3, 5] },
-  multiplier: { prices: [0, 100, 400, 1500], mult: [1, 1.2, 1.5, 2] },
-  auto: { prices: [0, 250, 1000, 5000], income: [0, 0.001, 0.005, 0.02] },
-  combo: { prices: [0, 80, 250, 800], bonus: [0, 0.01, 0.05, 0.2] }
-};
-
-let state = {
-  balance_micro: 0, total_clicks: 0, total_earned_micro: 0,
-  energy: 1000, max_energy: 1000, last_update: Date.now(), last_auto_tick: Date.now(),
-  upg_click: 0, upg_regen: 0, upg_max_energy: 0, upg_crit: 0, upg_multiplier: 0, upg_auto: 0, upg_combo: 0,
-  tasks: {
-    t1: { prog: 0, claimed: false }, t2: { prog: 0, claimed: false }, t3: { prog: 0, claimed: false },
-    t4: { prog: 0, claimed: false }, t5: { prog: 0, claimed: false }, t6: { prog: 0, claimed: false }
-  },
-  daily_streak: 0, last_daily_claim: 0,
-  withdraw_history: [],
-  start_date: Date.now(),
-  user: { name: "Игрок", photo: "", username: "" }
-};
-
-const DAILY_REWARDS = [0.005, 0.01, 0.015, 0.02, 0.03, 0.04, 0.08];
-
-function fmt(micro) { return (micro / 1000000).toFixed(3); }
-
-function showToast(msg) {
-  const t = document.getElementById("toast");
-  t.textContent = msg; t.classList.add("show");
-  clearTimeout(t.timer); t.timer = setTimeout(() => t.classList.remove("show"), 2500);
+if (tg) {
+  tg.ready();
+  tg.expand();
+  initData = tg.initData;
+  const u = tg.initDataUnsafe?.user;
+  if (u) {
+    document.getElementById("user-name").textContent = u.first_name;
+    if (u.photo_url) {
+      document.getElementById("user-avatar").innerHTML = `<img src="${u.photo_url}">`;
+      document.getElementById("prof-avatar").innerHTML = `<img src="${u.photo_url}">`;
+    }
+  }
+} else {
+  // Если открыто в обычном браузере для теста
+  document.getElementById("user-name").textContent = "Web Tester";
+  initData = "dev_mode"; 
 }
+
+// --- API ЗАПРОСЫ ---
+async function api(path, method = 'GET', body = null) {
+  const headers = { 'Authorization': `tma ${initData}` };
+  if (body) headers['Content-Type'] = 'application/json';
+  
+  try {
+    const res = await fetch(API_URL + path, { method, headers, body: body ? JSON.stringify(body) : null });
+    if (!res.ok) throw new Error(await res.text());
+    return await res.json();
+  } catch (e) {
+    showToast("Ошибка сети сервера");
+    console.error(e);
+    return null;
+  }
+}
+
+// --- ИНИЦИАЛИЗАЦИЯ ---
+async function initGame() {
+  const data = await api('/api/auth', 'POST');
+  if (data) {
+    userState = data.user;
+    updateUI();
+    renderShop();
+    renderTasks();
+    renderDaily();
+    fetchOnline();
+  }
+}
+
+function updateUI() {
+  if (!userState) return;
+  document.getElementById("ui-balance").textContent = (userState.balance_micro / 1000000).toFixed(3);
+  document.getElementById("ui-withdraw-balance").textContent = (userState.balance_micro / 1000000).toFixed(3);
+  document.getElementById("ui-clicks").textContent = userState.total_clicks;
+  document.getElementById("ui-income").textContent = "+" + (0.001 * (1 + userState.upgrades.click * 0.5)).toFixed(3); // Упрощенно
+  document.getElementById("user-level").textContent = `Уровень ${Math.floor(userState.total_earned_micro / 10000000) + 1}`;
+  
+  document.getElementById("prof-name").textContent = userState.name;
+  document.getElementById("prof-clicks").textContent = userState.total_clicks;
+  document.getElementById("prof-earned").textContent = (userState.total_earned_micro / 1000000).toFixed(3);
+}
+
+async function fetchOnline() {
+  const data = await api('/api/online');
+  if (data) document.getElementById("ui-online").textContent = data.online;
+}
+setInterval(fetchOnline, 15000);
+
+// --- КЛИК ---
+document.getElementById("tap-btn").addEventListener("click", async (e) => {
+  if (userState.energy < 1) { showToast("Нет энергии!"); return; }
+  
+  // Оптимистичное обновление (чтобы не лагало)
+  userState.energy -= 1;
+  const reward = 0.001; // Визуально
+  createParticles(e.clientX, e.clientY);
+  createFloatingText(e.clientX, e.clientY, reward);
+
+  // Отправка на сервер
+  const res = await api('/api/tap', 'POST');
+  if (res) {
+    userState.balance_micro = res.balance_micro;
+    userState.energy = res.energy;
+    updateUI();
+  }
+});
 
 function goPage(id) {
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   document.getElementById("page-" + id).classList.add("active");
   document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.page === id));
-  if(id === 'shop') renderShop();
-  if(id === 'tasks') renderTasks();
-  if(id === 'daily') renderDaily();
-  if(id === 'withdraw') renderWithdraw();
-  if(id === 'profile') renderProfile();
 }
 
-function save() {
-  state.last_update = Date.now();
-  localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2500);
 }
 
-function load() {
-  try {
-    const saved = localStorage.getItem(SAVE_KEY);
-    if(saved) {
-      const parsed = JSON.parse(saved);
-      state = { ...state, ...parsed };
-      const now = Date.now();
-      const timePassed = now - state.last_update;
-      if(timePassed > 0) {
-        const regenMs = CONFIG.regen.values[state.upg_regen] || 3000;
-        const regenAmount = Math.floor(timePassed / regenMs);
-        state.energy = Math.min(state.max_energy, state.energy + regenAmount);
-      }
-    }
-  } catch(e) { console.error("Load error", e); }
-}
-
-function getClickValue() {
-  let base = CONFIG.click.values[state.upg_click] || 0.001;
-  let mult = CONFIG.multiplier.mult[state.upg_multiplier] || 1;
-  return base * mult;
-}
-
-function updateUI() {
-  document.getElementById("ui-balance").textContent = fmt(state.balance_micro);
-  document.getElementById("ui-income").textContent = "+" + getClickValue().toFixed(3);
-  document.getElementById("ui-clicks").textContent = state.total_clicks;
-  document.getElementById("ui-online").textContent = Math.floor(100 + Math.random() * 50); // Заглушка для онлайна
-  document.getElementById("ui-withdraw-balance").textContent = fmt(state.balance_micro);
-}
-
-function createFloatingText(x, y, amount) {
-  const el = document.createElement("div");
-  el.className = "floating-text";
-  el.textContent = "+" + amount.toFixed(3);
-  el.style.left = (x - 30) + "px"; el.style.top = (y - 30) + "px";
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 800);
-}
-
+// Визуал
 function createParticles(x, y) {
   for(let i=0; i<5; i++) {
     const p = document.createElement("div");
@@ -280,310 +473,35 @@ function createParticles(x, y) {
     setTimeout(() => p.remove(), 600);
   }
 }
+function createFloatingText(x, y, amount) {
+  const el = document.createElement("div");
+  el.className = "floating-text";
+  el.textContent = "+" + amount.toFixed(3);
+  el.style.left = (x - 30) + "px"; el.style.top = (y - 30) + "px";
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 800);
+}
 
-// --- КЛИК ---
-document.getElementById("tap-btn").addEventListener("click", (e) => {
-  if(state.energy < 1) { showToast("Нет энергии! Жди."); return; }
+// Заглушки для магазина и заданий (для беты)
+function renderShop() { document.getElementById("shop-list").innerHTML = "<div class='card'>Улучшения загружаются...</div>"; }
+function renderTasks() { document.getElementById("tasks-list").innerHTML = "<div class='card'>Задания загружаются...</div>"; }
+function renderDaily() { document.getElementById("daily-list").innerHTML = "<div class='card'>Награды загружаются...</div>"; }
+
+// Вывод
+async function createWithdrawRequest() {
+  const val = parseFloat(document.getElementById("withdraw-amount").value);
+  if (!val || val < 1) return showToast("Минимум 1.000 ⭐");
   
-  state.energy -= 1;
-  state.total_clicks += 1;
-  
-  let reward = getClickValue();
-  if(state.upg_crit > 0) {
-    if(Math.random() * 100 < CONFIG.crit.chance[state.upg_crit]) {
-      reward *= CONFIG.crit.mult[state.upg_crit];
-    }
-  }
-  if(state.upg_combo > 0 && state.total_clicks % 100 === 0) {
-    reward += CONFIG.combo.bonus[state.upg_combo];
-  }
-
-  const micro = Math.floor(reward * 1000000);
-  state.balance_micro += micro;
-  state.total_earned_micro += micro;
-
-  createFloatingText(e.clientX, e.clientY, reward);
-  createParticles(e.clientX, e.clientY);
-  updateUI();
-  updateTaskProgress();
-});
-
-// Таймер регена и авто-дохода
-setInterval(() => {
-  const now = Date.now();
-  if(state.energy < state.max_energy) {
-    const regenMs = CONFIG.regen.values[state.upg_regen] || 3000;
-    const timePassed = now - state.last_update;
-    if(timePassed >= regenMs) {
-      const amount = Math.floor(timePassed / regenMs);
-      state.energy = Math.min(state.max_energy, state.energy + amount);
-      state.last_update = now;
-      updateUI();
-    }
+  const res = await api('/api/withdraw', 'POST', { amount_micro: Math.floor(val * 1000000) });
+  if (res && res.success) {
+    showToast("Заявка создана!");
+    userState.balance_micro -= Math.floor(val * 1000000);
+    updateUI();
+    document.getElementById("withdraw-amount").value = "";
   } else {
-    state.last_update = now;
-  }
-
-  if(state.upg_auto > 0) {
-    const timePassed = now - state.last_auto_tick;
-    if(timePassed >= 1000) {
-      const incomePerSec = CONFIG.auto.income[state.upg_auto];
-      const microToAdd = Math.floor(incomePerSec * 1000000 * (timePassed / 1000));
-      state.balance_micro += microToAdd;
-      state.total_earned_micro += microToAdd;
-      state.last_auto_tick = now;
-      updateUI();
-    }
-  }
-}, 1000);
-
-setInterval(save, 3000);
-
-const SHOP_ITEMS = [
-  { id: 'click', name: '👆 Сила клика', desc: 'Больше звёзд за клик' },
-  { id: 'regen', name: '⚡ Скорость энергии', desc: 'Быстрее восстанавливается' },
-  { id: 'max_energy', name: '🔋 Макс. энергия', desc: 'Увеличивает запас' },
-  { id: 'crit', name: '💥 Крит', desc: 'Шанс на x2, x3, x5' },
-  { id: 'multiplier', name: '✖️ Множитель', desc: 'Общий доход x1.2 и выше' },
-  { id: 'auto', name: '🤖 Авто-сбор', desc: 'Пассивный доход' },
-  { id: 'combo', name: '🔥 Комбо', desc: 'Бонус каждые 100 кликов' }
-];
-
-function renderShop() {
-  const list = document.getElementById("shop-list");
-  list.innerHTML = SHOP_ITEMS.map(item => {
-    const lvl = state[`upg_${item.id}`];
-    const maxLvl = CONFIG[item.id].prices.length - 1;
-    let price = "MAX";
-    let canBuy = false;
-    let nextDesc = "Максимальный уровень";
-
-    if(lvl < maxLvl) {
-      const priceStars = CONFIG[item.id].prices[lvl + 1];
-      price = priceStars + " ⭐";
-      canBuy = state.balance_micro >= priceStars * 1000000;
-      if(item.id === 'click') nextDesc = `След: +${CONFIG.click.values[lvl + 1].toFixed(3)} ⭐/клик`;
-      if(item.id === 'regen') nextDesc = `След: 1 ед. за ${CONFIG.regen.values[lvl + 1]/1000} сек`;
-      if(item.id === 'max_energy') nextDesc = `След: до ${CONFIG.max_energy.values[lvl + 1]} ед.`;
-      if(item.id === 'crit') nextDesc = `След: ${CONFIG.crit.chance[lvl + 1]}% шанс`;
-      if(item.id === 'multiplier') nextDesc = `След: x${CONFIG.multiplier.mult[lvl + 1]}`;
-      if(item.id === 'auto') nextDesc = `След: +${CONFIG.auto.income[lvl + 1].toFixed(3)}/сек`;
-      if(item.id === 'combo') nextDesc = `След: +${CONFIG.combo.bonus[lvl + 1]} за 100 кликов`;
-    }
-
-    return `
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">${item.name}</div>
-          <div class="card-reward">Ур. ${lvl}</div>
-        </div>
-        <div class="card-desc">${item.desc}. ${nextDesc}</div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
-          <div class="card-reward">${price}</div>
-          <button class="btn-claim" onclick="buyUpgrade('${item.id}')" ${!canBuy ? 'disabled' : ''}>
-            ${lvl >= maxLvl ? 'МАКС' : 'Купить'}
-          </button>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
-
-function buyUpgrade(id) {
-  const lvl = state[`upg_${id}`];
-  const maxLvl = CONFIG[id].prices.length - 1;
-  if(lvl >= maxLvl) return;
-  const priceStars = CONFIG[id].prices[lvl + 1];
-  if(state.balance_micro < priceStars * 1000000) { showToast("Недостаточно звёзд!"); return; }
-  state.balance_micro -= priceStars * 1000000;
-  state[`upg_${id}`] += 1;
-  if(id === 'max_energy') state.max_energy = CONFIG.max_energy.values[state.upg_max_energy];
-  updateUI(); renderShop(); updateTaskProgress(); save();
-  showToast("Улучшение куплено!");
-}
-
-// --- ЗАДАНИЯ ---
-const TASK_DEFS = [
-  { id: 't1', name: 'Первый шаг', desc: 'Сделать 50 кликов', target: 50, reward: 0.005, type: 'clicks' },
-  { id: 't2', name: 'Активный', desc: 'Сделать 100 кликов', target: 100, reward: 0.01, type: 'clicks' },
-  { id: 't3', name: 'Трудяга', desc: 'Сделать 250 кликов', target: 250, reward: 0.02, type: 'clicks' },
-  { id: 't4', name: 'Полтысячи', desc: 'Сделать 500 кликов', target: 500, reward: 0.04, type: 'clicks' },
-  { id: 't5', name: 'Тысячник', desc: 'Сделать 1000 кликов', target: 1000, reward: 0.08, type: 'clicks' },
-  { id: 't6', name: 'Шопоголик', desc: 'Купить улучшение', target: 1, reward: 0.02, type: 'upgrades' }
-];
-
-function updateTaskProgress() {
-  const totalUpgrades = Object.keys(CONFIG).reduce((sum, k) => sum + state[`upg_${k}`], 0);
-  TASK_DEFS.forEach(t => {
-    if(state.tasks[t.id].claimed) return;
-    if(t.type === 'clicks') state.tasks[t.id].prog = state.total_clicks;
-    if(t.type === 'upgrades') state.tasks[t.id].prog = totalUpgrades;
-  });
-}
-
-function renderTasks() {
-  updateTaskProgress();
-  document.getElementById("tasks-list").innerHTML = TASK_DEFS.map(t => {
-    const task = state.tasks[t.id];
-    const isDone = task.prog >= t.target;
-    const progPercent = Math.min(100, (task.prog / t.target) * 100);
-    return `
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">${t.name}</div>
-          <div class="card-reward">+${t.reward} ⭐</div>
-        </div>
-        <div class="card-desc">${t.desc}</div>
-        <div class="task-progress-bg"><div class="task-progress-fill" style="width:${progPercent}%"></div></div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
-          <div style="font-size:11px; color:var(--muted);">${Math.floor(task.prog)} / ${t.target}</div>
-          <button class="btn-claim ${isDone && !task.claimed ? 'ready' : ''}" onclick="claimTask('${t.id}')" ${!isDone || task.claimed ? 'disabled' : ''}>
-            ${task.claimed ? 'Получено' : (isDone ? 'Забрать' : 'В процессе')}
-          </button>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
-
-function claimTask(id) {
-  const t = TASK_DEFS.find(x => x.id === id);
-  const task = state.tasks[id];
-  if(task.claimed || task.prog < t.target) return;
-  task.claimed = true;
-  state.balance_micro += t.reward * 1000000;
-  state.total_earned_micro += t.reward * 1000000;
-  updateUI(); renderTasks(); save();
-  showToast(`Задание выполнено! +${t.reward} ⭐`);
-}
-
-// --- ЕЖЕДНЕВНЫЕ ---
-function renderDaily() {
-  const now = Date.now();
-  const hoursPassed = (now - state.last_daily_claim) / (1000 * 60 * 60);
-  const canClaim = hoursPassed >= 24 || state.last_daily_claim === 0;
-  
-  let html = `
-    <div class="card" style="align-items:center; text-align:center; padding:30px;">
-      <h2 style="font-size:22px; margin-bottom:10px;">Ежедневный бонус</h2>
-      <p style="color:var(--muted); font-size:13px; margin-bottom:20px;">Заходи каждый день!</p>
-      <button class="btn-primary" onclick="claimDaily()" ${!canClaim ? 'disabled' : ''} style="width:100%;">
-        ${canClaim ? 'Забрать награду' : 'Ждать'}
-      </button>
-    </div>
-    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:10px;">
-  `;
-
-  DAILY_REWARDS.forEach((rew, i) => {
-    const day = i + 1;
-    const isClaimed = state.daily_streak > i;
-    const isToday = state.daily_streak === i && canClaim;
-    html += `
-      <div style="background:var(--panel); border:1px solid ${isToday ? 'var(--accent)' : 'var(--line)'}; border-radius:12px; padding:10px 5px; text-align:center; opacity:${isClaimed ? 0.4 : 1};">
-        <div style="font-size:10px; color:var(--muted);">День ${day}</div>
-        <div style="font-size:13px; font-weight:900; color:var(--gold);">${rew} ⭐</div>
-      </div>
-    `;
-  });
-  
-  html += `</div>`;
-  document.getElementById("daily-list").innerHTML = html;
-}
-
-function claimDaily() {
-  const now = Date.now();
-  const hoursPassed = (now - state.last_daily_claim) / (1000 * 60 * 60);
-  if(hoursPassed < 24 && state.last_daily_claim !== 0) { showToast("Приходи завтра!"); return; }
-  
-  const reward = DAILY_REWARDS[state.daily_streak] || DAILY_REWARDS[0];
-  state.balance_micro += reward * 1000000;
-  state.total_earned_micro += reward * 1000000;
-  state.last_daily_claim = now;
-  state.daily_streak = (state.daily_streak + 1) % 7;
-  updateUI(); renderDaily(); save();
-  showToast(`Получено ${reward} ⭐!`);
-  }
-
-  function renderWithdraw() {
-  document.getElementById("ui-withdraw-balance").textContent = fmt(state.balance_micro);
-  
-  const history = document.getElementById("withdraw-history");
-  if(state.withdraw_history.length === 0) {
-    history.innerHTML = `<div style="text-align:center; color:var(--muted); padding:20px; font-size:13px;">Нет заявок</div>`;
-    return;
-  }
-
-  history.innerHTML = state.withdraw_history.map(w => `
-    <div class="card" style="flex-direction:row; justify-content:space-between; align-items:center;">
-      <div>
-        <div class="card-title">${fmt(w.amount_micro)} ⭐</div>
-        <div class="card-desc">${new Date(w.date).toLocaleString()}</div>
-      </div>
-      <div style="font-size:11px; font-weight:800; color:${w.status === 'pending' ? 'var(--accent)' : 'var(--success)'};">
-        ${w.status === 'pending' ? 'Ожидает' : 'Выполнено'}
-      </div>
-    </div>
-  `).join("");
-}
-
-function createWithdrawRequest() {
-  const input = document.getElementById("withdraw-amount");
-  const amount = parseFloat(input.value);
-  if (!amount || amount < 1) { showToast("Минимум 1.000 ⭐"); return; }
-  if (amount * 1000000 > state.balance_micro) { showToast("Недостаточно звёзд"); return; }
-  
-  state.balance_micro -= amount * 1000000;
-  state.withdraw_history.unshift({
-    amount_micro: amount * 1000000,
-    date: Date.now(),
-    status: 'pending'
-  });
-  
-  input.value = "";
-  updateUI();
-  renderWithdraw();
-  save();
-  showToast("Заявка создана!");
-}
-
-function renderProfile() {
-  document.getElementById("prof-clicks").textContent = state.total_clicks;
-  document.getElementById("prof-earned").textContent = fmt(state.total_earned_micro);
-  const d = new Date(state.start_date);
-  document.getElementById("prof-date").textContent = `${d.getDate()}.${d.getMonth()+1}.${d.getFullYear()}`;
-  const lvl = Math.floor(state.total_earned_micro / 100000000) + 1;
-  document.getElementById("prof-lvl").textContent = `Уровень ${lvl}`;
-  document.getElementById("user-level").textContent = `Уровень ${lvl}`;
-}
-
-// Telegram User
-const tg = window.Telegram?.WebApp;
-if (tg) {
-  tg.ready();
-  tg.expand();
-  const user = tg.initDataUnsafe?.user;
-  if (user) {
-    state.user.name = user.first_name || "Игрок";
-    state.user.username = user.username || "";
-    if (user.photo_url) state.user.photo = user.photo_url;
-    document.getElementById("user-avatar").innerHTML = `<img src="${user.photo_url}">`;
-    document.getElementById("prof-avatar").innerHTML = `<img src="${user.photo_url}">`;
-    document.getElementById("user-name").textContent = user.first_name;
-    document.getElementById("prof-name").textContent = user.first_name;
+    showToast(res?.error || "Ошибка");
   }
 }
 
 // Запуск
-load();
-updateUI();
-renderShop();
-renderTasks();
-renderDaily();
-renderWithdraw();
-renderProfile();
-
-// Сохранение при выходе
-window.addEventListener("beforeunload", save);
-</script>
-</body>
-</html>
+initGame();

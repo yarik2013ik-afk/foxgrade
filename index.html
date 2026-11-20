@@ -3,70 +3,117 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Aurix | Clicker</title>
+<title>AURIX | Idle Clicker</title>
 <style>
   :root {
-    --bg: #0b0d14;
-    --panel: #161922;
-    --panel-light: #212533;
-    --line: #2d3347;
-    --accent: #ff8a1f;
-    --accent-glow: rgba(255, 138, 31, 0.4);
+    --bg: #050508;
+    --panel: #0f111a;
+    --panel-light: #1a1d2d;
+    --line: #2a2e45;
+    --accent: #ffaa00;
+    --accent-glow: rgba(255, 170, 0, 0.4);
+    --purple: #7b61ff;
     --text: #ffffff;
     --muted: #8b93b0;
     --gold: #ffd36a;
     --success: #00ff88;
-    --danger: #ff4444;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-
-  /* --- ШАПКА --- */
-  .topbar { height: 70px; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; background: var(--panel); border-bottom: 1px solid var(--line); z-index: 10; }
-  .balance-box { display: flex; align-items: center; gap: 8px; background: var(--panel-light); padding: 8px 16px; border-radius: 30px; border: 1px solid var(--line); font-size: 18px; font-weight: 800; color: var(--gold); }
+  body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; background-image: radial-gradient(circle at 50% 0%, #15102a 0%, transparent 50%); }
   
-  /* --- ЭНЕРГИЯ --- */
-  .energy-container { flex: 1; margin-left: 16px; max-width: 200px; }
-  .energy-text { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
-  .energy-bar-bg { width: 100%; height: 8px; background: var(--panel-light); border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
-  .energy-bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #7b61ff, #a855f7); border-radius: 10px; transition: width 0.3s ease; }
+  /* ШАПКА */
+  .topbar { padding: 12px 16px; display: flex; justify-content: space-between; align-items: flex-start; background: linear-gradient(to bottom, rgba(15,17,26,0.9), transparent); z-index: 10; }
+  .balance-section { display: flex; flex-direction: column; gap: 4px; }
+  .balance-title { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .balance-value { font-size: 26px; font-weight: 900; color: var(--gold); text-shadow: 0 0 15px var(--accent-glow); display: flex; align-items: center; gap: 6px; }
+  .stats-section { text-align: right; display: flex; flex-direction: column; gap: 4px; }
+  .stat-badge { background: rgba(123, 97, 255, 0.15); border: 1px solid rgba(123, 97, 255, 0.3); padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; color: #b3a6ff; }
+  .stat-badge.gold { background: rgba(255, 170, 0, 0.15); border-color: rgba(255, 170, 0, 0.3); color: var(--gold); }
 
-  /* --- СТРАНИЦЫ --- */
-  .page { display: none; flex: 1; flex-direction: column; overflow-y: auto; padding-bottom: 80px; }
-  .page.active { display: flex; }
+  /* ЭНЕРГИЯ */
+  .energy-bar-container { margin: 10px 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 10px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+  .energy-icon { font-size: 20px; filter: drop-shadow(0 0 5px #7b61ff); }
+  .energy-bar-bg { flex: 1; height: 12px; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); position: relative; }
+  .energy-bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #7b61ff, #a855f7); border-radius: 10px; transition: width 0.3s ease; box-shadow: 0 0 10px #7b61ff; }
+  .energy-text { font-size: 12px; font-weight: 800; color: #fff; min-width: 80px; text-align: right; }
 
-  /* --- ИГРА --- */
-  .game-area { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }
-  .click-btn { width: 240px; height: 240px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #2a2e40, #161922); border: 4px solid var(--accent); box-shadow: 0 0 40px var(--accent-glow), inset 0 0 30px rgba(255, 138, 31, 0.2); display: flex; justify-content: center; align-items: center; font-size: 110px; cursor: pointer; transition: transform 0.05s ease, box-shadow 0.1s ease; position: relative; }
-  .click-btn:active { transform: scale(0.92); box-shadow: 0 0 60px var(--accent-glow), inset 0 0 40px rgba(255, 138, 31, 0.5); }
-  .click-btn::after { content: '⭐'; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6)); }
+  /* СТРАНИЦЫ */
+  .page { display: none; flex: 1; flex-direction: column; overflow-y: auto; padding-bottom: 90px; position: relative; }
+  .page.active { display: flex; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ГЛАВНЫЙ ЭКРАН (ЗВЕЗДА) */
+  .game-area { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; }
   
-  .floating-text { position: absolute; color: var(--gold); font-weight: 900; font-size: 24px; pointer-events: none; animation: floatUp 0.8s ease-out forwards; text-shadow: 0 0 10px rgba(255, 211, 106, 0.8); z-index: 100; }
-  @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-100px) scale(1.5); } }
+  /* Космический фон */
+  .space-bg { position: absolute; inset: 0; background-image: radial-gradient(white 1px, transparent 1px); background-size: 50px 50px; opacity: 0.1; pointer-events: none; }
 
-  /* --- МАГАЗИН --- */
-  .shop-container { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
-  .shop-card { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-  .shop-header { display: flex; justify-content: space-between; align-items: center; }
-  .shop-title { font-size: 18px; font-weight: 900; display: flex; align-items: center; gap: 8px; }
-  .shop-level { font-size: 14px; color: var(--muted); font-weight: 700; background: var(--panel-light); padding: 4px 10px; border-radius: 10px; }
-  .shop-desc { font-size: 13px; color: var(--muted); line-height: 1.4; }
-  .shop-action { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; border-top: 1px solid var(--line); padding-top: 12px; }
-  .shop-price { font-size: 18px; font-weight: 900; color: var(--gold); display: flex; align-items: center; gap: 4px; }
-  .btn-buy { background: var(--accent); padding: 12px 24px; border-radius: 12px; font-weight: 900; font-size: 15px; color: #fff; border: 0; cursor: pointer; transition: 0.1s; box-shadow: 0 4px 15px var(--accent-glow); }
-  .btn-buy:active { transform: scale(0.96); }
-  .btn-buy:disabled { opacity: 0.5; background: var(--line); box-shadow: none; cursor: not-allowed; }
+  /* Вращающаяся звезда */
+  .star-wrapper { position: relative; width: 260px; height: 260px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; }
+  .star-core { font-size: 140px; position: relative; z-index: 2; filter: drop-shadow(0 0 30px var(--accent)); animation: spin 20s linear infinite; transition: transform 0.1s; }
+  .star-wrapper:active .star-core { transform: scale(0.9); }
+  .star-glow { position: absolute; inset: -20px; border-radius: 50%; background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%); animation: pulse 2s infinite alternate; }
+  
+  @keyframes spin { 100% { transform: rotate(360deg); } }
+  @keyframes pulse { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.1); opacity: 0.8; } }
 
-  /* --- НИЖНЕЕ МЕНЮ --- */
-  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: rgba(11, 13, 20, 0.98); backdrop-filter: blur(10px); border-top: 1px solid var(--line); display: flex; justify-content: space-around; align-items: center; z-index: 50; }
-  .nav-btn { background: none; border: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--muted); font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+  /* Всплывающий текст */
+  .floating-text { position: absolute; color: var(--gold); font-weight: 900; font-size: 24px; pointer-events: none; animation: floatUp 0.8s ease-out forwards; text-shadow: 0 0 15px var(--gold); z-index: 100; }
+  @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-150px) scale(1.5); } }
+
+  /* Частицы */
+  .particle { position: absolute; width: 6px; height: 6px; background: var(--gold); border-radius: 50%; pointer-events: none; animation: particleAnim 0.6s ease-out forwards; z-index: 100; }
+  @keyframes particleAnim { 0% { opacity: 1; transform: translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); } }
+
+  /* МАГАЗИН / КАРТОЧКИ */
+  .list-container { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); position: relative; overflow: hidden; }
+  .card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); }
+  .card-header { display: flex; justify-content: space-between; align-items: center; }
+  .card-title { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+  .card-level { font-size: 12px; background: var(--panel-light); padding: 4px 8px; border-radius: 8px; color: var(--muted); font-weight: 700; }
+  .card-desc { font-size: 13px; color: var(--muted); line-height: 1.4; }
+  .card-action { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .card-price { font-size: 16px; font-weight: 900; color: var(--gold); }
+  .btn-buy { background: linear-gradient(135deg, var(--accent), #e67300); padding: 10px 20px; border-radius: 10px; font-weight: 800; font-size: 14px; color: #000; border: 0; cursor: pointer; transition: 0.1s; box-shadow: 0 4px 15px var(--accent-glow); }
+  .btn-buy:active { transform: scale(0.95); }
+  .btn-buy:disabled { opacity: 0.5; background: var(--line); box-shadow: none; color: var(--muted); cursor: not-allowed; }
+
+  /* ЗАДАНИЯ */
+  .task-progress-bg { width: 100%; height: 8px; background: var(--panel-light); border-radius: 4px; overflow: hidden; margin-top: 6px; }
+  .task-progress-fill { height: 100%; background: var(--success); width: 0%; border-radius: 4px; transition: width 0.3s; }
+  .btn-claim { background: var(--panel-light); border: 1px solid var(--line); padding: 8px 16px; border-radius: 10px; font-weight: 800; font-size: 13px; color: var(--text); cursor: pointer; }
+  .btn-claim.ready { background: var(--success); color: #000; border-color: var(--success); box-shadow: 0 0 15px rgba(0,255,136,0.3); }
+  .btn-claim:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ЕЖЕДНЕВНЫЕ */
+  .daily-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 16px; }
+  .daily-box { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 6px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .daily-box.claimed { opacity: 0.4; border-color: var(--success); }
+  .daily-box.today { border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); }
+  .daily-day { font-size: 11px; color: var(--muted); }
+  .daily-reward { font-size: 14px; font-weight: 900; color: var(--gold); }
+
+  /* ПРОФИЛЬ */
+  .profile-card { margin: 16px; background: linear-gradient(135deg, var(--panel), var(--panel-light)); border: 1px solid var(--line); border-radius: 20px; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--purple)); display: flex; justify-content: center; align-items: center; font-size: 40px; border: 3px solid var(--gold); box-shadow: 0 0 20px var(--accent-glow); }
+  .profile-name { font-size: 22px; font-weight: 900; }
+  .profile-level { font-size: 14px; color: var(--gold); font-weight: 700; background: rgba(255, 170, 0, 0.1); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255, 170, 0, 0.3); }
+  .profile-stats { width: 100%; display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+  .profile-stat-row { display: flex; justify-content: space-between; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px; font-size: 14px; }
+  .profile-stat-row span { color: var(--muted); }
+  .profile-stat-row strong { color: var(--text); }
+
+  /* НИЖНЕЕ МЕНЮ */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: rgba(15, 17, 26, 0.95); backdrop-filter: blur(15px); border-top: 1px solid var(--line); display: flex; justify-content: space-around; align-items: center; z-index: 50; padding: 0 4px; }
+  .nav-btn { background: none; border: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--muted); font-size: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; flex: 1; padding: 8px 0; }
   .nav-btn .icon { font-size: 22px; transition: 0.2s; }
   .nav-btn.active { color: var(--accent); }
-  .nav-btn.active .icon { transform: scale(1.1); filter: drop-shadow(0 0 8px var(--accent)); }
+  .nav-btn.active .icon { transform: translateY(-3px) scale(1.1); filter: drop-shadow(0 0 8px var(--accent)); }
 
-  /* --- ТОСТ --- */
-  .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--panel-light); border: 1px solid var(--line); padding: 12px 24px; border-radius: 30px; font-weight: 700; font-size: 14px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 200; text-align: center; }
+  /* ТОСТ */
+  .toast { position: fixed; bottom: 95px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--panel-light); border: 1px solid var(--line); padding: 12px 24px; border-radius: 30px; font-weight: 700; font-size: 14px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 200; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
@@ -74,78 +121,81 @@
 
   <!-- ШАПКА -->
   <header class="topbar">
-    <div class="balance-box">
-      <span>⭐</span>
-      <span id="balance">0.00</span>
+    <div class="balance-section">
+      <div class="balance-title">Баланс</div>
+      <div class="balance-value"><span>⭐</span> <span id="ui-balance">0.000</span></div>
     </div>
-    <div class="energy-container">
-      <div class="energy-text">
-        <span>Энергия</span>
-        <span id="energy-text-val">0 / 0</span>
-      </div>
-      <div class="energy-bar-bg">
-        <div class="energy-bar-fill" id="energy-bar"></div>
-      </div>
+    <div class="stats-section">
+      <div class="stat-badge gold" id="ui-income">+0.001 / клик</div>
+      <div class="stat-badge" id="ui-clicks">Кликов: 0</div>
     </div>
   </header>
 
-  <!-- ИГРА -->
-  <main id="page-game" class="page active">
+  <!-- ЭНЕРГИЯ -->
+  <div class="energy-bar-container">
+    <div class="energy-icon">⚡</div>
+    <div class="energy-bar-bg">
+      <div class="energy-bar-fill" id="ui-energy-fill"></div>
+    </div>
+    <div class="energy-text" id="ui-energy-text">0 / 0</div>
+  </div>
+
+  <!-- СТРАНИЦА: ГЛАВНАЯ -->
+  <main id="page-home" class="page active">
     <div class="game-area" id="game-area">
-      <div class="click-btn" id="click-btn"></div>
+      <div class="space-bg"></div>
+      <div class="star-wrapper" id="star-btn">
+        <div class="star-glow"></div>
+        <div class="star-core">⭐</div>
+      </div>
     </div>
   </main>
 
-  <!-- МАГАЗИН (УЛУЧШЕНИЯ) -->
+  <!-- СТРАНИЦА: УЛУЧШЕНИЯ -->
   <main id="page-shop" class="page">
-    <div class="shop-container">
+    <div class="list-container" id="shop-list"></div>
+  </main>
+
+  <!-- СТРАНИЦА: ЗАДАНИЯ -->
+  <main id="page-tasks" class="page">
+    <div class="list-container" id="tasks-list"></div>
+  </main>
+
+  <!-- СТРАНИЦА: НАГРАДЫ -->
+  <main id="page-daily" class="page">
+    <div class="list-container">
+      <div class="card" style="align-items: center; text-align: center; padding: 30px;">
+        <h2 style="font-size: 24px; margin-bottom: 10px;">Ежедневный бонус</h2>
+        <p style="color: var(--muted); font-size: 14px; margin-bottom: 20px;">Заходи каждый день и получай звёзды!</p>
+        <button class="btn-buy" id="btn-daily" onclick="claimDaily()" style="width: 100%; padding: 16px; font-size: 18px;">Забрать награду</button>
+      </div>
+      <div class="daily-grid" id="daily-grid"></div>
+    </div>
+  </main>
+
+  <!-- СТРАНИЦА: ПРОФИЛЬ -->
+  <main id="page-profile" class="page">
+    <div class="profile-card">
+      <div class="profile-avatar">🦊</div>
+      <div class="profile-name" id="prof-name">Игрок</div>
+      <div class="profile-level" id="prof-level">Уровень 1</div>
       
-      <!-- Карточка: Сила клика -->
-      <div class="shop-card">
-        <div class="shop-header">
-          <div class="shop-title">👆 Сила клика</div>
-          <div class="shop-level" id="lvl-click">Ур. 1</div>
-        </div>
-        <div class="shop-desc" id="desc-click">Приносит 0.01 ⭐ за клик.</div>
-        <div class="shop-action">
-          <div class="shop-price">⭐ <span id="price-click">50</span></div>
-          <button class="btn-buy" id="btn-click" onclick="buyUpgrade('click')">Улучшить</button>
-        </div>
+      <div class="profile-stats">
+        <div class="profile-stat-row"><span>Всего кликов</span><strong id="prof-total-clicks">0</strong></div>
+        <div class="profile-stat-row"><span>Заработано звёзд</span><strong id="prof-total-earned">0.000</strong></div>
+        <div class="profile-stat-row"><span>Макс. энергия</span><strong id="prof-max-energy">1000</strong></div>
+        <div class="profile-stat-row"><span>Дата регистрации</span><strong id="prof-date">-</strong></div>
       </div>
-
-      <!-- Карточка: Восстановление -->
-      <div class="shop-card">
-        <div class="shop-header">
-          <div class="shop-title">⚡ Восстановление</div>
-          <div class="shop-level" id="lvl-regen">Ур. 1</div>
-        </div>
-        <div class="shop-desc" id="desc-regen">+1 энергии за 5 сек.</div>
-        <div class="shop-action">
-          <div class="shop-price">⭐ <span id="price-regen">100</span></div>
-          <button class="btn-buy" id="btn-regen" onclick="buyUpgrade('regen')">Улучшить</button>
-        </div>
-      </div>
-
-      <!-- Карточка: Макс. энергия -->
-      <div class="shop-card">
-        <div class="shop-header">
-          <div class="shop-title">🔋 Макс. энергия</div>
-          <div class="shop-level" id="lvl-max">Ур. 1</div>
-        </div>
-        <div class="shop-desc" id="desc-max">Максимум 1000 кликов.</div>
-        <div class="shop-action">
-          <div class="shop-price">⭐ <span id="price-max">250</span></div>
-          <button class="btn-buy" id="btn-max" onclick="buyUpgrade('max')">Улучшить</button>
-        </div>
-      </div>
-
     </div>
   </main>
 
   <!-- НИЖНЕЕ МЕНЮ -->
   <nav class="bottom-nav">
-    <button class="nav-btn active" data-page="game" onclick="goPage('game')"><span class="icon">👆</span>Кликер</button>
+    <button class="nav-btn active" data-page="home" onclick="goPage('home')"><span class="icon">⭐</span>Главная</button>
     <button class="nav-btn" data-page="shop" onclick="goPage('shop')"><span class="icon">🛒</span>Улучшения</button>
+    <button class="nav-btn" data-page="tasks" onclick="goPage('tasks')"><span class="icon">📋</span>Задания</button>
+    <button class="nav-btn" data-page="daily" onclick="goPage('daily')"><span class="icon">🎁</span>Награды</button>
+    <button class="nav-btn" data-page="profile" onclick="goPage('profile')"><span class="icon">👤</span>Профиль</button>
   </nav>
 
   <div class="toast" id="toast"></div>
@@ -154,53 +204,89 @@
 
 "use strict";
 
-const SAVE_KEY = "aurix_clicker_save";
+const SAVE_KEY = "aurix_global_save_v1";
 
-// Конфигурация улучшений
-const UPGRADES = {
+// Конфигурация улучшений (Все цены и значения)
+const CONFIG = {
   click: {
-    basePrice: 50,
-    prices: [50, 150, 500, 1500, 5000], // Цены для уровней 1-5
-    values: [0.01, 0.02, 0.05, 0.10, 0.25] // Сила клика
+    prices: [0, 2, 5, 12, 25, 50, 100, 200, 400, 800, 1600, 3200, 6400, 12800],
+    values: [0.001, 0.002, 0.003, 0.005, 0.008, 0.012, 0.020, 0.035, 0.060, 0.100, 0.15, 0.25, 0.40, 0.60]
   },
   regen: {
-    basePrice: 100,
-    prices: [100, 300, 800, 2000, 5000], // Цены
-    values: [5000, 4000, 3000, 2000, 1000] // Время регена 1 ед. (в мс)
+    prices: [0, 5, 15, 40, 100, 250, 600, 1500],
+    values: [3000, 2500, 2000, 1500, 1000, 700, 400, 200] // мс
   },
-  max: {
-    basePrice: 250,
-    prices: [250, 800, 2000, 5000, 12000], // Цены
-    values: [1000, 1500, 2000, 3000, 4000, 5000] // Макс. энергия
+  max_energy: {
+    prices: [0, 10, 30, 80, 200, 500, 1200],
+    values: [1000, 1500, 2000, 3000, 4000, 5000, 7500]
+  },
+  crit: {
+    prices: [0, 50, 150, 500, 1500],
+    chance: [0, 5, 10, 20, 30], // %
+    mult: [0, 2, 2.5, 3, 5]
+  },
+  multiplier: {
+    prices: [0, 100, 400, 1500, 5000],
+    mult: [1, 1.1, 1.25, 1.5, 2]
+  },
+  auto: {
+    prices: [0, 250, 1000, 5000],
+    income: [0, 0.001, 0.005, 0.02] // за секунду
+  },
+  combo: {
+    prices: [0, 80, 250, 800],
+    bonus: [0, 0.01, 0.05, 0.2] // доп. звезды за 100 кликов
   }
 };
 
-// Состояние игры
-let game = {
-  balance: 0,
-  clickLevel: 1, // Индексы уровней (1 = Ур.1, 2 = Ур.2 и т.д.)
-  regenLevel: 1,
-  maxLevel: 1,
+// Состояние игры (ВСЕ дробные числа храним в тысячных/миллионных для точности)
+let state = {
+  balance_micro: 0, // 1 звезда = 1,000,000 микро-звезд
+  total_clicks: 0,
+  total_earned_micro: 0,
   energy: 1000,
-  lastUpdate: Date.now() // Время последнего сохранения для оффлайн-восстановления
+  max_energy: 1000,
+  last_update: Date.now(),
+  last_auto_tick: Date.now(),
+  
+  // Уровни улучшений (начинаются с 0, что значит "не куплено")
+  upg_click: 0,
+  upg_regen: 0,
+  upg_max_energy: 0,
+  upg_crit: 0,
+  upg_multiplier: 0,
+  upg_auto: 0,
+  upg_combo: 0,
+
+  // Задания (id: {progress, claimed})
+  tasks: {
+    t1: { prog: 0, claimed: false }, // 100 кликов
+    t2: { prog: 0, claimed: false }, // 500 кликов
+    t3: { prog: 0, claimed: false }, // 10 звезд
+    t4: { prog: 0, claimed: false }, // 1 улучшение
+    t5: { prog: 0, claimed: false }  // 1000 кликов
+  },
+  
+  // Ежедневные
+  daily_streak: 0,
+  last_daily_claim: 0, // timestamp
+  
+  start_date: Date.now()
 };
 
-// DOM Элементы
-const elBalance = document.getElementById("balance");
-const elEnergyText = document.getElementById("energy-text-val");
-const elEnergyBar = document.getElementById("energy-bar");
-const gameArea = document.getElementById("game-area");
+const DAILY_REWARDS = [1, 2, 3, 5, 8, 12, 20];
 
-// Таймеры
-let regenInterval = null;
-let saveTimer = null;
-
-// Форматирование чисел
-function fmt(n) {
-  return n.toLocaleString("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+// Утилиты
+function fmtStars(micro) {
+  return (micro / 1000000).toFixed(3);
 }
 
-// Уведомления
+function getClickValue() {
+  let base = CONFIG.click.values[state.upg_click] || 0.001;
+  let mult = CONFIG.multiplier.mult[state.upg_multiplier] || 1;
+  return base * mult; // возвращает в обычных звездах
+}
+
 function showToast(msg) {
   const t = document.getElementById("toast");
   t.textContent = msg;
@@ -209,231 +295,406 @@ function showToast(msg) {
   t.timer = setTimeout(() => t.classList.remove("show"), 2500);
 }
 
-// Переключение страниц
-function goPage(pageId) {
+function goPage(id) {
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-  document.getElementById("page-" + pageId).classList.add("active");
-  
-  document.querySelectorAll(".nav-btn").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.page === pageId);
-  });
+  document.getElementById("page-" + id).classList.add("active");
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.page === id));
+  if(id === 'shop') renderShop();
+  if(id === 'tasks') renderTasks();
+  if(id === 'daily') renderDaily();
+  if(id === 'profile') renderProfile();
 }
 
-// --- ИНИЦИАЛИЗАЦИЯ И СОХРАНЕНИЕ ---
-function initGame() {
-  loadGame();
-  applyOfflineEnergy();
-  updateUI();
-  startRegenLoop();
+// --- СОХРАНЕНИЯ ---
+function save() {
+  state.last_update = Date.now();
+  localStorage.setItem(SAVE_KEY, JSON.stringify(state));
 }
 
-function loadGame() {
+function load() {
   try {
     const saved = localStorage.getItem(SAVE_KEY);
-    if (saved) {
+    if(saved) {
       const parsed = JSON.parse(saved);
-      game = { ...game, ...parsed };
-    }
-  } catch (e) {
-    console.error("Ошибка загрузки:", e);
-  }
-}
-
-function saveGame() {
-  game.lastUpdate = Date.now();
-  localStorage.setItem(SAVE_KEY, JSON.stringify(game));
-}
-
-function autoSave() {
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(saveGame, 500);
-}
-
-// --- ЭНЕРГИЯ ---
-function getMaxEnergy() {
-  return UPGRADES.max.values[game.maxLevel - 1];
-}
-
-function getRegenTime() {
-  return UPGRADES.regen.values[game.regenLevel - 1];
-}
-
-function applyOfflineEnergy() {
-  const now = Date.now();
-  const timePassed = now - game.lastUpdate;
-  const regenTime = getRegenTime();
-  
-  if (timePassed > 0) {
-    const energyToAdd = Math.floor(timePassed / regenTime);
-    if (energyToAdd > 0) {
-      game.energy = Math.min(getMaxEnergy(), game.energy + energyToAdd);
-      game.lastUpdate = now;
-    }
-  }
-}
-
-function startRegenLoop() {
-  if (regenInterval) clearInterval(regenInterval);
-  
-  // Обновляем энергию каждую секунду для визуала
-  regenInterval = setInterval(() => {
-    if (game.energy < getMaxEnergy()) {
-      const regenTime = getRegenTime();
-      const timePassed = Date.now() - game.lastUpdate;
-      
-      if (timePassed >= regenTime) {
-        const add = Math.floor(timePassed / regenTime);
-        game.energy = Math.min(getMaxEnergy(), game.energy + add);
-        game.lastUpdate = Date.now();
-        updateUI();
-        autoSave();
+      state = { ...state, ...parsed };
+      // Восстановление оффлайн энергии
+      const now = Date.now();
+      const timePassed = now - state.last_update;
+      if(timePassed > 0) {
+        const regenMs = CONFIG.regen.values[state.upg_regen] || 3000;
+        const regenAmount = Math.floor(timePassed / regenMs);
+        state.energy = Math.min(state.max_energy, state.energy + regenAmount);
       }
-    } else {
-      game.lastUpdate = Date.now(); // Сбрасываем таймер, если энергия полная
     }
-  }, 1000);
+  } catch(e) { console.error("Load error", e); }
 }
 
-// --- UI ---
-function updateUI() {
-  // Баланс
-  elBalance.textContent = fmt(game.balance);
+// --- ЦИКЛ ИГРЫ ---
+function tick() {
+  const now = Date.now();
   
-  // Энергия
-  const max = getMaxEnergy();
-  elEnergyText.textContent = `${Math.floor(game.energy)} / ${max}`;
-  elEnergyBar.style.width = `${(game.energy / max) * 100}%`;
-
-  // Магазин
-  updateShopCard('click');
-  updateShopCard('regen');
-  updateShopCard('max');
-}
-
-function updateShopCard(type) {
-  const lvl = game[`${type}Level`];
-  const maxLvl = UPGRADES[type].values.length;
-  
-  document.getElementById(`lvl-${type}`).textContent = `Ур. ${lvl}`;
-  
-  const btn = document.getElementById(`btn-${type}`);
-  const priceEl = document.getElementById(`price-${type}`);
-  const descEl = document.getElementById(`desc-${type}`);
-
-  if (lvl >= maxLvl) {
-    btn.disabled = true;
-    btn.textContent = "МАКС";
-    priceEl.textContent = "0";
-    descEl.textContent = "Максимальный уровень достигнут!";
-    return;
-  }
-
-  const price = UPGRADES[type].prices[lvl - 1]; // Цена для текущего уровня
-  priceEl.textContent = price.toLocaleString("ru-RU");
-  
-  // Описание
-  if (type === 'click') {
-    descEl.textContent = `Приносит ${UPGRADES[type].values[lvl-1]} ⭐ за клик. (След: ${UPGRADES[type].values[lvl]} ⭐)`;
-  } else if (type === 'regen') {
-    descEl.textContent = `+1 энергии за ${UPGRADES[type].values[lvl-1]/1000} сек. (След: ${UPGRADES[type].values[lvl]/1000} сек.)`;
-  } else if (type === 'max') {
-    descEl.textContent = `Максимум ${UPGRADES[type].values[lvl-1]} кликов. (След: ${UPGRADES[type].values[lvl]})`;
-  }
-
-  // Доступность кнопки
-  if (game.balance >= price) {
-    btn.disabled = false;
+  // 1. Регенерация энергии
+  if(state.energy < state.max_energy) {
+    const regenMs = CONFIG.regen.values[state.upg_regen] || 3000;
+    const timePassed = now - state.last_update;
+    if(timePassed >= regenMs) {
+      const amount = Math.floor(timePassed / regenMs);
+      state.energy = Math.min(state.max_energy, state.energy + amount);
+      state.last_update = now;
+      updateUI();
+    }
   } else {
-    btn.disabled = true;
+    state.last_update = now;
+  }
+
+  // 2. Авто-доход
+  if(state.upg_auto > 0) {
+    const timePassed = now - state.last_auto_tick;
+    if(timePassed >= 1000) {
+      const incomePerSec = CONFIG.auto.income[state.upg_auto];
+      const microToAdd = Math.floor(incomePerSec * 1000000 * (timePassed / 1000));
+      state.balance_micro += microToAdd;
+      state.total_earned_micro += microToAdd;
+      state.last_auto_tick = now;
+      updateUI();
+    }
   }
 }
- // --- КЛИК ПО КНОПКЕ ---
-document.getElementById("click-btn").addEventListener("click", (e) => {
-  if (game.energy < 1) {
-    showToast("Нет энергии! Подожди немного.");
+
+// Запуск интервала каждые 100мс (для плавной энергии)
+setInterval(tick, 100);
+
+// Автосохранение
+setInterval(save, 3000);
+
+// --- КЛИК ---
+document.getElementById("star-btn").addEventListener("click", (e) => {
+  if(state.energy < 1) {
+    showToast("Нет энергии! Жди восстановления.");
     return;
   }
 
-  // Тратим энергию
-  game.energy -= 1;
-  
-  // Начисляем баланс
-  const reward = UPGRADES.click.values[game.clickLevel - 1];
-  game.balance += reward;
+  state.energy -= 1;
+  state.total_clicks += 1;
 
-  // Если энергия была полная, запускаем таймер
-  if (game.energy === getMaxEnergy() - 1) {
-    game.lastUpdate = Date.now();
+  // Расчет награды
+  let reward = getClickValue();
+  
+  // Крит
+  if(state.upg_crit > 0) {
+    const chance = CONFIG.crit.chance[state.upg_crit];
+    if(Math.random() * 100 < chance) {
+      const mult = CONFIG.crit.mult[state.upg_crit];
+      reward *= mult;
+    }
   }
 
-  updateUI();
-  autoSave();
+  // Комбо (каждые 100 кликов)
+  if(state.upg_combo > 0 && state.total_clicks % 100 === 0) {
+    reward += CONFIG.combo.bonus[state.upg_combo];
+  }
+
+  // Начисление
+  const micro = Math.floor(reward * 1000000);
+  state.balance_micro += micro;
+  state.total_earned_micro += micro;
+
+  // Эффекты
   createFloatingText(e.clientX, e.clientY, reward);
+  createParticles(e.clientX, e.clientY);
+  
+  updateUI();
+  updateTaskProgress();
 });
 
+function updateUI() {
+  document.getElementById("ui-balance").textContent = fmtStars(state.balance_micro);
+  document.getElementById("ui-income").textContent = `+${getClickValue().toFixed(3)} / клик`;
+  document.getElementById("ui-clicks").textContent = `Кликов: ${state.total_clicks}`;
+  
+  const max = state.max_energy;
+  document.getElementById("ui-energy-text").textContent = `${Math.floor(state.energy)} / ${max}`;
+  document.getElementById("ui-energy-fill").style.width = `${(state.energy / max) * 100}%`;
+}
+
 function createFloatingText(x, y, amount) {
-  const rect = gameArea.getBoundingClientRect();
   const el = document.createElement("div");
   el.className = "floating-text";
-  el.textContent = "+" + amount;
-  
-  el.style.left = (x - rect.left - 20) + "px";
-  el.style.top = (y - rect.top - 20) + "px";
-  
-  const randomX = (Math.random() - 0.5) * 50;
-  el.style.transform = `translateX(${randomX}px)`;
-  
-  gameArea.appendChild(el);
+  el.textContent = "+" + amount.toFixed(3);
+  el.style.left = (x - 30) + "px";
+  el.style.top = (y - 30) + "px";
+  document.body.appendChild(el);
   setTimeout(() => el.remove(), 800);
 }
 
-// --- ПОКУПКА УЛУЧШЕНИЙ ---
-function buyUpgrade(type) {
-  const lvl = game[`${type}Level`];
-  const maxLvl = UPGRADES[type].values.length;
-  
-  if (lvl >= maxLvl) {
-    showToast("Максимальный уровень!");
-    return;
+function createParticles(x, y) {
+  for(let i=0; i<5; i++) {
+    const p = document.createElement("div");
+    p.className = "particle";
+    p.style.left = x + "px";
+    p.style.top = y + "px";
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 50 + Math.random() * 50;
+    p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+    p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 600);
   }
+}
+// --- МАГАЗИН ---
+const SHOP_ITEMS = [
+  { id: 'click', name: '👆 Сила клика', desc: 'Больше звёзд за клик' },
+  { id: 'regen', name: '⚡ Скорость энергии', desc: 'Энергия восстанавливается быстрее' },
+  { id: 'max_energy', name: '🔋 Макс. энергия', desc: 'Увеличивает запас кликов' },
+  { id: 'crit', name: '💥 Критический клик', desc: 'Шанс получить x2, x3 и т.д.' },
+  { id: 'multiplier', name: '✖️ Множитель дохода', desc: 'Увеличивает общий доход' },
+  { id: 'auto', name: '🤖 Авто-сбор', desc: 'Пассивный доход в секунду' },
+  { id: 'combo', name: '🔥 Бонус за серию', desc: 'Доп. звезды каждые 100 кликов' }
+];
 
-  const price = UPGRADES[type].prices[lvl - 1];
-  
-  if (game.balance < price) {
+function renderShop() {
+  const list = document.getElementById("shop-list");
+  list.innerHTML = SHOP_ITEMS.map(item => {
+    const lvl = state[`upg_${item.id}`];
+    const maxLvl = CONFIG[item.id].prices.length - 1;
+    
+    let price = "MAX";
+    let canBuy = false;
+    let nextDesc = "Максимальный уровень";
+
+    if(lvl < maxLvl) {
+      const priceStars = CONFIG[item.id].prices[lvl + 1];
+      price = priceStars + " ⭐";
+      canBuy = state.balance_micro >= priceStars * 1000000;
+      
+      // Формируем описание следующего уровня
+      if(item.id === 'click') nextDesc = `След: +${CONFIG.click.values[lvl + 1].toFixed(3)} ⭐/клик`;
+      if(item.id === 'regen') nextDesc = `След: 1 ед. за ${CONFIG.regen.values[lvl + 1]/1000} сек`;
+      if(item.id === 'max_energy') nextDesc = `След: до ${CONFIG.max_energy.values[lvl + 1]} ед.`;
+      if(item.id === 'crit') nextDesc = `След: ${CONFIG.crit.chance[lvl + 1]}% шанс на x${CONFIG.crit.mult[lvl + 1]}`;
+      if(item.id === 'multiplier') nextDesc = `След: множитель x${CONFIG.multiplier.mult[lvl + 1]}`;
+      if(item.id === 'auto') nextDesc = `След: +${CONFIG.auto.income[lvl + 1].toFixed(3)} ⭐/сек`;
+      if(item.id === 'combo') nextDesc = `След: +${CONFIG.combo.bonus[lvl + 1]} ⭐ за 100 кликов`;
+    }
+
+    return `
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">${item.name}</div>
+          <div class="card-level">Ур. ${lvl}</div>
+        </div>
+        <div class="card-desc">${item.desc}. ${nextDesc}</div>
+        <div class="card-action">
+          <div class="card-price">${price}</div>
+          <button class="btn-buy" onclick="buyUpgrade('${item.id}')" ${!canBuy ? 'disabled' : ''}>
+            ${lvl >= maxLvl ? 'МАКС' : 'Купить'}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function buyUpgrade(id) {
+  const lvl = state[`upg_${id}`];
+  const maxLvl = CONFIG[id].prices.length - 1;
+  if(lvl >= maxLvl) return;
+
+  const priceStars = CONFIG[id].prices[lvl + 1];
+  const priceMicro = priceStars * 1000000;
+
+  if(state.balance_micro < priceMicro) {
     showToast("Недостаточно звёзд!");
     return;
   }
 
-  // Списываем баланс
-  game.balance -= price;
-  
-  // Повышаем уровень
-  game[`${type}Level`] += 1;
-  
-  // Спец. эффекты для каждого типа
-  if (type === 'max') {
-    // Если повысили макс. энергию, текущая не меняется, просто лимит растет
+  // Списание и повышение
+  state.balance_micro -= priceMicro;
+  state[`upg_${id}`] += 1;
+
+  // Спец. эффекты
+  if(id === 'max_energy') {
+    state.max_energy = CONFIG.max_energy.values[state.upg_max_energy];
   }
-  
-  showToast("Улучшение куплено!");
+
   updateUI();
-  saveGame(); // Мгновенное сохранение
+  renderShop();
+  updateTaskProgress();
+  save();
+  showToast("Улучшение куплено!");
 }
 
-// --- ЗАПУСК ---
-initGame();
+// --- ЗАДАНИЯ ---
+const TASK_DEFS = [
+  { id: 't1', name: 'Новичок', desc: 'Сделать 100 кликов', target: 100, reward: 1, type: 'clicks' },
+  { id: 't2', name: 'Активный', desc: 'Сделать 500 кликов', target: 500, reward: 3, type: 'clicks' },
+  { id: 't3', name: 'Богач', desc: 'Накопить 10 ⭐', target: 10, reward: 2, type: 'balance' },
+  { id: 't4', name: 'Покупатель', desc: 'Купить 1 улучшение', target: 1, reward: 5, type: 'upgrades' },
+  { id: 't5', name: 'Тысячник', desc: 'Сделать 1000 кликов', target: 1000, reward: 10, type: 'clicks' }
+];
 
-// Сохраняем при закрытии страницы
-window.addEventListener("beforeunload", saveGame);
+function updateTaskProgress() {
+  const totalUpgrades = Object.keys(CONFIG).reduce((sum, k) => sum + state[`upg_${k}`], 0);
+  
+  TASK_DEFS.forEach(t => {
+    if(state.tasks[t.id].claimed) return;
+    
+    if(t.type === 'clicks') state.tasks[t.id].prog = state.total_clicks;
+    if(t.type === 'balance') state.tasks[t.id].prog = state.balance_micro / 1000000;
+    if(t.type === 'upgrades') state.tasks[t.id].prog = totalUpgrades;
+  });
+}
 
-// При возвращении на вкладку обновляем оффлайн-энергию
-document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible") {
-    applyOfflineEnergy();
-    updateUI();
-    game.lastUpdate = Date.now();
+function renderTasks() {
+  updateTaskProgress();
+  const list = document.getElementById("tasks-list");
+  
+  list.innerHTML = TASK_DEFS.map(t => {
+    const task = state.tasks[t.id];
+    const isDone = task.prog >= t.target;
+    const progPercent = Math.min(100, (task.prog / t.target) * 100);
+    
+    return `
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">${t.name}</div>
+          <div class="card-price">+${t.reward} ⭐</div>
+        </div>
+        <div class="card-desc">${t.desc}</div>
+        <div class="task-progress-bg">
+          <div class="task-progress-fill" style="width: ${progPercent}%"></div>
+        </div>
+        <div class="card-action">
+          <div style="font-size: 12px; color: var(--muted);">${Math.floor(task.prog)} / ${t.target}</div>
+          <button class="btn-claim ${isDone && !task.claimed ? 'ready' : ''}" 
+                  onclick="claimTask('${t.id}')" 
+                  ${!isDone || task.claimed ? 'disabled' : ''}>
+            ${task.claimed ? 'Получено' : (isDone ? 'Забрать' : 'В процессе')}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function claimTask(id) {
+  const t = TASK_DEFS.find(x => x.id === id);
+  const task = state.tasks[id];
+  
+  if(task.claimed || task.prog < t.target) return;
+  
+  task.claimed = true;
+  state.balance_micro += t.reward * 1000000;
+  state.total_earned_micro += t.reward * 1000000;
+  
+  updateUI();
+  renderTasks();
+  save();
+  showToast(`Задание выполнено! +${t.reward} ⭐`);
+}
+
+// --- ЕЖЕДНЕВНЫЕ ---
+function renderDaily() {
+  const now = Date.now();
+  const hoursPassed = (now - state.last_daily_claim) / (1000 * 60 * 60);
+  const canClaim = hoursPassed >= 24 || state.last_daily_claim === 0;
+  
+  const btn = document.getElementById("btn-daily");
+  if(canClaim) {
+    btn.disabled = false;
+    btn.textContent = "Забрать награду";
+    btn.classList.add("ready");
+  } else {
+    btn.disabled = true;
+    const hoursLeft = Math.ceil(24 - hoursPassed);
+    btn.textContent = `Ждать ${hoursLeft} ч.`;
+    btn.classList.remove("ready");
   }
-});
+
+  // Сетка
+  const grid = document.getElementById("daily-grid");
+  grid.innerHTML = DAILY_REWARDS.map((rew, i) => {
+    const day = i + 1;
+    const isClaimed = state.daily_streak > i; // Если стрик больше текущего дня, значит забрали
+    const isToday = state.daily_streak === i && canClaim;
+    
+    return `
+      <div class="daily-box ${isClaimed ? 'claimed' : ''} ${isToday ? 'today' : ''}">
+        <div class="daily-day">День ${day}</div>
+        <div class="daily-reward">${rew} ⭐</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function claimDaily() {
+  const now = Date.now();
+  const hoursPassed = (now - state.last_daily_claim) / (1000 * 60 * 60);
+  
+  if(hoursPassed < 24 && state.last_daily_claim !== 0) {
+    showToast("Приходи завтра!");
+    return;
+  }
+
+  const reward = DAILY_REWARDS[state.daily_streak] || DAILY_REWARDS[0];
+  
+  state.balance_micro += reward * 1000000;
+  state.total_earned_micro += reward * 1000000;
+  state.last_daily_claim = now;
+  state.daily_streak = (state.daily_streak + 1) % 7;
+
+  updateUI();
+  renderDaily();
+  save();
+  showToast(`Получено ${reward} ⭐!`);
+}
+
+// --- ПРОФИЛЬ ---
+function renderProfile() {
+  document.getElementById("prof-total-clicks").textContent = state.total_clicks;
+  document.getElementById("prof-total-earned").textContent = fmtStars(state.total_earned_micro);
+  document.getElementById("prof-max-energy").textContent = state.max_energy;
+  
+  const d = new Date(state.start_date);
+  document.getElementById("prof-date").textContent = `${d.getDate()}.${d.getMonth()+1}.${d.getFullYear()}`;
+  
+  // Уровень (1 уровень за каждые 100 звезд)
+  const lvl = Math.floor(state.total_earned_micro / 100000000) + 1;
+  document.getElementById("prof-level").textContent = `Уровень ${lvl}`;
+  }
+
+  // --- ЗАПУСК ---
+function init() {
+  load();
+  
+  // Восстановление оффлайн авто-дохода
+  if(state.upg_auto > 0) {
+    const now = Date.now();
+    const timePassed = now - state.last_auto_tick;
+    if(timePassed > 0) {
+      const incomePerSec = CONFIG.auto.income[state.upg_auto];
+      const microToAdd = Math.floor(incomePerSec * 1000000 * (timePassed / 1000));
+      state.balance_micro += microToAdd;
+      state.total_earned_micro += microToAdd;
+      state.last_auto_tick = now;
+    }
+  }
+
+  updateUI();
+  updateTaskProgress();
+  
+  // Отрисовка стартовых страниц
+  renderShop();
+  renderTasks();
+  renderDaily();
+  renderProfile();
+}
+
+// Запускаем после загрузки DOM
+document.addEventListener("DOMContentLoaded", init);
+
+// Сохраняем при выходе
+window.addEventListener("beforeunload", save);
 </script>
 </body>
 </html>

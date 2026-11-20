@@ -41,26 +41,24 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important;
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 .section-title { font-size: 20px; font-weight: 900; margin: 20px 0 12px; }
 
-/* КЕЙСЫ (УЛУЧШЕННЫЙ ДИЗАЙН) */
+/* ТАБЫ */
+.tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab-btn { flex-shrink: 0; padding: 8px 16px; border-radius: 20px; background: var(--panel); border: 1px solid var(--line); font-size: 13px; font-weight: 700; color: var(--muted); }
+.tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); }
+
+/* КЕЙСЫ */
 .case-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-.case-card { 
-  background: var(--panel); border: 1px solid var(--line); border-radius: 20px; 
-  overflow: hidden; display: flex; flex-direction: column; position: relative;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: 0.2s;
-}
+.case-card { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: 0.2s; }
 .case-card:active { border-color: var(--accent); }
-.case-art { 
-  height: 140px; display: flex; justify-content: center; align-items: center; 
-  position: relative; overflow: hidden; 
-}
-/* Тот самый оранжевый фон со свечением */
+.case-art { height: 140px; display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; }
 .art-orange { background: radial-gradient(circle at 50% 50%, #ff8a1f, #8a3d00); box-shadow: inset 0 0 40px rgba(255, 138, 31, 0.5); }
 .art-blue { background: radial-gradient(circle at 50% 50%, #3b82f6, #1e3a8a); box-shadow: inset 0 0 40px rgba(59, 130, 246, 0.5); }
 .art-purple { background: radial-gradient(circle at 50% 50%, #a855f7, #4c1d95); box-shadow: inset 0 0 40px rgba(168, 85, 247, 0.5); }
 .art-gold { background: radial-gradient(circle at 50% 50%, #fbbf24, #78350f); box-shadow: inset 0 0 40px rgba(251, 191, 36, 0.5); }
 
 .case-art::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, transparent 60%); }
-.case-art .case-img { position: relative; z-index: 2; width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6)); animation: float 3s ease-in-out infinite; }
+.case-art .emoji-art { font-size: 70px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6)); position: relative; z-index: 2; animation: float 3s ease-in-out infinite; }
 @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
 .case-info { padding: 14px; display: flex; flex-direction: column; gap: 6px; flex-grow: 1; }
@@ -85,7 +83,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important;
 .roulette-pointer { position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; background: var(--accent); transform: translateX(-50%); z-index: 10; box-shadow: 0 0 15px var(--accent); }
 .roulette-track { display: flex; gap: 10px; padding: 0 10px; position: absolute; left: 0; will-change: transform; }
 .roulette-item { width: 100px; height: 100px; flex-shrink: 0; background: var(--panel-light); border-radius: 12px; display: flex; justify-content: center; align-items: center; position: relative; border: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
-.roulette-item img { width: 65px; height: 65px; object-fit: contain; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
+.roulette-item .emoji-art { font-size: 50px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
 .roulette-item.win-glow { border-color: var(--gold); box-shadow: 0 0 20px var(--gold), inset 0 0 20px rgba(255,211,106,0.3); }
 .btn-spin { background: linear-gradient(135deg, var(--accent), #e67300); padding: 16px; border-radius: 14px; font-size: 18px; font-weight: 900; width: 100%; margin-bottom: 20px; }
 
@@ -94,8 +92,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important;
 .case-drop-list h3 { font-size: 15px; font-weight: 800; margin-bottom: 12px; color: var(--muted); }
 .drop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .drop-item { background: var(--panel-light); border-radius: 12px; padding: 12px 8px; text-align: center; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center; }
-.drop-img-bg { width: 55px; height: 55px; border-radius: 12px; background: rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; margin-bottom: 8px; }
-.drop-item img { width: 45px; height: 45px; object-fit: contain; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.5)); }
+.drop-item .emoji-art { font-size: 35px; margin-bottom: 6px; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.5)); }
 .drop-item .name { font-size: 11px; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
 .drop-item .price { font-size: 10px; color: var(--gold); font-weight: 800; }
 
@@ -114,17 +111,22 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important;
 .upg-stat-box strong { font-size: 16px; font-weight: 800; }
 .btn-upgrade { background: linear-gradient(135deg, var(--accent), #e67300); padding: 18px; border-radius: 14px; font-size: 18px; font-weight: 900; width: 100%; }
 
+/* КНОПКИ МНОЖИТЕЛИ */
+.upg-multipliers { display: flex; gap: 8px; width: 100%; margin-bottom: 15px; }
+.btn-mult { flex: 1; background: var(--panel-light); border: 1px solid var(--line); padding: 10px; border-radius: 10px; font-weight: 800; font-size: 14px; color: var(--muted); }
+.btn-mult.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
 /* ВЫБОР И ИНВЕНТАРЬ */
 .select-list { display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; margin-top: 15px; padding-right: 5px; }
 .select-btn { display: flex; align-items: center; gap: 12px; background: var(--panel-light); padding: 12px 16px; border-radius: 12px; width: 100%; text-align: left; }
-.select-btn img { width: 35px; height: 35px; object-fit: contain; }
+.select-btn .emoji-art { font-size: 30px; }
 .select-btn .info { display: flex; flex-direction: column; }
 .select-btn .name { font-weight: 800; font-size: 14px; }
 .select-btn .price { font-size: 12px; color: var(--gold); }
 
 .inv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .inv-item { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 8px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.inv-item img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 8px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
+.inv-item .emoji-art { font-size: 40px; margin-bottom: 8px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
 .inv-item .name { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
 .inv-item .price { font-size: 11px; color: var(--gold); margin-bottom: 8px; }
 .btn-sell { background: #2e3348; width: 100%; padding: 6px; border-radius: 8px; font-size: 11px; font-weight: 700; }
@@ -151,6 +153,12 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important;
 </header>
 
 <main id="page-home" class="page active">
+  <div class="tabs" id="case-tabs">
+    <button class="tab-btn active" onclick="filterCases('all', this)">Все</button>
+    <button class="tab-btn" onclick="filterCases('cheap', this)">Стартовые</button>
+    <button class="tab-btn" onclick="filterCases('rare', this)">Редкие</button>
+    <button class="tab-btn" onclick="filterCases('premium', this)">Премиум</button>
+  </div>
   <h2 class="section-title" style="margin-top:0">Кейсы</h2>
   <div class="case-grid" id="cases-grid"></div>
 </main>
@@ -174,6 +182,14 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important;
         <button style="margin-top:6px; font-size:12px; background:var(--panel-light); padding:6px 12px; border-radius:8px; width:100%;" onclick="openSelect('target')">Выбрать</button>
       </div>
     </div>
+    
+    <!-- Кнопки множители -->
+    <div class="upg-multipliers">
+      <button class="btn-mult" onclick="setMultiplier(2, this)">x2</button>
+      <button class="btn-mult" onclick="setMultiplier(4, this)">x4</button>
+      <button class="btn-mult" onclick="setMultiplier(8, this)">x8</button>
+    </div>
+
     <button class="btn-upgrade" id="btn-upgrade" onclick="doUpgrade()">Улучшить</button>
   </div>
 </main>
@@ -224,52 +240,58 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important;
 
 "use strict";
 
-const SAVE_KEY = "foxgrade_v9";
+const SAVE_KEY = "foxgrade_v11";
 
-// ССЫЛКИ НА РЕАЛЬНЫЕ КАРТИНКИ (Имитация TG подарков)
-// Я использую надежный CDN с PNG картинками, чтобы они выглядели 3D и сочно.
+// НАСТОЯЩИЕ ПОДАРКИ (Используем эмодзи, так как они не ломаются)
 const ITEMS = {
-  // Дешевые (Обычные)
-  heart:{id:"heart",name:"Сердце",icon:"https://i.ibb.co/3s6yKqZ/heart.png",price:15},
-  teddy:{id:"teddy",name:"Мишка",icon:"https://i.ibb.co/1Jz3R5b/teddy.png",price:15},
-  gift:{id:"gift",name:"Подарок",icon:"https://i.ibb.co/4Wk4KqZ/gift.png",price:25},
-  rose:{id:"rose",name:"Роза",icon:"https://i.ibb.co/2Kk4KqZ/rose.png",price:25},
-  cake:{id:"cake",name:"Торт",icon:"https://i.ibb.co/5Wk4KqZ/cake.png",price:50},
-  bouquet:{id:"bouquet",name:"Букет",icon:"https://i.ibb.co/9Wk4KqZ/bouquet.png",price:50},
-  rocket:{id:"rocket",name:"Ракета",icon:"https://i.ibb.co/6Wk4KqZ/rocket.png",price:50},
-  champagne:{id:"champagne",name:"Шампанское",icon:"https://i.ibb.co/7Wk4KqZ/champagne.png",price:50},
+  // Звёзды
+  stars1:{id:"stars1",name:"1 Звезда",icon:"⭐",price:1},
+  stars5:{id:"stars5",name:"5 Звёзд",icon:"🌟",price:5},
+  stars10:{id:"stars10",name:"10 Звёзд",icon:"✨",price:10},
+  stars50:{id:"stars50",name:"50 Звёзд",icon:"💫",price:50},
   
-  // Средние (Редкие)
-  trophy:{id:"trophy",name:"Кубок",icon:"https://i.ibb.co/8Wk4KqZ/trophy.png",price:100},
-  ring:{id:"ring",name:"Кольцо",icon:"https://i.ibb.co/9Wk4KqZ/ring.png",price:100},
-  diamond:{id:"diamond",name:"Алмаз",icon:"https://i.ibb.co/1Wk4KqZ/diamond.png",price:100},
-  icecream:{id:"icecream",name:"Мороженое",icon:"https://i.ibb.co/2Wk4KqZ/icecream.png",price:300},
-  ramen:{id:"ramen",name:"Рамен",icon:"https://i.ibb.co/3Wk4KqZ/ramen.png",price:367},
+  // Дешевые
+  heart:{id:"heart",name:"Сердце",icon:"💝",price:15},
+  teddy:{id:"teddy",name:"Мишка",icon:"🧸",price:15},
+  gift:{id:"gift",name:"Подарок",icon:"🎁",price:25},
+  rose:{id:"rose",name:"Роза",icon:"🌹",price:25},
+  cake:{id:"cake",name:"Торт",icon:"🎂",price:50},
+  bouquet:{id:"bouquet",name:"Букет",icon:"💐",price:50},
+  rocket:{id:"rocket",name:"Ракета",icon:"🚀",price:50},
+  champagne:{id:"champagne",name:"Шампанское",icon:"🍾",price:50},
+  
+  // Средние
+  trophy:{id:"trophy",name:"Кубок",icon:"🏆",price:100},
+  ring:{id:"ring",name:"Кольцо",icon:"💍",price:100},
+  diamond:{id:"diamond",name:"Алмаз",icon:"💎",price:100},
+  icecream:{id:"icecream",name:"Мороженое",icon:"🍦",price:300},
+  ramen:{id:"ramen",name:"Рамен",icon:"🍜",price:367},
   
   // Эпические
-  flame:{id:"flame",name:"Chill Flame",icon:"https://i.ibb.co/4Wk4KqZ/flame.png",price:455},
-  statue:{id:"statue",name:"Статуя",icon:"https://i.ibb.co/5Wk4KqZ/statue.png",price:480},
-  mask:{id:"mask",name:"Маска",icon:"https://i.ibb.co/6Wk4KqZ/mask.png",price:843},
-  backpack:{id:"backpack",name:"Рюкзак",icon:"https://i.ibb.co/7Wk4KqZ/backpack.png",price:479},
-  candy:{id:"candy",name:"Конфета",icon:"https://i.ibb.co/8Wk4KqZ/candy.png",price:475},
-  flamingo:{id:"flamingo",name:"Фламинго",icon:"https://i.ibb.co/9Wk4KqZ/flamingo.png",price:450},
+  flame:{id:"flame",name:"Chill Flame",icon:"🔥",price:455},
+  statue:{id:"statue",name:"Статуя",icon:"🗽",price:480},
+  mask:{id:"mask",name:"Маска",icon:"🎭",price:843},
+  backpack:{id:"backpack",name:"Рюкзак",icon:"🎒",price:479},
+  candy:{id:"candy",name:"Конфета",icon:"🍭",price:475},
+  flamingo:{id:"flamingo",name:"Фламинго",icon:"🦩",price:450},
+  sword:{id:"sword",name:"Меч",icon:"⚔️",price:547},
   
-  // НОВЫЕ NFT (С твоих скринов)
-  car:{id:"car",name:"Тачка",icon:"https://i.ibb.co/1Wk4KqZ/car.png",price:5947},
-  bear:{id:"bear",name:"Розовый Мишка",icon:"https://i.ibb.co/2Wk4KqZ/bear.png",price:2965},
-  ring2:{id:"ring2",name:"Золотое Кольцо",icon:"https://i.ibb.co/3Wk4KqZ/ring2.png",price:11278},
-  pipe:{id:"pipe",name:"Трубка",icon:"https://i.ibb.co/4Wk4KqZ/pipe.png",price:3243},
-  helmet:{id:"helmet",name:"Шлем",icon:"https://i.ibb.co/5Wk4KqZ/helmet.png",price:15069},
-  frog:{id:"frog",name:"Фрог",icon:"https://i.ibb.co/6Wk4KqZ/frog.png",price:574231},
-  watch:{id:"watch",name:"Часы",icon:"https://i.ibb.co/7Wk4KqZ/watch.png",price:4730},
-  cat:{id:"cat",name:"Черный Кот",icon:"https://i.ibb.co/8Wk4KqZ/cat.png",price:21954}
+  // Легендарные NFT
+  crown:{id:"crown",name:"Корона",icon:"👑",price:650},
+  dragon:{id:"dragon",name:"Дракон",icon:"🐉",price:1300},
+  crystal:{id:"crystal",name:"Кристалл",icon:"🔮",price:2200},
+  car:{id:"car",name:"Тачка",icon:"🚗",price:5947},
+  bear:{id:"bear",name:"Розовый Мишка",icon:"🐻",price:2965},
+  ring2:{id:"ring2",name:"Золотое Кольцо",icon:"💍",price:11278},
+  helmet:{id:"helmet",name:"Шлем",icon:"🪖",price:15069},
+  frog:{id:"frog",name:"Фрог",icon:"🐸",price:574231}
 };
 
 const CASES = [
-  { id:"start", name:"Стартовый", price:0, art:"gift", style:"art-orange", items:["heart","teddy","gift","rose"] },
-  { id:"sale", name:"Сдача", price:39, art:"diamond", style:"art-blue", items:["cake","bouquet","rocket","champagne"] },
-  { id:"mid", name:"Мелочь", price:150, art:"ring", style:"art-purple", items:["trophy","ring","diamond","icecream"] },
-  { id:"nft", name:"NFT Кейс", price:500, art:"flamingo", style:"art-gold", items:["car","bear","ring2","helmet","frog"] }
+  { id:"start", name:"Стартовый", price:0, art:"gift", style:"art-orange", category: "cheap", items:["stars1","stars5","heart","teddy","gift"] },
+  { id:"sale", name:"Сдача", price:39, art:"diamond", style:"art-blue", category: "cheap", items:["stars5","stars10","cake","rocket","champagne"] },
+  { id:"mid", name:"Мелочь", price:150, art:"ring", style:"art-purple", category: "rare", items:["stars10","stars50","trophy","ring","diamond","icecream"] },
+  { id:"nft", name:"NFT Кейс", price:500, art:"flamingo", style:"art-gold", category: "premium", items:["stars50","car","bear","ring2","helmet","frog"] }
 ];
 
 let game = { balance: 1500, inventory: [] };
@@ -278,6 +300,7 @@ let isSpinning = false;
 let upgSource = null;
 let upgTarget = null;
 let isUpgrading = false;
+let currentCategory = "all";
 
 function fmt(n) { return Math.floor(n).toLocaleString("ru-RU"); }
 function showToast(msg) {
@@ -286,10 +309,7 @@ function showToast(msg) {
   t.textContent = msg; t.classList.add("show");
   clearTimeout(t.timer); t.timer = setTimeout(() => t.classList.remove("show"), 2500);
 }
-function updateBalance() { 
-  const el = document.getElementById("ui-balance");
-  if(el) el.textContent = fmt(game.balance); 
-}
+function updateBalance() { const el = document.getElementById("ui-balance"); if(el) el.textContent = fmt(game.balance); }
 function save() { localStorage.setItem(SAVE_KEY, JSON.stringify(game)); }
 function load() {
   try { const s = localStorage.getItem(SAVE_KEY); if(s) game = {...game, ...JSON.parse(s)}; } catch(e){}
@@ -305,14 +325,23 @@ function goPage(name) {
   window.scrollTo(0,0);
 }
 
+function filterCases(category, btn) {
+  currentCategory = category;
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderCases();
+}
+
 function renderCases() {
   const grid = document.getElementById("cases-grid");
   if(!grid) return;
 
-  grid.innerHTML = CASES.map(c => `
+  const filtered = CASES.filter(c => currentCategory === "all" || c.category === currentCategory);
+
+  grid.innerHTML = filtered.map(c => `
     <div class="case-card" onclick="openCaseScreen('${c.id}')">
       <div class="case-art ${c.style}">
-        <img src="${ITEMS[c.art].icon}" class="case-img" alt="case">
+        <div class="emoji-art">${ITEMS[c.art].icon}</div>
       </div>
       <div class="case-info">
         <div class="case-name">${c.name}</div>
@@ -341,7 +370,7 @@ function openCaseScreen(id) {
     const item = ITEMS[itemId];
     return `
       <div class="drop-item">
-        <div class="drop-img-bg"><img src="${item.icon}"></div>
+        <div class="emoji-art">${item.icon}</div>
         <div class="name">${item.name}</div>
         <div class="price">⭐ ${fmt(item.price)}</div>
       </div>
@@ -373,7 +402,7 @@ function spinCase() {
 
   for(let i=0; i<totalItems; i++) {
     const item = i === winIndex ? winItem : ITEMS[currentCase.items[Math.floor(Math.random() * currentCase.items.length)]];
-    trackHtml += `<div class="roulette-item" id="cs-item-${i}"><img src="${item.icon}"></div>`;
+    trackHtml += `<div class="roulette-item" id="cs-item-${i}"><div class="emoji-art">${item.icon}</div></div>`;
   }
   track.innerHTML = trackHtml;
 
@@ -392,7 +421,15 @@ function spinCase() {
     const wonEl = document.getElementById(`cs-item-${winIndex}`);
     if(wonEl) wonEl.classList.add("win-glow");
     btn.textContent = "Забрать"; btn.disabled = false; isSpinning = false;
-    game.inventory.push({ uid: Date.now(), ...winItem });
+    
+    // Если выпали звёзды, добавляем их к балансу сразу
+    if(winItem.id.includes("stars")) {
+      game.balance += winItem.price;
+      updateBalance();
+    } else {
+      game.inventory.push({ uid: Date.now(), ...winItem });
+    }
+    
     save();
     btn.onclick = () => { closeCaseScreen(); btn.onclick = spinCase; };
   }, 4100);
@@ -408,7 +445,7 @@ function spinCase() {
 
   grid.innerHTML = game.inventory.map(inv => `
     <div class="inv-item">
-      <img src="${inv.icon}">
+      <div class="emoji-art">${inv.icon}</div>
       <div class="name">${inv.name}</div>
       <div class="price">⭐ ${fmt(inv.price)}</div>
       <button class="btn-sell" onclick="sellItem(${inv.uid})">Продать</button>
@@ -436,7 +473,7 @@ function openSelect(type) {
     if(!game.inventory.length) { showToast("Инвентарь пуст!"); return; }
     html = game.inventory.map(inv => `
       <button class="select-btn" onclick="pickSource(${inv.uid})">
-        <img src="${inv.icon}">
+        <div class="emoji-art">${inv.icon}</div>
         <div class="info"><div class="name">${inv.name}</div><div class="price">⭐ ${fmt(inv.price)}</div></div>
       </button>
     `).join("");
@@ -444,7 +481,7 @@ function openSelect(type) {
     const sortedItems = Object.values(ITEMS).sort((a, b) => a.price - b.price);
     html = sortedItems.map(item => `
       <button class="select-btn" onclick="pickTarget('${item.id}')">
-        <img src="${item.icon}">
+        <div class="emoji-art">${item.icon}</div>
         <div class="info"><div class="name">${item.name}</div><div class="price">⭐ ${fmt(item.price)}</div></div>
       </button>
     `).join("");
@@ -467,6 +504,29 @@ function pickTarget(id) {
   updateChanceAndWheel();
 }
 
+// Функция для кнопок x2, x4, x8
+function setMultiplier(mult, btn) {
+  document.querySelectorAll(".btn-mult").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+
+  if(!upgSource) {
+    showToast("Сначала выбери свой предмет!");
+    return;
+  }
+
+  // Ищем ближайшую цель по цене
+  const targetPrice = upgSource.price * mult;
+  const sortedItems = Object.values(ITEMS).sort((a, b) => a.price - b.price);
+  
+  // Находим первый предмет, который дороже или равен нужной цене
+  let found = sortedItems.find(i => i.price >= targetPrice);
+  if(!found) found = sortedItems[sortedItems.length - 1]; // Если не нашли, берем самый дорогой
+
+  upgTarget = found;
+  document.getElementById("upg-target-name").textContent = upgTarget.name;
+  updateChanceAndWheel();
+}
+
 function updateChanceAndWheel() {
   const circle = document.getElementById("prob-circle");
   const text = document.getElementById("prob-text");
@@ -480,7 +540,6 @@ function updateChanceAndWheel() {
   const raw = (upgSource.price / upgTarget.price) * 100;
   const chance = Math.max(1, Math.min(95, raw));
   
-  // Отрисовка секторов: зеленый (шанс) и красный (провал)
   circle.style.background = `conic-gradient(from -90deg, var(--success) 0% ${chance}%, var(--danger) ${chance}% 100%)`;
   text.textContent = Math.floor(chance) + "%";
 }

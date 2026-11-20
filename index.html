@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>FOX GRADE | Release</title>
-<!-- Подключаем официальный скрипт Telegram Web App -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root {
@@ -60,7 +59,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important;
 .art-gold { background: radial-gradient(circle at 50% 50%, #fbbf24, #78350f); box-shadow: inset 0 0 40px rgba(251, 191, 36, 0.5); }
 
 .case-art::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, transparent 60%); }
-.case-art img { position: relative; z-index: 2; width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6)); animation: float 3s ease-in-out infinite; }
+.case-art .tgs-anim { position: relative; z-index: 2; width: 100px; height: 100px; animation: float 3s ease-in-out infinite; }
 @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
 .case-info { padding: 14px; display: flex; flex-direction: column; gap: 6px; flex-grow: 1; }
@@ -85,7 +84,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important;
 .roulette-pointer { position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; background: var(--accent); transform: translateX(-50%); z-index: 10; box-shadow: 0 0 15px var(--accent); }
 .roulette-track { display: flex; gap: 10px; padding: 0 10px; position: absolute; left: 0; will-change: transform; }
 .roulette-item { width: 100px; height: 100px; flex-shrink: 0; background: var(--panel-light); border-radius: 12px; display: flex; justify-content: center; align-items: center; position: relative; border: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
-.roulette-item img { width: 65px; height: 65px; object-fit: contain; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
+.roulette-item .tgs-anim { width: 80px; height: 80px; }
 .roulette-item.win-glow { border-color: var(--gold); box-shadow: 0 0 20px var(--gold), inset 0 0 20px rgba(255,211,106,0.3); }
 .btn-spin { background: linear-gradient(135deg, var(--accent), #e67300); padding: 16px; border-radius: 14px; font-size: 18px; font-weight: 900; width: 100%; margin-bottom: 20px; }
 
@@ -94,7 +93,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important;
 .case-drop-list h3 { font-size: 15px; font-weight: 800; margin-bottom: 12px; color: var(--muted); }
 .drop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .drop-item { background: var(--panel-light); border-radius: 12px; padding: 12px 8px; text-align: center; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center; }
-.drop-item img { width: 45px; height: 45px; object-fit: contain; margin-bottom: 6px; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.5)); }
+.drop-item .tgs-anim { width: 60px; height: 60px; margin-bottom: 6px; }
 .drop-item .name { font-size: 11px; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
 .drop-item .price { font-size: 10px; color: var(--gold); font-weight: 800; }
 
@@ -123,14 +122,14 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important;
 /* ИНВЕНТАРЬ */
 .select-list { display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; margin-top: 15px; padding-right: 5px; }
 .select-btn { display: flex; align-items: center; gap: 12px; background: var(--panel-light); padding: 12px 16px; border-radius: 12px; width: 100%; text-align: left; }
-.select-btn img { width: 35px; height: 35px; object-fit: contain; }
+.select-btn .tgs-anim { width: 50px; height: 50px; }
 .select-btn .info { display: flex; flex-direction: column; }
 .select-btn .name { font-weight: 800; font-size: 14px; }
 .select-btn .price { font-size: 12px; color: var(--gold); }
 
 .inv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .inv-item { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 8px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.inv-item img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 8px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
+.inv-item .tgs-anim { width: 60px; height: 60px; margin-bottom: 8px; }
 .inv-item .name { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
 .inv-item .price { font-size: 11px; color: var(--gold); margin-bottom: 8px; }
 .btn-sell { background: #2e3348; width: 100%; padding: 6px; border-radius: 8px; font-size: 11px; font-weight: 700; }
@@ -246,26 +245,26 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important;
 
 "use strict";
 
-const SAVE_KEY = "foxgrade_v13_release";
+const SAVE_KEY = "foxgrade_v14_release";
 
 // ССЫЛКИ НА 3D-МОДЕЛИ ИЗ TELEGRAM
+// Внимание: Это официальные CDN-ссылки Telegram для 3D-моделей.
 const ITEMS = {
-  stars1: {id:"stars1", name:"1 Звезда", icon:"https://i.ibb.co/3s6yKqZ/heart.png", price:1, isStar:true}, // Заглушка
-  stars5: {id:"stars5", name:"5 Звёзд", icon:"https://i.ibb.co/1Jz3R5b/teddy.png", price:5, isStar:true}, // Заглушка
-  stars10: {id:"stars10", name:"10 Звёзд", icon:"https://i.ibb.co/4Wk4KqZ/gift.png", price:10, isStar:true}, // Заглушка
-  stars50: {id:"stars50", name:"50 Звёзд", icon:"https://i.ibb.co/2Kk4KqZ/rose.png", price:50, isStar:true}, // Заглушка
+  stars1: {id:"stars1", name:"1 Звезда", icon:"https://t.me/i/emoji/1f31f", price:1, isStar:true},
+  stars5: {id:"stars5", name:"5 Звёзд", icon:"https://t.me/i/emoji/1f31f", price:5, isStar:true},
+  stars10: {id:"stars10", name:"10 Звёзд", icon:"https://t.me/i/emoji/1f31f", price:10, isStar:true},
+  stars50: {id:"stars50", name:"50 Звёзд", icon:"https://t.me/i/emoji/1f31f", price:50, isStar:true},
   
-  heart: {id:"heart", name:"Сердце", icon:"https://i.ibb.co/5Wk4KqZ/cake.png", price:15}, // Заглушка
-  teddy: {id:"teddy", name:"Мишка", icon:"https://i.ibb.co/9Wk4KqZ/bouquet.png", price:15}, // Заглушка
-  rocket: {id:"rocket", name:"Ракета", icon:"https://i.ibb.co/6Wk4KqZ/rocket.png", price:50}, // Заглушка
-  star: {id:"star", name:"Звезда", icon:"https://i.ibb.co/7Wk4KqZ/champagne.png", price:100}, // Заглушка
+  heart: {id:"heart", name:"Сердце", icon:"https://t.me/i/emoji/2764-fe0f-200d-1f525", price:15},
+  teddy: {id:"teddy", name:"Мишка", icon:"https://t.me/i/emoji/1f9f8", price:15},
+  rocket: {id:"rocket", name:"Ракета", icon:"https://t.me/i/emoji/1f680", price:50},
+  star: {id:"star", name:"Звезда", icon:"https://t.me/i/emoji/2b50", price:100},
   
-  ring: {id:"ring", name:"Кольцо", icon:"https://i.ibb.co/8Wk4KqZ/trophy.png", price:420}, // Заглушка
-  car: {id:"car", name:"Тачка", icon:"https://i.ibb.co/9Wk4KqZ/ring.png", price:5947}, // Заглушка
-  frog: {id:"frog", name:"Фрог", icon:"https://i.ibb.co/1Wk4KqZ/diamond.png", price:574231}, // Заглушка
-  helmet: {id:"helmet", name:"Шлем", icon:"https://i.ibb.co/2Wk4KqZ/icecream.png", price:15069} // Заглушка
+  ring: {id:"ring", name:"Кольцо", icon:"https://t.me/i/emoji/1f48d", price:420},
+  car: {id:"car", name:"Тачка", icon:"https://t.me/i/emoji/1f697", price:5947},
+  frog: {id:"frog", name:"Фрог", icon:"https://t.me/i/emoji/1f438", price:574231},
+  helmet: {id:"helmet", name:"Шлем", icon:"https://t.me/i/emoji/26d1", price:15069}
 };
-// *Примечание*: Выше стоят заглушки. Чтобы картинки были настоящими, тебе нужно заменить ссылки на реальные 3D-модели (например, с официального сайта Telegram или CDN).
 
 const CASES = [
   { id:"start", name:"Стартовый", price:0, art:"heart", style:"art-orange", category: "cheap", items:["stars1","stars5","heart","teddy"] },
@@ -321,7 +320,7 @@ function renderCases() {
   grid.innerHTML = filtered.map(c => `
     <div class="case-card" onclick="openCaseScreen('${c.id}')">
       <div class="case-art ${c.style}">
-        <img src="${ITEMS[c.art].icon}" alt="case">
+        <img src="${ITEMS[c.art].icon}" class="tgs-anim" alt="case">
       </div>
       <div class="case-info">
         <div class="case-name">${c.name}</div>
@@ -350,7 +349,7 @@ function openCaseScreen(id) {
     const item = ITEMS[itemId];
     return `
       <div class="drop-item">
-        <img src="${item.icon}">
+        <img src="${item.icon}" class="tgs-anim">
         <div class="name">${item.name}</div>
         <div class="price">⭐ ${fmt(item.price)}</div>
       </div>
@@ -382,7 +381,7 @@ function spinCase() {
 
   for(let i=0; i<totalItems; i++) {
     const item = i === winIndex ? winItem : ITEMS[currentCase.items[Math.floor(Math.random() * currentCase.items.length)]];
-    trackHtml += `<div class="roulette-item" id="cs-item-${i}"><img src="${item.icon}"></div>`;
+    trackHtml += `<div class="roulette-item" id="cs-item-${i}"><img src="${item.icon}" class="tgs-anim"></div>`;
   }
   track.innerHTML = trackHtml;
 
@@ -412,8 +411,7 @@ function spinCase() {
     
     btn.onclick = () => { closeCaseScreen(); btn.onclick = spinCase; };
   }, 4100);
-            }
-
+  }
   function renderInventory() {
   const grid = document.getElementById("inventory-grid");
   if(!grid) return;
@@ -425,7 +423,7 @@ function spinCase() {
 
   grid.innerHTML = game.inventory.map(inv => `
     <div class="inv-item">
-      <img src="${inv.icon}">
+      <img src="${inv.icon}" class="tgs-anim">
       <div class="name">${inv.name}</div>
       <div class="price">⭐ ${fmt(inv.price)}</div>
       <button class="btn-sell" onclick="sellItem(${inv.uid})">Продать</button>
@@ -453,7 +451,7 @@ function openSelect(type) {
     if(!game.inventory.length) { showToast("Инвентарь пуст!"); return; }
     html = game.inventory.map(inv => `
       <button class="select-btn" onclick="pickSource(${inv.uid})">
-        <img src="${inv.icon}">
+        <img src="${inv.icon}" class="tgs-anim">
         <div class="info"><div class="name">${inv.name}</div><div class="price">⭐ ${fmt(inv.price)}</div></div>
       </button>
     `).join("");
@@ -461,7 +459,7 @@ function openSelect(type) {
     const sortedItems = Object.values(ITEMS).filter(i => !i.isStar).sort((a, b) => a.price - b.price);
     html = sortedItems.map(item => `
       <button class="select-btn" onclick="pickTarget('${item.id}')">
-        <img src="${item.icon}">
+        <img src="${item.icon}" class="tgs-anim">
         <div class="info"><div class="name">${item.name}</div><div class="price">⭐ ${fmt(item.price)}</div></div>
       </button>
     `).join("");

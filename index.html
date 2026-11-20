@@ -1,212 +1,4 @@
-const express = require('express');
-const cors = require('cors');
-const crypto = require('crypto');
-const app = express();
-
-app.use(express.json());
-app.use(cors()); // Для бета-теста разрешаем все домены. В проде укажи свой GitHub Pages URL.
-
-const BOT_TOKEN = process.env.BOT_TOKEN || "ТВОЙ_ТОКЕН_БОТА";
-const ADMIN_ID = process.env.ADMIN_TELEGRAM_ID || "ТВОЙ_ТЕЛЕГРАМ_ID";
-
-// Имитация базы данных (для беты в памяти). Для продакшена используй SQLite/Postgres.
-const db = {
-  users: {}, // { tgId: { balance_micro, clicks, upgrades, ... } }
-  withdrawRequests: [],
-  online: {} // { tgId: timestamp }
-};
-
-// --- БЕЗОПАСНОСТЬ ---
-// Проверка подлинности данных от Telegram WebApp
-function validateTelegramData(initData) {
-  if (!initData || !BOT_TOKEN) return null;
-  try {
-    const params = new URLSearchParams(initData);
-    const hash = params.get('hash');
-    if (!hash) return null;
-    params.delete('hash');
-    
-    const dataCheckString = Array.from(params.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([k, v]) => `${k}=${v}`).join('\n');
-    
-    const secretKey = crypto.createHmac('sha256', 'WebAppData').update(BOT_TOKEN).digest();
-    const calculatedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
-    
-    if (calculatedHash !== hash) return null;
-    return JSON.parse(params.get('user') || 'null');
-  } catch (e) { return null; }
-}
-
-function auth(req, res, next) {
-  const initData = req.headers['authorization']?.replace('tma ', '');
-  const user = validateTelegramData(initData);
-  
-  if (!user) {
-    // Для локальной разработки без Telegram (чтобы ты мог тестить в браузере)
-    if (process.env.NODE_ENV === 'development') {
-      req.user = { id: 12345678, first_name: "TestUser", username: "test" };
-      return next();
-    }
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  req.user = user;
-  next();
-}
-
-function adminAuth(req, res, next) {
-  if (String(req.user.id) !== String(ADMIN_ID)) {
-    return res.status(403).json({ error: "Access denied" });
-  }
-  next();
-}
-
-// --- ИНИЦИАЛИЗАЦИЯ ИГРОКА ---
-app.post('/api/auth', auth, (req, res) => {
-  const uid = req.user.id;
-  const now = Date.now();
-
-  if (!db.users[uid]) {
-    // НОВЫЙ ИГРОК
-    db.users[uid] = {
-      id: uid,
-      name: req.user.first_name || "Игрок",
-      username: req.user.username || "",
-      photo: req.user.photo_url || "",
-      balance_micro: 0,
-      total_clicks: 0,
-      total_earned_micro: 0,
-      energy: 1000,
-      max_energy: 1000,
-      upgrades: { click: 0, regen: 0, max_energy: 0, crit: 0, multiplier: 0, auto: 0, combo: 0 },
-      daily_streak: 0,
-      last_daily: 0,
-      last_update: now,
-      start_date: now
-    };
-  }
-
-  db.online[uid] = now;
-
-  // Восстановление энергии оффлайн
-  const user = db.users[uid];
-  const timePassed = now - user.last_update;
-  if (timePassed > 0 && user.energy < user.max_energy) {
-    const regenMs = [3000, 2500, 2000, 1500, 1000, 500][user.upgrades.regen] || 3000;
-    const regenAmount = Math.floor(timePassed / regenMs);
-    user.energy = Math.min(user.max_energy, user.energy + regenAmount);
-    user.last_update = now;
-  }
-
-  res.json({ success: true, user });
-});
-
-// --- ГЛАВНЫЕ ДЕЙСТВИЯ ---
-app.post('/api/tap', auth, (req, res) => {
-  const user = db.users[req.user.id];
-  if (!user) return res.status(404).json({ error: "Not found" });
-  
-  if (user.energy < 1) return res.status(400).json({ error: "No energy" });
-
-  user.energy -= 1;
-  user.total_clicks += 1;
-  
-  const base = [0.001, 0.002, 0.003, 0.005, 0.008, 0.012, 0.020, 0.035, 0.060, 0.100][user.upgrades.click] || 0.001;
-  const mult = [1, 1.2, 1.5, 2][user.upgrades.multiplier] || 1;
-  let reward = base * mult;
-
-  // Крит
-  const critChance = [0, 5, 10, 20][user.upgrades.crit] || 0;
-  if (Math.random() * 100 < critChance) reward *= 2;
-
-  const micro = Math.floor(reward * 1000000);
-  user.balance_micro += micro;
-  user.total_earned_micro += micro;
-  user.last_update = Date.now();
-  db.online[req.user.id] = Date.now();
-
-  res.json({ balance_micro: user.balance_micro, energy: user.energy });
-});
-
-// --- ОНЛАЙН ---
-app.get('/api/online', (req, res) => {
-  const now = Date.now();
-  const activeUsers = Object.keys(db.online).filter(uid => now - db.online[uid] < 60000); // Активен, если был < 60 сек назад
-  res.json({ online: activeUsers.length });
-});
-
-// --- ВЫВОД ---
-app.post('/api/withdraw', auth, (req, res) => {
-  const user = db.users[req.user.id];
-  const { amount_micro } = req.body;
-  
-  if (!amount_micro || amount_micro < 1000000) return res.status(400).json({ error: "Min 1.000" });
-  if (user.balance_micro < amount_micro) return res.status(400).json({ error: "Not enough balance" });
-
-  // Заморозка
-  user.balance_micro -= amount_micro;
-  
-  const reqId = "#" + Math.floor(1000 + Math.random() * 9000);
-  const request = {
-    id: reqId,
-    userId: user.id,
-    username: user.username || user.name,
-    amount_micro,
-    status: 'pending',
-    date: Date.now()
-  };
-  
-  db.withdrawRequests.push(request);
-
-  // Уведомление админу
-  if (BOT_TOKEN && ADMIN_ID) {
-    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: ADMIN_ID,
-        text: `🔔 ЗАЯВКА НА ВЫВОД\nИгрок: @${user.username}\nСумма: ${amount_micro/1000000} ⭐\nID: ${reqId}`
-      })
-    }).catch(console.error);
-  }
-
-  res.json({ success: true, request });
-});
-
-app.get('/api/withdraw/history', auth, (req, res) => {
-  const history = db.withdrawRequests.filter(r => r.userId === req.user.id).reverse();
-  res.json(history);
-});
-
-// --- АДМИН ПАНЕЛЬ ---
-app.get('/api/admin/requests', auth, adminAuth, (req, res) => {
-  res.json(db.withdrawRequests);
-});
-
-app.post('/api/admin/withdraw/:id', auth, adminAuth, (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body; // 'approved' | 'rejected' | 'completed'
-  
-  const request = db.withdrawRequests.find(r => r.id === id);
-  if (!request) return res.status(404).json({ error: "Not found" });
-
-  if (request.status !== 'pending') return res.status(400).json({ error: "Already processed" });
-
-  request.status = status;
-
-  // Если отклонили — возвращаем баланс
-  if (status === 'rejected') {
-    const user = db.users[request.userId];
-    if (user) user.balance_micro += request.amount_micro;
-  }
-
-  res.json({ success: true });
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`AURIX Server on port ${PORT}`));
-
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -252,7 +44,6 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
 .tap-title { font-size: 32px; font-weight: 900; letter-spacing: 2px; color: #fff; text-shadow: 0 0 20px var(--accent); margin-bottom: 4px; }
 .tap-subtitle { font-size: 14px; font-weight: 700; color: var(--muted); letter-spacing: 4px; }
 .tap-star { font-size: 40px; margin-top: 8px; filter: drop-shadow(0 0 15px var(--gold)); }
-.hint-text { margin-top: 25px; font-size: 13px; color: var(--muted); text-align: center; padding: 0 20px; }
 
 /* КАРТОЧКИ */
 .list-container { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
@@ -276,7 +67,7 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
 .nav-btn .icon { font-size: 20px; }
 .nav-btn.active { color: var(--accent); text-shadow: 0 0 10px var(--accent-glow); }
 
-/* ЧАСТИЦЫ И ЭФФЕКТЫ */
+/* ЧАСТИЦЫ */
 .particle { position: absolute; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; pointer-events: none; animation: particleAnim 0.6s ease-out forwards; z-index: 100; }
 @keyframes particleAnim { 0% { opacity: 1; transform: translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); } }
 .floating-text { position: absolute; color: var(--gold); font-weight: 900; font-size: 20px; pointer-events: none; animation: floatUp 0.8s ease-out forwards; text-shadow: 0 0 10px var(--gold); z-index: 100; }
@@ -295,7 +86,7 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
   </div>
   <div class="balance-header">
     <div class="val" id="ui-balance">0.000</div>
-    <div class="online-badge">🟢 <span id="ui-online">0</span> онлайн</div>
+    <div class="online-badge">🟢 <span id="ui-online">1</span> онлайн</div>
   </div>
 </header>
 
@@ -310,7 +101,6 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
       <div class="tap-subtitle">ТАПАЙ</div>
       <div class="tap-star">⭐</div>
     </div>
-    <div class="hint-text" id="hint-text">Бета-тест V1.0</div>
   </div>
 </main>
 
@@ -355,111 +145,84 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
 <div class="toast" id="toast"></div>
 
 <script>
-const API_URL = "https://ТВОЙ_СЕРВЕР.onrender.com"; // Сюда ссылку из Render!
-  </script>
+// ВНИМАНИЕ: Это версия работает на LocalStorage (без сервера).
+// Чтобы игра работала у тебя сейчас, мы используем локальное сохранение.
 
-let tg = window.Telegram?.WebApp;
-let initData = "";
-let userState = null;
+const SAVE_KEY = "aurix_beta_local";
+let state = {
+  balance_micro: 0, total_clicks: 0, total_earned_micro: 0,
+  energy: 1000, max_energy: 1000,
+  upg_click: 0, upg_regen: 0, upg_max_energy: 0, upg_crit: 0, upg_multiplier: 0, upg_auto: 0, upg_combo: 0
+};
 
-if (tg) {
+function fmt(micro) { return (micro / 1000000).toFixed(3); }
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(t.timer); t.timer = setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+function goPage(id) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById("page-" + id).classList.add("active");
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.page === id));
+  if(id === 'shop') renderShop();
+  if(id === 'tasks') renderTasks();
+  if(id === 'daily') renderDaily();
+}
+
+function updateUI() {
+  document.getElementById("ui-balance").textContent = fmt(state.balance_micro);
+  document.getElementById("ui-clicks").textContent = state.total_clicks;
+  document.getElementById("ui-withdraw-balance").textContent = fmt(state.balance_micro);
+  document.getElementById("prof-clicks").textContent = state.total_clicks;
+  document.getElementById("prof-earned").textContent = fmt(state.total_earned_micro);
+  
+  // Восстановление энергии (визуально)
+  const fill = (state.energy / state.max_energy) * 100;
+  // Если у тебя есть полоска энергии в HTML, раскомментируй:
+  // document.getElementById("energy-fill").style.width = fill + "%";
+}
+
+// Инициализация Telegram
+if (window.Telegram?.WebApp) {
+  const tg = window.Telegram.WebApp;
   tg.ready();
   tg.expand();
-  initData = tg.initData;
   const u = tg.initDataUnsafe?.user;
   if (u) {
     document.getElementById("user-name").textContent = u.first_name;
+    document.getElementById("prof-name").textContent = u.first_name;
     if (u.photo_url) {
       document.getElementById("user-avatar").innerHTML = `<img src="${u.photo_url}">`;
       document.getElementById("prof-avatar").innerHTML = `<img src="${u.photo_url}">`;
     }
   }
 } else {
-  // Если открыто в обычном браузере для теста
   document.getElementById("user-name").textContent = "Web Tester";
-  initData = "dev_mode"; 
+  document.getElementById("prof-name").textContent = "Web Tester";
 }
 
-// --- API ЗАПРОСЫ ---
-async function api(path, method = 'GET', body = null) {
-  const headers = { 'Authorization': `tma ${initData}` };
-  if (body) headers['Content-Type'] = 'application/json';
+// Загрузка
+try {
+  const saved = localStorage.getItem(SAVE_KEY);
+  if (saved) state = { ...state, ...JSON.parse(saved) };
+} catch(e){}
+
+document.getElementById("tap-btn").addEventListener("click", (e) => {
+  if (state.energy < 1) { showToast("Нет энергии!"); return; }
+  state.energy -= 1;
+  state.total_clicks += 1;
+  state.balance_micro += 1000; // 0.001
+  state.total_earned_micro += 1000;
   
-  try {
-    const res = await fetch(API_URL + path, { method, headers, body: body ? JSON.stringify(body) : null });
-    if (!res.ok) throw new Error(await res.text());
-    return await res.json();
-  } catch (e) {
-    showToast("Ошибка сети сервера");
-    console.error(e);
-    return null;
-  }
-}
-
-// --- ИНИЦИАЛИЗАЦИЯ ---
-async function initGame() {
-  const data = await api('/api/auth', 'POST');
-  if (data) {
-    userState = data.user;
-    updateUI();
-    renderShop();
-    renderTasks();
-    renderDaily();
-    fetchOnline();
-  }
-}
-
-function updateUI() {
-  if (!userState) return;
-  document.getElementById("ui-balance").textContent = (userState.balance_micro / 1000000).toFixed(3);
-  document.getElementById("ui-withdraw-balance").textContent = (userState.balance_micro / 1000000).toFixed(3);
-  document.getElementById("ui-clicks").textContent = userState.total_clicks;
-  document.getElementById("ui-income").textContent = "+" + (0.001 * (1 + userState.upgrades.click * 0.5)).toFixed(3); // Упрощенно
-  document.getElementById("user-level").textContent = `Уровень ${Math.floor(userState.total_earned_micro / 10000000) + 1}`;
-  
-  document.getElementById("prof-name").textContent = userState.name;
-  document.getElementById("prof-clicks").textContent = userState.total_clicks;
-  document.getElementById("prof-earned").textContent = (userState.total_earned_micro / 1000000).toFixed(3);
-}
-
-async function fetchOnline() {
-  const data = await api('/api/online');
-  if (data) document.getElementById("ui-online").textContent = data.online;
-}
-setInterval(fetchOnline, 15000);
-
-// --- КЛИК ---
-document.getElementById("tap-btn").addEventListener("click", async (e) => {
-  if (userState.energy < 1) { showToast("Нет энергии!"); return; }
-  
-  // Оптимистичное обновление (чтобы не лагало)
-  userState.energy -= 1;
-  const reward = 0.001; // Визуально
   createParticles(e.clientX, e.clientY);
-  createFloatingText(e.clientX, e.clientY, reward);
-
-  // Отправка на сервер
-  const res = await api('/api/tap', 'POST');
-  if (res) {
-    userState.balance_micro = res.balance_micro;
-    userState.energy = res.energy;
-    updateUI();
-  }
+  createFloatingText(e.clientX, e.clientY, 0.001);
+  updateUI();
+  localStorage.setItem(SAVE_KEY, JSON.stringify(state));
 });
 
-function goPage(id) {
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-  document.getElementById("page-" + id).classList.add("active");
-  document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.page === id));
-}
-
-function showToast(msg) {
-  const t = document.getElementById("toast");
-  t.textContent = msg; t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2500);
-}
-
-// Визуал
 function createParticles(x, y) {
   for(let i=0; i<5; i++) {
     const p = document.createElement("div");
@@ -482,26 +245,15 @@ function createFloatingText(x, y, amount) {
   setTimeout(() => el.remove(), 800);
 }
 
-// Заглушки для магазина и заданий (для беты)
-function renderShop() { document.getElementById("shop-list").innerHTML = "<div class='card'>Улучшения загружаются...</div>"; }
-function renderTasks() { document.getElementById("tasks-list").innerHTML = "<div class='card'>Задания загружаются...</div>"; }
-function renderDaily() { document.getElementById("daily-list").innerHTML = "<div class='card'>Награды загружаются...</div>"; }
+function renderShop() { document.getElementById("shop-list").innerHTML = "<div class='card'>Улучшения появятся здесь</div>"; }
+function renderTasks() { document.getElementById("tasks-list").innerHTML = "<div class='card'>Задания появятся здесь</div>"; }
+function renderDaily() { document.getElementById("daily-list").innerHTML = "<div class='card'>Награды появятся здесь</div>"; }
 
-// Вывод
-async function createWithdrawRequest() {
-  const val = parseFloat(document.getElementById("withdraw-amount").value);
-  if (!val || val < 1) return showToast("Минимум 1.000 ⭐");
-  
-  const res = await api('/api/withdraw', 'POST', { amount_micro: Math.floor(val * 1000000) });
-  if (res && res.success) {
-    showToast("Заявка создана!");
-    userState.balance_micro -= Math.floor(val * 1000000);
-    updateUI();
-    document.getElementById("withdraw-amount").value = "";
-  } else {
-    showToast(res?.error || "Ошибка");
-  }
+function createWithdrawRequest() {
+  showToast("Для вывода нужен сервер!");
 }
 
-// Запуск
-initGame();
+updateUI();
+</script>
+</body>
+</html>

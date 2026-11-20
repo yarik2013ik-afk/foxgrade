@@ -4,8 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>FOX GRADE | Release</title>
+<!-- Подключаем официальный скрипт Telegram Web App -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-/* ========== ПЕРЕМЕННЫЕ ========== */
 :root {
   --bg: #0b0d14;
   --panel: #161922;
@@ -26,7 +27,7 @@ button { border: 0; color: white; font: inherit; cursor: pointer; outline: none;
 button:active { transform: scale(0.96); }
 button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
 
-/* ========== ШАПКА ========== */
+/* ШАПКА */
 .topbar { height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; position: sticky; top: 0; z-index: 50; background: rgba(11, 13, 20, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05); }
 .logo { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
 .logo .fox { color: var(--accent); text-shadow: 0 0 15px var(--accent-glow); }
@@ -36,19 +37,19 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important;
 .star { color: var(--gold); font-size: 16px; }
 .topup { background: linear-gradient(135deg, #7b61ff, #5c45eb); border-radius: 20px; padding: 9px 14px; font-weight: 800; font-size: 13px; }
 
-/* ========== СТРАНИЦЫ ========== */
+/* СТРАНИЦЫ */
 .page { display: none; padding: 16px; animation: fadeIn 0.3s ease; }
 .page.active { display: block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 .section-title { font-size: 20px; font-weight: 900; margin: 20px 0 12px; }
 
-/* ========== ТАБЫ ========== */
+/* ТАБЫ */
 .tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
 .tabs::-webkit-scrollbar { display: none; }
 .tab-btn { flex-shrink: 0; padding: 8px 16px; border-radius: 20px; background: var(--panel); border: 1px solid var(--line); font-size: 13px; font-weight: 700; color: var(--muted); }
 .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); }
 
-/* ========== КЕЙСЫ ========== */
+/* КЕЙСЫ */
 .case-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 .case-card { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: 0.2s; }
 .case-card:active { border-color: var(--accent); }
@@ -59,7 +60,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important;
 .art-gold { background: radial-gradient(circle at 50% 50%, #fbbf24, #78350f); box-shadow: inset 0 0 40px rgba(251, 191, 36, 0.5); }
 
 .case-art::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, transparent 60%); }
-.case-art .css-item { position: relative; z-index: 2; animation: float 3s ease-in-out infinite; }
+.case-art img { position: relative; z-index: 2; width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6)); animation: float 3s ease-in-out infinite; }
 @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
 .case-info { padding: 14px; display: flex; flex-direction: column; gap: 6px; flex-grow: 1; }
@@ -67,68 +68,37 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important;
 .case-price { font-size: 14px; color: var(--gold); font-weight: 800; }
 .btn-open { background: linear-gradient(135deg, var(--accent), #e67300); padding: 12px; border-radius: 12px; font-weight: 800; font-size: 14px; text-align: center; margin-top: auto; box-shadow: 0 4px 15px var(--accent-glow); }
 
-/* ========== CSS-ПОДАРКИ ========== */
-.css-item { width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; position: relative; }
-.css-item::before { content: ''; position: absolute; width: 100%; height: 100%; border-radius: 50%; filter: blur(15px); opacity: 0.6; z-index: -1; }
-
-.item-heart::before { background: #ff3366; }
-.item-heart { font-size: 50px; color: #ff3366; text-shadow: 0 0 10px #ff3366, 0 5px 15px rgba(0,0,0,0.5); }
-.item-heart::after { content: '❤'; }
-
-.item-teddy { width: 50px; height: 50px; background: #b98248; border-radius: 50%; box-shadow: inset -10px -10px 20px rgba(0,0,0,0.5), 0 10px 15px rgba(0,0,0,0.5); }
-.item-teddy::before { content: ''; position: absolute; width: 20px; height: 20px; background: #d19a63; border-radius: 50%; top: 10px; left: 15px; box-shadow: 15px 0 0 #d19a63; }
-
-.item-rocket { width: 40px; height: 60px; background: linear-gradient(to bottom, #fff, #ccc); border-radius: 50% 50% 10% 10%; position: relative; box-shadow: 0 10px 15px rgba(0,0,0,0.5); }
-.item-rocket::after { content: ''; position: absolute; bottom: -15px; left: 10px; width: 20px; height: 20px; background: #ff5500; border-radius: 50% 50% 0 0; box-shadow: 0 0 15px #ff5500; }
-
-.item-star { font-size: 50px; color: #ffd36a; text-shadow: 0 0 15px #ffd36a, 0 5px 15px rgba(0,0,0,0.5); }
-.item-star::after { content: '⭐'; }
-
-.item-ring { width: 45px; height: 45px; border: 8px solid #ffd36a; border-radius: 50%; box-shadow: 0 0 15px #ffd36a, inset 0 0 10px rgba(0,0,0,0.5); position: relative; }
-.item-ring::after { content: '💎'; position: absolute; top: -25px; left: 5px; font-size: 20px; }
-
-.item-frog { width: 50px; height: 40px; background: #4caf50; border-radius: 50% 50% 40% 40%; box-shadow: inset 0 -10px 15px rgba(0,0,0,0.3), 0 10px 15px rgba(0,0,0,0.5); position: relative; }
-.item-frog::before { content: ''; position: absolute; top: -10px; left: 5px; width: 15px; height: 15px; background: #fff; border-radius: 50%; box-shadow: 25px 0 0 #fff; }
-.item-frog::after { content: ''; position: absolute; top: -5px; left: 8px; width: 8px; height: 8px; background: #000; border-radius: 50%; box-shadow: 25px 0 0 #000; }
-
-.item-car { width: 60px; height: 30px; background: #e63946; border-radius: 10px 20px 5px 5px; position: relative; box-shadow: 0 10px 15px rgba(0,0,0,0.5); }
-.item-car::before { content: ''; position: absolute; top: -15px; left: 10px; width: 30px; height: 15px; background: #e63946; border-radius: 10px 10px 0 0; }
-.item-car::after { content: ''; position: absolute; bottom: -10px; left: 5px; width: 15px; height: 15px; background: #333; border-radius: 50%; box-shadow: 35px 0 0 #333; }
-
-.item-helmet { width: 50px; height: 50px; background: #d4af37; border-radius: 50% 50% 10% 10%; position: relative; box-shadow: inset -10px -10px 20px rgba(0,0,0,0.5), 0 10px 15px rgba(0,0,0,0.5); }
-.item-helmet::after { content: ''; position: absolute; top: 0; left: -10px; width: 70px; height: 20px; background: #ff3333; border-radius: 10px 10px 0 0; }
-
-.small-item .css-item { transform: scale(0.6); }
-
-/* ========== МОДАЛКИ ========== */
+/* МОДАЛКИ */
 .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); z-index: 100; display: none; justify-content: center; align-items: center; padding: 16px; }
 .overlay.active { display: flex; }
 .modal-box { background: var(--panel); border: 1px solid var(--line); border-radius: 24px; width: 100%; max-width: 400px; padding: 20px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
 
-/* ========== ЭКРАН КЕЙСА ========== */
+/* ЭКРАН КЕЙСА */
 .case-screen-box { background: var(--panel); border: 1px solid var(--line); border-radius: 24px; width: 100%; max-width: 450px; height: 85vh; display: flex; flex-direction: column; overflow: hidden; position: relative; }
 .case-screen-header { padding: 16px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--line); position: relative; }
 .case-screen-header h2 { font-size: 18px; font-weight: 900; }
 .btn-back { position: absolute; left: 16px; font-size: 20px; background: none; color: var(--muted); }
 .case-screen-content { flex-grow: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; align-items: center; }
 
-/* ========== РУЛЕТКА ========== */
+/* РУЛЕТКА */
 .roulette-large { height: 120px; width: 100%; background: #090b10; border-radius: 16px; position: relative; overflow: hidden; border: 1px solid var(--line); margin-bottom: 20px; display: flex; align-items: center; }
 .roulette-pointer { position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; background: var(--accent); transform: translateX(-50%); z-index: 10; box-shadow: 0 0 15px var(--accent); }
 .roulette-track { display: flex; gap: 10px; padding: 0 10px; position: absolute; left: 0; will-change: transform; }
 .roulette-item { width: 100px; height: 100px; flex-shrink: 0; background: var(--panel-light); border-radius: 12px; display: flex; justify-content: center; align-items: center; position: relative; border: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+.roulette-item img { width: 65px; height: 65px; object-fit: contain; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
 .roulette-item.win-glow { border-color: var(--gold); box-shadow: 0 0 20px var(--gold), inset 0 0 20px rgba(255,211,106,0.3); }
 .btn-spin { background: linear-gradient(135deg, var(--accent), #e67300); padding: 16px; border-radius: 14px; font-size: 18px; font-weight: 900; width: 100%; margin-bottom: 20px; }
 
-/* ========== СПИСОК ВЫПАДЕНИЯ ========== */
+/* СПИСОК ВЫПАДЕНИЯ */
 .case-drop-list { width: 100%; }
 .case-drop-list h3 { font-size: 15px; font-weight: 800; margin-bottom: 12px; color: var(--muted); }
 .drop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .drop-item { background: var(--panel-light); border-radius: 12px; padding: 12px 8px; text-align: center; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center; }
+.drop-item img { width: 45px; height: 45px; object-fit: contain; margin-bottom: 6px; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.5)); }
 .drop-item .name { font-size: 11px; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
 .drop-item .price { font-size: 10px; color: var(--gold); font-weight: 800; }
 
-/* ========== АПГРЕЙДЕР ========== */
+/* АПГРЕЙДЕР */
 .upgrader-page { display: none; }
 .upgrader-page.active { display: block; }
 .upg-container { background: var(--panel); border: 1px solid var(--line); border-radius: 24px; padding: 20px; display: flex; flex-direction: column; align-items: center; position: relative; }
@@ -150,20 +120,22 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important;
 .btn-mult { flex: 1; background: var(--panel-light); border: 1px solid var(--line); padding: 12px; border-radius: 10px; font-weight: 800; font-size: 14px; color: var(--muted); }
 .btn-mult.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-/* ========== ИНВЕНТАРЬ ========== */
+/* ИНВЕНТАРЬ */
 .select-list { display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; margin-top: 15px; padding-right: 5px; }
 .select-btn { display: flex; align-items: center; gap: 12px; background: var(--panel-light); padding: 12px 16px; border-radius: 12px; width: 100%; text-align: left; }
+.select-btn img { width: 35px; height: 35px; object-fit: contain; }
 .select-btn .info { display: flex; flex-direction: column; }
 .select-btn .name { font-weight: 800; font-size: 14px; }
 .select-btn .price { font-size: 12px; color: var(--gold); }
 
 .inv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .inv-item { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 8px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.inv-item .name { font-size: 12px; font-weight: 700; margin-bottom: 4px; margin-top: 5px; }
+.inv-item img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 8px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
+.inv-item .name { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
 .inv-item .price { font-size: 11px; color: var(--gold); margin-bottom: 8px; }
 .btn-sell { background: #2e3348; width: 100%; padding: 6px; border-radius: 8px; font-size: 11px; font-weight: 700; }
 
-/* ========== МЕНЮ ========== */
+/* МЕНЮ */
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: rgba(11, 13, 20, 0.98); backdrop-filter: blur(10px); border-top: 1px solid var(--line); display: flex; justify-content: space-around; align-items: center; z-index: 50; }
 .nav-btn { background: none; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--muted); font-size: 10px; font-weight: 700; transition: 0.2s; }
 .nav-btn .icon { font-size: 20px; transition: 0.2s; }
@@ -274,30 +246,32 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important;
 
 "use strict";
 
-const SAVE_KEY = "foxgrade_v12_release";
+const SAVE_KEY = "foxgrade_v13_release";
 
-// Все предметы с CSS-классами
+// ССЫЛКИ НА 3D-МОДЕЛИ ИЗ TELEGRAM
 const ITEMS = {
-  stars1: {id:"stars1", name:"1 Звезда", price:1, cssClass:"item-star", isStar:true},
-  stars5: {id:"stars5", name:"5 Звёзд", price:5, cssClass:"item-star", isStar:true},
-  stars10: {id:"stars10", name:"10 Звёзд", price:10, cssClass:"item-star", isStar:true},
-  stars50: {id:"stars50", name:"50 Звёзд", price:50, cssClass:"item-star", isStar:true},
+  stars1: {id:"stars1", name:"1 Звезда", icon:"https://i.ibb.co/3s6yKqZ/heart.png", price:1, isStar:true}, // Заглушка
+  stars5: {id:"stars5", name:"5 Звёзд", icon:"https://i.ibb.co/1Jz3R5b/teddy.png", price:5, isStar:true}, // Заглушка
+  stars10: {id:"stars10", name:"10 Звёзд", icon:"https://i.ibb.co/4Wk4KqZ/gift.png", price:10, isStar:true}, // Заглушка
+  stars50: {id:"stars50", name:"50 Звёзд", icon:"https://i.ibb.co/2Kk4KqZ/rose.png", price:50, isStar:true}, // Заглушка
   
-  heart:{id:"heart", name:"Сердце", price:15, cssClass:"item-heart"},
-  teddy:{id:"teddy", name:"Мишка", price:15, cssClass:"item-teddy"},
-  rocket:{id:"rocket", name:"Ракета", price:50, cssClass:"item-rocket"},
-  star:{id:"star", name:"Звезда", price:100, cssClass:"item-star"},
-  ring:{id:"ring", name:"Кольцо", price:420, cssClass:"item-ring"},
-  car:{id:"car", name:"Тачка", price:5947, cssClass:"item-car"},
-  frog:{id:"frog", name:"Фрог", price:574231, cssClass:"item-frog"},
-  helmet:{id:"helmet", name:"Шлем", price:15069, cssClass:"item-helmet"}
+  heart: {id:"heart", name:"Сердце", icon:"https://i.ibb.co/5Wk4KqZ/cake.png", price:15}, // Заглушка
+  teddy: {id:"teddy", name:"Мишка", icon:"https://i.ibb.co/9Wk4KqZ/bouquet.png", price:15}, // Заглушка
+  rocket: {id:"rocket", name:"Ракета", icon:"https://i.ibb.co/6Wk4KqZ/rocket.png", price:50}, // Заглушка
+  star: {id:"star", name:"Звезда", icon:"https://i.ibb.co/7Wk4KqZ/champagne.png", price:100}, // Заглушка
+  
+  ring: {id:"ring", name:"Кольцо", icon:"https://i.ibb.co/8Wk4KqZ/trophy.png", price:420}, // Заглушка
+  car: {id:"car", name:"Тачка", icon:"https://i.ibb.co/9Wk4KqZ/ring.png", price:5947}, // Заглушка
+  frog: {id:"frog", name:"Фрог", icon:"https://i.ibb.co/1Wk4KqZ/diamond.png", price:574231}, // Заглушка
+  helmet: {id:"helmet", name:"Шлем", icon:"https://i.ibb.co/2Wk4KqZ/icecream.png", price:15069} // Заглушка
 };
+// *Примечание*: Выше стоят заглушки. Чтобы картинки были настоящими, тебе нужно заменить ссылки на реальные 3D-модели (например, с официального сайта Telegram или CDN).
 
 const CASES = [
-  { id:"start", name:"Стартовый", price:0, art:"item-star", style:"art-orange", category: "cheap", items:["stars1","stars5","heart","teddy"] },
-  { id:"sale", name:"Сдача", price:39, art:"item-heart", style:"art-blue", category: "cheap", items:["stars5","stars10","rocket","star"] },
-  { id:"mid", name:"Мелочь", price:150, art:"item-ring", style:"art-purple", category: "rare", items:["stars10","stars50","ring","star"] },
-  { id:"nft", name:"NFT Кейс", price:500, art:"item-frog", style:"art-gold", category: "premium", items:["stars50","car","helmet","frog"] }
+  { id:"start", name:"Стартовый", price:0, art:"heart", style:"art-orange", category: "cheap", items:["stars1","stars5","heart","teddy"] },
+  { id:"sale", name:"Сдача", price:39, art:"rocket", style:"art-blue", category: "cheap", items:["stars5","stars10","rocket","star"] },
+  { id:"mid", name:"Мелочь", price:150, art:"ring", style:"art-purple", category: "rare", items:["stars10","stars50","ring","star"] },
+  { id:"nft", name:"NFT Кейс", price:500, art:"frog", style:"art-gold", category: "premium", items:["stars50","car","helmet","frog"] }
 ];
 
 let game = { balance: 1500, inventory: [] };
@@ -347,7 +321,7 @@ function renderCases() {
   grid.innerHTML = filtered.map(c => `
     <div class="case-card" onclick="openCaseScreen('${c.id}')">
       <div class="case-art ${c.style}">
-        <div class="css-item ${c.art}"></div>
+        <img src="${ITEMS[c.art].icon}" alt="case">
       </div>
       <div class="case-info">
         <div class="case-name">${c.name}</div>
@@ -376,7 +350,7 @@ function openCaseScreen(id) {
     const item = ITEMS[itemId];
     return `
       <div class="drop-item">
-        <div class="css-item ${item.cssClass} small-item" style="transform:scale(0.7)"></div>
+        <img src="${item.icon}">
         <div class="name">${item.name}</div>
         <div class="price">⭐ ${fmt(item.price)}</div>
       </div>
@@ -408,7 +382,7 @@ function spinCase() {
 
   for(let i=0; i<totalItems; i++) {
     const item = i === winIndex ? winItem : ITEMS[currentCase.items[Math.floor(Math.random() * currentCase.items.length)]];
-    trackHtml += `<div class="roulette-item" id="cs-item-${i}"><div class="css-item ${item.cssClass}"></div></div>`;
+    trackHtml += `<div class="roulette-item" id="cs-item-${i}"><img src="${item.icon}"></div>`;
   }
   track.innerHTML = trackHtml;
 
@@ -438,8 +412,9 @@ function spinCase() {
     
     btn.onclick = () => { closeCaseScreen(); btn.onclick = spinCase; };
   }, 4100);
-}
-function renderInventory() {
+            }
+
+  function renderInventory() {
   const grid = document.getElementById("inventory-grid");
   if(!grid) return;
 
@@ -450,7 +425,7 @@ function renderInventory() {
 
   grid.innerHTML = game.inventory.map(inv => `
     <div class="inv-item">
-      <div class="css-item ${inv.cssClass}"></div>
+      <img src="${inv.icon}">
       <div class="name">${inv.name}</div>
       <div class="price">⭐ ${fmt(inv.price)}</div>
       <button class="btn-sell" onclick="sellItem(${inv.uid})">Продать</button>
@@ -478,7 +453,7 @@ function openSelect(type) {
     if(!game.inventory.length) { showToast("Инвентарь пуст!"); return; }
     html = game.inventory.map(inv => `
       <button class="select-btn" onclick="pickSource(${inv.uid})">
-        <div class="css-item ${inv.cssClass}" style="transform:scale(0.6)"></div>
+        <img src="${inv.icon}">
         <div class="info"><div class="name">${inv.name}</div><div class="price">⭐ ${fmt(inv.price)}</div></div>
       </button>
     `).join("");
@@ -486,7 +461,7 @@ function openSelect(type) {
     const sortedItems = Object.values(ITEMS).filter(i => !i.isStar).sort((a, b) => a.price - b.price);
     html = sortedItems.map(item => `
       <button class="select-btn" onclick="pickTarget('${item.id}')">
-        <div class="css-item ${item.cssClass}" style="transform:scale(0.6)"></div>
+        <img src="${item.icon}">
         <div class="info"><div class="name">${item.name}</div><div class="price">⭐ ${fmt(item.price)}</div></div>
       </button>
     `).join("");

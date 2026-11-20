@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AURIX | Update</title>
+<title>AURIX | Idle Clicker</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root {
@@ -22,45 +22,38 @@
 * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
 body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; background-image: radial-gradient(circle at 50% 0%, #15102a 0%, transparent 50%); }
 
-/* ШАПКА С ПРОФИЛЕМ */
+/* ШАПКА */
 .top-profile { display: flex; align-items: center; gap: 12px; padding: 16px; z-index: 10; }
-.avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--panel-light); border: 2px solid var(--line); overflow: hidden; display: flex; justify-content: center; align-items: center; font-size: 24px; }
+.avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--panel-light); border: 2px solid var(--line); overflow: hidden; display: flex; justify-content: center; align-items: center; font-size: 24px; flex-shrink: 0; }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
 .profile-info { display: flex; flex-direction: column; }
 .profile-name { font-size: 16px; font-weight: 800; }
 .profile-lvl { font-size: 12px; color: var(--accent); font-weight: 700; }
 .balance-header { margin-left: auto; text-align: right; }
 .balance-header .val { font-size: 20px; font-weight: 900; color: var(--gold); }
-.online-badge { font-size: 11px; color: var(--success); display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
+.online-badge { font-size: 11px; color: var(--success); display: flex; align-items: center; gap: 4px; justify-content: flex-end; margin-top: 2px; }
 
-/* ГЛАВНЫЙ ЭКРАН */
+/* СТРАНИЦЫ */
 .page { display: none; flex: 1; flex-direction: column; overflow-y: auto; padding-bottom: 90px; position: relative; }
 .page.active { display: flex; animation: fadeIn 0.3s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+/* ГЛАВНАЯ */
 .game-area { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; }
 .stats-top { display: flex; justify-content: space-around; width: 100%; padding: 10px 20px; margin-bottom: 20px; }
 .stat-item { text-align: center; }
 .stat-item .label { font-size: 11px; color: var(--muted); text-transform: uppercase; }
 .stat-item .value { font-size: 16px; font-weight: 800; color: var(--text); }
 
-/* КРУГЛАЯ КНОПКА */
 .tap-button { width: 240px; height: 240px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #2a2e40, #161922); border: 4px solid var(--accent); box-shadow: 0 0 50px var(--accent-glow), inset 0 0 30px rgba(255, 170, 0, 0.2); display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.1s, box-shadow 0.2s; position: relative; animation: pulseBtn 3s infinite alternate; }
 .tap-button:active { transform: scale(0.92); box-shadow: 0 0 80px var(--accent-glow), inset 0 0 50px rgba(255, 170, 0, 0.5); }
 @keyframes pulseBtn { 0% { box-shadow: 0 0 40px var(--accent-glow); } 100% { box-shadow: 0 0 60px var(--accent-glow); } }
-
 .tap-title { font-size: 32px; font-weight: 900; letter-spacing: 2px; color: #fff; text-shadow: 0 0 20px var(--accent); margin-bottom: 4px; }
 .tap-subtitle { font-size: 14px; font-weight: 700; color: var(--muted); letter-spacing: 4px; }
 .tap-star { font-size: 40px; margin-top: 8px; filter: drop-shadow(0 0 15px var(--gold)); }
 .hint-text { margin-top: 25px; font-size: 13px; color: var(--muted); text-align: center; padding: 0 20px; }
 
-/* ЧАСТИЦЫ */
-.particle { position: absolute; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; pointer-events: none; animation: particleAnim 0.6s ease-out forwards; z-index: 100; }
-@keyframes particleAnim { 0% { opacity: 1; transform: translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); } }
-.floating-text { position: absolute; color: var(--gold); font-weight: 900; font-size: 20px; pointer-events: none; animation: floatUp 0.8s ease-out forwards; text-shadow: 0 0 10px var(--gold); z-index: 100; }
-@keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-100px) scale(1.5); } }
-
-/* СПИСКИ КАРТОЧЕК */
+/* КАРТОЧКИ */
 .list-container { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 12px 16px; display: flex; flex-direction: column; gap: 6px; }
 .card-header { display: flex; justify-content: space-between; align-items: center; }
@@ -79,20 +72,27 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
 .input-group label { font-size: 13px; color: var(--muted); }
 .input-group input { background: var(--panel-light); border: 1px solid var(--line); padding: 14px; border-radius: 12px; color: #fff; font-size: 18px; font-weight: 700; outline: none; }
 .btn-primary { background: linear-gradient(135deg, var(--accent), #e67300); padding: 16px; border-radius: 12px; font-weight: 900; font-size: 16px; color: #000; border: 0; cursor: pointer; }
-.btn-primary:disabled { opacity: 0.5; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* МЕНЮ */
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: rgba(15, 17, 26, 0.95); backdrop-filter: blur(15px); border-top: 1px solid var(--line); display: flex; justify-content: space-around; align-items: center; z-index: 50; padding: 0 4px; }
 .nav-btn { background: none; border: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--muted); font-size: 9px; font-weight: 700; cursor: pointer; flex: 1; padding: 6px 0; }
 .nav-btn .icon { font-size: 20px; }
 .nav-btn.active { color: var(--accent); text-shadow: 0 0 10px var(--accent-glow); }
-.toast { position: fixed; bottom: 95px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--panel-light); border: 1px solid var(--line); padding: 12px 24px; border-radius: 30px; font-weight: 700; font-size: 13px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 200; text-align: center; }
+
+/* ТОСТ */
+.toast { position: fixed; bottom: 95px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--panel-light); border: 1px solid var(--line); padding: 12px 24px; border-radius: 30px; font-weight: 700; font-size: 13px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 200; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ЧАСТИЦЫ */
+.particle { position: absolute; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; pointer-events: none; animation: particleAnim 0.6s ease-out forwards; z-index: 100; }
+@keyframes particleAnim { 0% { opacity: 1; transform: translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); } }
+.floating-text { position: absolute; color: var(--gold); font-weight: 900; font-size: 20px; pointer-events: none; animation: floatUp 0.8s ease-out forwards; text-shadow: 0 0 10px var(--gold); z-index: 100; }
+@keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-100px) scale(1.5); } }
 </style>
 </head>
 <body>
 
-<!-- ШАПКА -->
 <header class="top-profile">
   <div class="avatar" id="user-avatar">🦊</div>
   <div class="profile-info">
@@ -105,7 +105,6 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
   </div>
 </header>
 
-<!-- ГЛАВНАЯ -->
 <main id="page-home" class="page active">
   <div class="game-area" id="game-area">
     <div class="stats-top">
@@ -121,22 +120,18 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
   </div>
 </main>
 
-<!-- УЛУЧШЕНИЯ -->
 <main id="page-shop" class="page">
   <div class="list-container" id="shop-list"></div>
 </main>
 
-<!-- ЗАДАНИЯ -->
 <main id="page-tasks" class="page">
   <div class="list-container" id="tasks-list"></div>
 </main>
 
-<!-- НАГРАДЫ -->
 <main id="page-daily" class="page">
   <div class="list-container" id="daily-list"></div>
 </main>
 
-<!-- ВЫВОД -->
 <main id="page-withdraw" class="page">
   <div class="withdraw-box">
     <h2 style="font-size:20px; text-align:center;">Вывод звёзд</h2>
@@ -150,7 +145,6 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
   <div class="list-container" id="withdraw-history"></div>
 </main>
 
-<!-- ПРОФИЛЬ -->
 <main id="page-profile" class="page">
   <div class="list-container">
     <div class="card" style="align-items:center; text-align:center; padding:30px;">
@@ -166,7 +160,6 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
   </div>
 </main>
 
-<!-- МЕНЮ -->
 <nav class="bottom-nav">
   <button class="nav-btn active" data-page="home" onclick="goPage('home')"><span class="icon">⭐</span>Главная</button>
   <button class="nav-btn" data-page="shop" onclick="goPage('shop')"><span class="icon">🛒</span>Улучшения</button>
@@ -179,76 +172,100 @@ body { background: var(--bg); color: var(--text); height: 100vh; display: flex; 
 <div class="toast" id="toast"></div>
 
 <script>
-// ВАЖНО: Это только фронтенд. Для реального онлайна и балансов нужен сервер (Часть 3).
-// Здесь мы используем localStorage как кэш, но данные с сервера будут приходить позже.
 
-const API_URL = "https://your-server-url.onrender.com"; // Сюда вставишь ссылку на сервер из Части 3
+"use strict";
+
+const SAVE_KEY = "aurix_full_save_v2";
+
+const CONFIG = {
+  click: { prices: [0, 2, 5, 12, 25, 50, 100, 200, 400, 800], values: [0.001, 0.002, 0.003, 0.005, 0.008, 0.012, 0.020, 0.035, 0.060, 0.100] },
+  regen: { prices: [0, 5, 15, 40, 100, 250], values: [3000, 2500, 2000, 1500, 1000, 500] },
+  max_energy: { prices: [0, 10, 30, 80, 200, 500], values: [1000, 1500, 2000, 3000, 4000, 5000] },
+  crit: { prices: [0, 50, 150, 500], chance: [0, 5, 10, 20], mult: [0, 2, 3, 5] },
+  multiplier: { prices: [0, 100, 400, 1500], mult: [1, 1.2, 1.5, 2] },
+  auto: { prices: [0, 250, 1000, 5000], income: [0, 0.001, 0.005, 0.02] },
+  combo: { prices: [0, 80, 250, 800], bonus: [0, 0.01, 0.05, 0.2] }
+};
 
 let state = {
-  balance_micro: 0,
-  total_clicks: 0,
-  total_earned_micro: 0,
-  energy: 1000,
-  max_energy: 1000,
-  upg_click: 0,
-  upg_regen: 0,
-  upg_max_energy: 0,
-  upg_crit: 0,
-  upg_multiplier: 0,
-  upg_auto: 0,
-  upg_combo: 0,
-  tasks: { t1: { prog: 0, claimed: false }, t2: { prog: 0, claimed: false } },
-  daily_streak: 0,
-  last_daily_claim: 0,
+  balance_micro: 0, total_clicks: 0, total_earned_micro: 0,
+  energy: 1000, max_energy: 1000, last_update: Date.now(), last_auto_tick: Date.now(),
+  upg_click: 0, upg_regen: 0, upg_max_energy: 0, upg_crit: 0, upg_multiplier: 0, upg_auto: 0, upg_combo: 0,
+  tasks: {
+    t1: { prog: 0, claimed: false }, t2: { prog: 0, claimed: false }, t3: { prog: 0, claimed: false },
+    t4: { prog: 0, claimed: false }, t5: { prog: 0, claimed: false }, t6: { prog: 0, claimed: false }
+  },
+  daily_streak: 0, last_daily_claim: 0,
+  withdraw_history: [],
+  start_date: Date.now(),
   user: { name: "Игрок", photo: "", username: "" }
 };
 
-// Инициализация Telegram WebApp
-const tg = window.Telegram?.WebApp;
-if (tg) {
-  tg.ready();
-  tg.expand();
-  const user = tg.initDataUnsafe?.user;
-  if (user) {
-    state.user.name = user.first_name || "Игрок";
-    state.user.username = user.username || "";
-    if (user.photo_url) state.user.photo = user.photo_url;
-    document.getElementById("user-avatar").innerHTML = `<img src="${user.photo_url}" alt="">`;
-    document.getElementById("prof-avatar").innerHTML = `<img src="${user.photo_url}" alt="">`;
-    document.getElementById("user-name").textContent = user.first_name;
-    document.getElementById("prof-name").textContent = user.first_name;
-  }
+const DAILY_REWARDS = [0.005, 0.01, 0.015, 0.02, 0.03, 0.04, 0.08];
+
+function fmt(micro) { return (micro / 1000000).toFixed(3); }
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(t.timer); t.timer = setTimeout(() => t.classList.remove("show"), 2500);
 }
 
 function goPage(id) {
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   document.getElementById("page-" + id).classList.add("active");
   document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.page === id));
+  if(id === 'shop') renderShop();
+  if(id === 'tasks') renderTasks();
+  if(id === 'daily') renderDaily();
+  if(id === 'withdraw') renderWithdraw();
+  if(id === 'profile') renderProfile();
 }
 
-function showToast(msg) {
-  const t = document.getElementById("toast");
-  t.textContent = msg; t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2500);
+function save() {
+  state.last_update = Date.now();
+  localStorage.setItem(SAVE_KEY, JSON.stringify(state));
 }
 
-function fmt(micro) { return (micro / 1000000).toFixed(3); }
+function load() {
+  try {
+    const saved = localStorage.getItem(SAVE_KEY);
+    if(saved) {
+      const parsed = JSON.parse(saved);
+      state = { ...state, ...parsed };
+      const now = Date.now();
+      const timePassed = now - state.last_update;
+      if(timePassed > 0) {
+        const regenMs = CONFIG.regen.values[state.upg_regen] || 3000;
+        const regenAmount = Math.floor(timePassed / regenMs);
+        state.energy = Math.min(state.max_energy, state.energy + regenAmount);
+      }
+    }
+  } catch(e) { console.error("Load error", e); }
+}
+
+function getClickValue() {
+  let base = CONFIG.click.values[state.upg_click] || 0.001;
+  let mult = CONFIG.multiplier.mult[state.upg_multiplier] || 1;
+  return base * mult;
+}
 
 function updateUI() {
   document.getElementById("ui-balance").textContent = fmt(state.balance_micro);
+  document.getElementById("ui-income").textContent = "+" + getClickValue().toFixed(3);
   document.getElementById("ui-clicks").textContent = state.total_clicks;
-  document.getElementById("ui-income").textContent = "+" + (0.001 * (state.upg_multiplier + 1)).toFixed(3);
+  document.getElementById("ui-online").textContent = Math.floor(100 + Math.random() * 50); // Заглушка для онлайна
+  document.getElementById("ui-withdraw-balance").textContent = fmt(state.balance_micro);
 }
 
-// Тап
-document.getElementById("tap-btn").addEventListener("click", (e) => {
-  state.total_clicks++;
-  state.balance_micro += 1000; // 0.001
-  updateUI();
-  createParticles(e.clientX, e.clientY);
-  createFloatingText(e.clientX, e.clientY, 0.001);
-  // В реальности здесь нужно отправлять запрос на сервер для проверки
-});
+function createFloatingText(x, y, amount) {
+  const el = document.createElement("div");
+  el.className = "floating-text";
+  el.textContent = "+" + amount.toFixed(3);
+  el.style.left = (x - 30) + "px"; el.style.top = (y - 30) + "px";
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 800);
+}
 
 function createParticles(x, y) {
   for(let i=0; i<5; i++) {
@@ -263,144 +280,310 @@ function createParticles(x, y) {
     setTimeout(() => p.remove(), 600);
   }
 }
-function createFloatingText(x, y, amount) {
-  const el = document.createElement("div");
-  el.className = "floating-text";
-  el.textContent = "+" + amount.toFixed(3);
-  el.style.left = (x - 30) + "px"; el.style.top = (y - 30) + "px";
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 800);
+
+// --- КЛИК ---
+document.getElementById("tap-btn").addEventListener("click", (e) => {
+  if(state.energy < 1) { showToast("Нет энергии! Жди."); return; }
+  
+  state.energy -= 1;
+  state.total_clicks += 1;
+  
+  let reward = getClickValue();
+  if(state.upg_crit > 0) {
+    if(Math.random() * 100 < CONFIG.crit.chance[state.upg_crit]) {
+      reward *= CONFIG.crit.mult[state.upg_crit];
+    }
+  }
+  if(state.upg_combo > 0 && state.total_clicks % 100 === 0) {
+    reward += CONFIG.combo.bonus[state.upg_combo];
+  }
+
+  const micro = Math.floor(reward * 1000000);
+  state.balance_micro += micro;
+  state.total_earned_micro += micro;
+
+  createFloatingText(e.clientX, e.clientY, reward);
+  createParticles(e.clientX, e.clientY);
+  updateUI();
+  updateTaskProgress();
+});
+
+// Таймер регена и авто-дохода
+setInterval(() => {
+  const now = Date.now();
+  if(state.energy < state.max_energy) {
+    const regenMs = CONFIG.regen.values[state.upg_regen] || 3000;
+    const timePassed = now - state.last_update;
+    if(timePassed >= regenMs) {
+      const amount = Math.floor(timePassed / regenMs);
+      state.energy = Math.min(state.max_energy, state.energy + amount);
+      state.last_update = now;
+      updateUI();
+    }
+  } else {
+    state.last_update = now;
+  }
+
+  if(state.upg_auto > 0) {
+    const timePassed = now - state.last_auto_tick;
+    if(timePassed >= 1000) {
+      const incomePerSec = CONFIG.auto.income[state.upg_auto];
+      const microToAdd = Math.floor(incomePerSec * 1000000 * (timePassed / 1000));
+      state.balance_micro += microToAdd;
+      state.total_earned_micro += microToAdd;
+      state.last_auto_tick = now;
+      updateUI();
+    }
+  }
+}, 1000);
+
+setInterval(save, 3000);
+
+const SHOP_ITEMS = [
+  { id: 'click', name: '👆 Сила клика', desc: 'Больше звёзд за клик' },
+  { id: 'regen', name: '⚡ Скорость энергии', desc: 'Быстрее восстанавливается' },
+  { id: 'max_energy', name: '🔋 Макс. энергия', desc: 'Увеличивает запас' },
+  { id: 'crit', name: '💥 Крит', desc: 'Шанс на x2, x3, x5' },
+  { id: 'multiplier', name: '✖️ Множитель', desc: 'Общий доход x1.2 и выше' },
+  { id: 'auto', name: '🤖 Авто-сбор', desc: 'Пассивный доход' },
+  { id: 'combo', name: '🔥 Комбо', desc: 'Бонус каждые 100 кликов' }
+];
+
+function renderShop() {
+  const list = document.getElementById("shop-list");
+  list.innerHTML = SHOP_ITEMS.map(item => {
+    const lvl = state[`upg_${item.id}`];
+    const maxLvl = CONFIG[item.id].prices.length - 1;
+    let price = "MAX";
+    let canBuy = false;
+    let nextDesc = "Максимальный уровень";
+
+    if(lvl < maxLvl) {
+      const priceStars = CONFIG[item.id].prices[lvl + 1];
+      price = priceStars + " ⭐";
+      canBuy = state.balance_micro >= priceStars * 1000000;
+      if(item.id === 'click') nextDesc = `След: +${CONFIG.click.values[lvl + 1].toFixed(3)} ⭐/клик`;
+      if(item.id === 'regen') nextDesc = `След: 1 ед. за ${CONFIG.regen.values[lvl + 1]/1000} сек`;
+      if(item.id === 'max_energy') nextDesc = `След: до ${CONFIG.max_energy.values[lvl + 1]} ед.`;
+      if(item.id === 'crit') nextDesc = `След: ${CONFIG.crit.chance[lvl + 1]}% шанс`;
+      if(item.id === 'multiplier') nextDesc = `След: x${CONFIG.multiplier.mult[lvl + 1]}`;
+      if(item.id === 'auto') nextDesc = `След: +${CONFIG.auto.income[lvl + 1].toFixed(3)}/сек`;
+      if(item.id === 'combo') nextDesc = `След: +${CONFIG.combo.bonus[lvl + 1]} за 100 кликов`;
+    }
+
+    return `
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">${item.name}</div>
+          <div class="card-reward">Ур. ${lvl}</div>
+        </div>
+        <div class="card-desc">${item.desc}. ${nextDesc}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+          <div class="card-reward">${price}</div>
+          <button class="btn-claim" onclick="buyUpgrade('${item.id}')" ${!canBuy ? 'disabled' : ''}>
+            ${lvl >= maxLvl ? 'МАКС' : 'Купить'}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
 }
 
-// Заявка на вывод (ЛОКАЛЬНАЯ ИМИТАЦИЯ, для реальной работы нужен сервер)
+function buyUpgrade(id) {
+  const lvl = state[`upg_${id}`];
+  const maxLvl = CONFIG[id].prices.length - 1;
+  if(lvl >= maxLvl) return;
+  const priceStars = CONFIG[id].prices[lvl + 1];
+  if(state.balance_micro < priceStars * 1000000) { showToast("Недостаточно звёзд!"); return; }
+  state.balance_micro -= priceStars * 1000000;
+  state[`upg_${id}`] += 1;
+  if(id === 'max_energy') state.max_energy = CONFIG.max_energy.values[state.upg_max_energy];
+  updateUI(); renderShop(); updateTaskProgress(); save();
+  showToast("Улучшение куплено!");
+}
+
+// --- ЗАДАНИЯ ---
+const TASK_DEFS = [
+  { id: 't1', name: 'Первый шаг', desc: 'Сделать 50 кликов', target: 50, reward: 0.005, type: 'clicks' },
+  { id: 't2', name: 'Активный', desc: 'Сделать 100 кликов', target: 100, reward: 0.01, type: 'clicks' },
+  { id: 't3', name: 'Трудяга', desc: 'Сделать 250 кликов', target: 250, reward: 0.02, type: 'clicks' },
+  { id: 't4', name: 'Полтысячи', desc: 'Сделать 500 кликов', target: 500, reward: 0.04, type: 'clicks' },
+  { id: 't5', name: 'Тысячник', desc: 'Сделать 1000 кликов', target: 1000, reward: 0.08, type: 'clicks' },
+  { id: 't6', name: 'Шопоголик', desc: 'Купить улучшение', target: 1, reward: 0.02, type: 'upgrades' }
+];
+
+function updateTaskProgress() {
+  const totalUpgrades = Object.keys(CONFIG).reduce((sum, k) => sum + state[`upg_${k}`], 0);
+  TASK_DEFS.forEach(t => {
+    if(state.tasks[t.id].claimed) return;
+    if(t.type === 'clicks') state.tasks[t.id].prog = state.total_clicks;
+    if(t.type === 'upgrades') state.tasks[t.id].prog = totalUpgrades;
+  });
+}
+
+function renderTasks() {
+  updateTaskProgress();
+  document.getElementById("tasks-list").innerHTML = TASK_DEFS.map(t => {
+    const task = state.tasks[t.id];
+    const isDone = task.prog >= t.target;
+    const progPercent = Math.min(100, (task.prog / t.target) * 100);
+    return `
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">${t.name}</div>
+          <div class="card-reward">+${t.reward} ⭐</div>
+        </div>
+        <div class="card-desc">${t.desc}</div>
+        <div class="task-progress-bg"><div class="task-progress-fill" style="width:${progPercent}%"></div></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+          <div style="font-size:11px; color:var(--muted);">${Math.floor(task.prog)} / ${t.target}</div>
+          <button class="btn-claim ${isDone && !task.claimed ? 'ready' : ''}" onclick="claimTask('${t.id}')" ${!isDone || task.claimed ? 'disabled' : ''}>
+            ${task.claimed ? 'Получено' : (isDone ? 'Забрать' : 'В процессе')}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function claimTask(id) {
+  const t = TASK_DEFS.find(x => x.id === id);
+  const task = state.tasks[id];
+  if(task.claimed || task.prog < t.target) return;
+  task.claimed = true;
+  state.balance_micro += t.reward * 1000000;
+  state.total_earned_micro += t.reward * 1000000;
+  updateUI(); renderTasks(); save();
+  showToast(`Задание выполнено! +${t.reward} ⭐`);
+}
+
+// --- ЕЖЕДНЕВНЫЕ ---
+function renderDaily() {
+  const now = Date.now();
+  const hoursPassed = (now - state.last_daily_claim) / (1000 * 60 * 60);
+  const canClaim = hoursPassed >= 24 || state.last_daily_claim === 0;
+  
+  let html = `
+    <div class="card" style="align-items:center; text-align:center; padding:30px;">
+      <h2 style="font-size:22px; margin-bottom:10px;">Ежедневный бонус</h2>
+      <p style="color:var(--muted); font-size:13px; margin-bottom:20px;">Заходи каждый день!</p>
+      <button class="btn-primary" onclick="claimDaily()" ${!canClaim ? 'disabled' : ''} style="width:100%;">
+        ${canClaim ? 'Забрать награду' : 'Ждать'}
+      </button>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:10px;">
+  `;
+
+  DAILY_REWARDS.forEach((rew, i) => {
+    const day = i + 1;
+    const isClaimed = state.daily_streak > i;
+    const isToday = state.daily_streak === i && canClaim;
+    html += `
+      <div style="background:var(--panel); border:1px solid ${isToday ? 'var(--accent)' : 'var(--line)'}; border-radius:12px; padding:10px 5px; text-align:center; opacity:${isClaimed ? 0.4 : 1};">
+        <div style="font-size:10px; color:var(--muted);">День ${day}</div>
+        <div style="font-size:13px; font-weight:900; color:var(--gold);">${rew} ⭐</div>
+      </div>
+    `;
+  });
+  
+  html += `</div>`;
+  document.getElementById("daily-list").innerHTML = html;
+}
+
+function claimDaily() {
+  const now = Date.now();
+  const hoursPassed = (now - state.last_daily_claim) / (1000 * 60 * 60);
+  if(hoursPassed < 24 && state.last_daily_claim !== 0) { showToast("Приходи завтра!"); return; }
+  
+  const reward = DAILY_REWARDS[state.daily_streak] || DAILY_REWARDS[0];
+  state.balance_micro += reward * 1000000;
+  state.total_earned_micro += reward * 1000000;
+  state.last_daily_claim = now;
+  state.daily_streak = (state.daily_streak + 1) % 7;
+  updateUI(); renderDaily(); save();
+  showToast(`Получено ${reward} ⭐!`);
+  }
+
+  function renderWithdraw() {
+  document.getElementById("ui-withdraw-balance").textContent = fmt(state.balance_micro);
+  
+  const history = document.getElementById("withdraw-history");
+  if(state.withdraw_history.length === 0) {
+    history.innerHTML = `<div style="text-align:center; color:var(--muted); padding:20px; font-size:13px;">Нет заявок</div>`;
+    return;
+  }
+
+  history.innerHTML = state.withdraw_history.map(w => `
+    <div class="card" style="flex-direction:row; justify-content:space-between; align-items:center;">
+      <div>
+        <div class="card-title">${fmt(w.amount_micro)} ⭐</div>
+        <div class="card-desc">${new Date(w.date).toLocaleString()}</div>
+      </div>
+      <div style="font-size:11px; font-weight:800; color:${w.status === 'pending' ? 'var(--accent)' : 'var(--success)'};">
+        ${w.status === 'pending' ? 'Ожидает' : 'Выполнено'}
+      </div>
+    </div>
+  `).join("");
+}
+
 function createWithdrawRequest() {
   const input = document.getElementById("withdraw-amount");
   const amount = parseFloat(input.value);
   if (!amount || amount < 1) { showToast("Минимум 1.000 ⭐"); return; }
   if (amount * 1000000 > state.balance_micro) { showToast("Недостаточно звёзд"); return; }
   
-  // Здесь должен быть fetch('/api/withdraw') на сервер
-  showToast("Заявка создана! Ожидайте.");
+  state.balance_micro -= amount * 1000000;
+  state.withdraw_history.unshift({
+    amount_micro: amount * 1000000,
+    date: Date.now(),
+    status: 'pending'
+  });
+  
   input.value = "";
+  updateUI();
+  renderWithdraw();
+  save();
+  showToast("Заявка создана!");
 }
 
+function renderProfile() {
+  document.getElementById("prof-clicks").textContent = state.total_clicks;
+  document.getElementById("prof-earned").textContent = fmt(state.total_earned_micro);
+  const d = new Date(state.start_date);
+  document.getElementById("prof-date").textContent = `${d.getDate()}.${d.getMonth()+1}.${d.getFullYear()}`;
+  const lvl = Math.floor(state.total_earned_micro / 100000000) + 1;
+  document.getElementById("prof-lvl").textContent = `Уровень ${lvl}`;
+  document.getElementById("user-level").textContent = `Уровень ${lvl}`;
+}
+
+// Telegram User
+const tg = window.Telegram?.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  const user = tg.initDataUnsafe?.user;
+  if (user) {
+    state.user.name = user.first_name || "Игрок";
+    state.user.username = user.username || "";
+    if (user.photo_url) state.user.photo = user.photo_url;
+    document.getElementById("user-avatar").innerHTML = `<img src="${user.photo_url}">`;
+    document.getElementById("prof-avatar").innerHTML = `<img src="${user.photo_url}">`;
+    document.getElementById("user-name").textContent = user.first_name;
+    document.getElementById("prof-name").textContent = user.first_name;
+  }
+}
+
+// Запуск
+load();
 updateUI();
+renderShop();
+renderTasks();
+renderDaily();
+renderWithdraw();
+renderProfile();
+
+// Сохранение при выходе
+window.addEventListener("beforeunload", save);
 </script>
 </body>
 </html>
-
-// server.js
-const express = require('express');
-const crypto = require('crypto');
-const cors = require('cors');
-const app = express();
-app.use(express.json());
-app.use(cors());
-
-const BOT_TOKEN = process.env.BOT_TOKEN; // Вставь токен из @BotFather
-const ADMIN_ID = process.env.ADMIN_ID;   // Твой Telegram ID
-
-// Простая база в памяти (для продакшена замени на SQLite/Postgres)
-const users = {}; // { userId: { balance_micro, inventory, last_active } }
-const withdrawRequests = [];
-
-// --- ВАЛИДАЦИЯ TELEGRAM INITDATA (Защита от подделки) ---
-// Алгоритм взят из официальной документации Telegram [citation:1][citation:14]
-function validateInitData(initData) {
-  if (!initData || !BOT_TOKEN) return null;
-  try {
-    const params = new URLSearchParams(initData);
-    const hash = params.get('hash');
-    if (!hash) return null;
-    params.delete('hash');
-    
-    const dataCheckString = Array.from(params.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([k, v]) => `${k}=${v}`).join('\n');
-    
-    const secretKey = crypto.createHmac('sha256', 'WebAppData').update(BOT_TOKEN).digest();
-    const calculatedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
-    
-    if (calculatedHash !== hash) return null;
-    
-    const user = JSON.parse(params.get('user') || 'null');
-    return user; // Возвращаем проверенного юзера
-  } catch (e) { return null; }
-}
-
-// Middleware авторизации
-function auth(req, res, next) {
-  const initData = req.headers['authorization']?.replace('tma ', '');
-  const user = validateInitData(initData);
-  if (!user) return res.status(401).json({ error: "Unauthorized" });
-  req.user = user;
-  next();
-}
-
-// --- ЭНДПОИНТЫ ---
-
-// 1. Синхронизация / Вход
-app.post('/api/sync', auth, (req, res) => {
-  const uid = req.user.id;
-  if (!users[uid]) {
-    users[uid] = { balance_micro: 0, total_clicks: 0, last_active: Date.now() };
-  }
-  users[uid].last_active = Date.now();
-  res.json({ balance: users[uid].balance_micro, clicks: users[uid].total_clicks });
-});
-
-// 2. Тап (Серверная валидация)
-app.post('/api/tap', auth, (req, res) => {
-  const uid = req.user.id;
-  const user = users[uid];
-  if (!user) return res.status(404).json({ error: "User not found" });
-  
-  // Защита от спама (не чаще 10 раз в секунду)
-  if (Date.now() - user.last_active < 100) return res.status(429).json({ error: "Too fast" });
-  
-  user.balance_micro += 1000; // 0.001
-  user.total_clicks += 1;
-  user.last_active = Date.now();
-  res.json({ balance: user.balance_micro });
-});
-
-// 3. Онлайн
-app.get('/api/online', (req, res) => {
-  const now = Date.now();
-  const online = Object.values(users).filter(u => now - u.last_active < 60000).length;
-  res.json({ online: Math.max(1, online) }); // Минимум 1 (ты сам)
-});
-
-// 4. Заявка на вывод
-app.post('/api/withdraw', auth, (req, res) => {
-  const uid = req.user.id;
-  const { amount } = req.body;
-  const user = users[uid];
-  
-  if (!user || amount < 1000000) return res.status(400).json({ error: "Min 1 star" });
-  if (user.balance_micro < amount) return res.status(400).json({ error: "Not enough balance" });
-  
-  // Заморозка (списание сразу)
-  user.balance_micro -= amount;
-  
-  const requestId = "#" + Math.floor(1000 + Math.random() * 9000);
-  withdrawRequests.push({ id: requestId, userId: uid, username: req.user.username, amount, status: 'pending', date: Date.now() });
-  
-  // Отправка уведомления админу (через Telegram Bot API)
-  sendAdminNotification(req.user, amount, requestId);
-  
-  res.json({ success: true, requestId });
-});
-
-async function sendAdminNotification(user, amount, reqId) {
-  if (!ADMIN_ID || !BOT_TOKEN) return;
-  const text = `AURIX — ЗАЯВКА НА ВЫВОД\n\nПользователь: @${user.username || user.id}\nСумма: ${amount/1000000} ⭐\nНомер: ${reqId}\nСтатус: Ожидает`;
-  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: ADMIN_ID, text })
-  });
-}
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
